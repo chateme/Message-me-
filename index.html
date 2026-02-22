@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v51</title>
+    <title>WhatsApp Nasir v53</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; --sent: #dcf8c6; --rec: #ffffff; }
@@ -11,83 +11,72 @@
         body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        /* Header & Chat */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
+        /* Header */
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; z-index: 100; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        
-        /* Messages */
+
+        /* Messages & Reply */
         .msg-row { display: flex; width: 100%; margin-bottom: 12px; position: relative; }
         .row-sent { justify-content: flex-end; }
         .row-rec { justify-content: flex-start; }
-        .msg { position: relative; padding: 8px 10px 22px 10px; border-radius: 8px; max-width: 85%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 90px; }
+        .msg { position: relative; padding: 8px 10px 22px 10px; border-radius: 8px; max-width: 85%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 100px; cursor: pointer; }
         .sent { background: var(--sent); border-top-right-radius: 0; }
         .received { background: var(--rec); border-top-left-radius: 0; }
         
-        /* Reply UI */
-        .reply-box { background: rgba(0,0,0,0.05); border-left: 4px solid var(--wa-teal); padding: 4px 8px; font-size: 12px; margin-bottom: 5px; border-radius: 4px; }
-        #reply-preview { display: none; background: #eee; padding: 10px; border-left: 5px solid var(--wa-teal); position: absolute; bottom: 65px; width: 100%; z-index: 50; }
+        .reply-box { background: rgba(0,0,0,0.06); border-left: 4px solid var(--wa-teal); padding: 5px; font-size: 11px; margin-bottom: 6px; border-radius: 4px; color: #555; }
+        #reply-preview { display: none; background: #f0f2f5; padding: 10px; border-left: 5px solid var(--wa-teal); width: 100%; }
 
-        /* Reaction UI */
-        .react-bar { display: none; position: absolute; top: -35px; background: white; border-radius: 20px; padding: 5px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 100; gap: 8px; }
-        .msg:hover .react-btn { opacity: 1; }
-        .react-btn { position: absolute; top: 2px; right: -25px; opacity: 0; cursor: pointer; color: #888; font-size: 14px; }
-        .reaction-badge { position: absolute; bottom: -10px; left: 10px; background: white; border-radius: 10px; padding: 1px 5px; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        /* Reactions */
+        .react-btn { position: absolute; top: -15px; right: 0; background: white; border-radius: 15px; display: flex; gap: 5px; padding: 2px 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; display: none; }
+        .msg:hover .react-btn { display: flex; }
+        .reaction-badge { position: absolute; bottom: -8px; left: 10px; background: white; border-radius: 10px; padding: 1px 5px; font-size: 11px; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
-        /* Location Menu */
-        #loc-menu { display: none; position: absolute; bottom: 70px; left: 50px; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); z-index: 200; }
-        .loc-item { padding: 12px 20px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
-
-        /* Footer */
-        .footer { padding: 8px; background: #f0f2f5; position: relative; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
-        #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 16px; background: transparent; }
+        /* Footer & Buttons */
+        .footer { padding: 8px; background: #f0f2f5; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; }
+        #msg-input { flex: 1; border: none; outline: none; padding: 10px 5px; font-size: 16px; background: transparent; }
         .btn-circle { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .icon { color: #8696a0; padding: 6px; cursor: pointer; font-size: 18px; }
         
-        #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
+        #rec-wrap { display: none; flex: 1; align-items: center; gap: 10px; color: red; font-weight: bold; }
+        .dot { height: 10px; width: 10px; background-color: red; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        
+        #loc-menu { display: none; position: absolute; bottom: 75px; left: 10px; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); z-index: 1000; width: 200px; }
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 150px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
 <div id="app-wrap">
-    <div id="login-screen">
-        <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green);"></i>
-        <h2 style="margin: 20px 0;">WhatsApp Nasir v51</h2>
-        <input type="text" id="my-num" style="width:100%; padding:15px; margin:10px 0; border-radius:8px;" placeholder="نام یا نمبر">
-        <input type="password" id="room-pass" style="width:100%; padding:15px; margin:10px 0; border-radius:8px;" placeholder="روم کوڈ">
-        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border-radius:30px; font-weight:bold;">شروع کریں</button>
-    </div>
-
-    <div id="chat-app" style="display:none; flex-direction:column; height:100%;">
+    <div id="chat-app" style="display:flex; flex-direction:column; height:100%;">
         <div class="header">
-            <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-            <div style="flex:1;"><h4>چیٹ</h4><small>آن لائن</small></div>
+            <i class="fas fa-arrow-left"></i>
+            <div style="flex:1;"><h4>WhatsApp Nasir v53</h4><small>آن لائن</small></div>
         </div>
 
         <div id="chat-flow"></div>
 
         <div id="reply-preview">
-            <div style="display:flex; justify-content:space-between;">
-                <small id="reply-text" style="color:var(--wa-teal); font-weight:bold;"></small>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <small id="reply-target-text" style="color:var(--wa-teal); font-weight:bold;"></small>
                 <i class="fas fa-times" onclick="cancelReply()"></i>
             </div>
         </div>
 
         <div id="loc-menu">
-            <div class="loc-item" onclick="sendLoc('current')">📍 موجودہ لوکیشن بھیجیں</div>
-            <div class="loc-item" onclick="sendLoc('live')">🛰️ لائیو لوکیشن شروع کریں</div>
+            <div style="padding:15px; border-bottom:1px solid #eee;" onclick="sendLoc('current')">📍 موجودہ لوکیشن</div>
+            <div style="padding:15px;" onclick="sendLoc('live')">🛰️ لائیو لوکیشن</div>
         </div>
-
-        <div id="emoji-panel" style="display:none; background:white; grid-template-columns: repeat(8,1fr); padding:10px;"></div>
+        <div id="emoji-panel"></div>
 
         <div class="footer">
             <div style="display:flex; align-items:center; gap:8px;">
                 <div class="input-bar">
-                    <i class="far fa-smile icon" onclick="toggleEmoji()"></i>
+                    <i class="far fa-smile" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="toggleEmoji()"></i>
+                    <div id="rec-wrap"><div class="dot"></div> <span id="rec-timer">00:00</span></div>
                     <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
-                    <i class="fas fa-location-dot icon" onclick="toggleLocMenu()"></i>
-                    <i class="fas fa-camera icon" onclick="document.getElementById('cam-in').click()"></i>
-                    <i class="fas fa-paperclip icon" onclick="document.getElementById('file-in').click()"></i>
+                    <i class="fas fa-location-dot" style="color:#8696a0; padding:8px;" onclick="toggleLoc()"></i>
+                    <i class="fas fa-camera" style="color:#8696a0; padding:8px;" onclick="document.getElementById('cam-in').click()"></i>
                 </div>
                 <button class="btn-circle" onclick="handleAction()">
                     <i class="fas fa-microphone" id="mic-ico"></i>
@@ -95,97 +84,129 @@
                 </button>
             </div>
         </div>
-        <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
-        <input type="file" id="file-in" style="display:none">
     </div>
+    <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
+    const roomKey = "V53_FINAL_ALL_IN_ONE";
 
-    let myNum = "", roomKey = "", replyTo = null;
+    let isRec = false, mediaRecorder, chunks = [], timerInterval, seconds = 0, replyText = null;
 
-    window.login = () => {
-        myNum = document.getElementById('my-num').value.trim();
-        let pass = document.getElementById('room-pass').value.trim();
-        if(!myNum || pass.length < 6) return alert("معلومات مکمل کریں!");
-        roomKey = "V51_PRO_" + btoa(pass).replace(/=/g, "");
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('chat-app').style.display = 'flex';
-        loadMessages();
-    };
-
-    // Location Menu
-    window.toggleLocMenu = () => { let m = document.getElementById('loc-menu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; };
-    window.sendLoc = (type) => {
-        navigator.geolocation.getCurrentPosition(p => {
-            let lat = p.coords.latitude, lon = p.coords.longitude;
-            let url = `https://www.google.com/maps?q=${lat},${lon}`;
-            sendData(`📍 ${type === 'live' ? 'لائیو' : 'موجودہ'} لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
-            toggleLocMenu();
-        });
+    // --- Core Logic ---
+    const inp = document.getElementById('msg-input');
+    inp.oninput = () => {
+        const hasT = inp.value.trim().length > 0;
+        document.getElementById('send-ico').style.display = hasT ? 'block' : 'none';
+        document.getElementById('mic-ico').style.display = hasT ? 'none' : 'block';
     };
 
     window.handleAction = () => {
-        const inp = document.getElementById('msg-input');
         if(inp.value.trim()) {
-            sendData(inp.value, 'text', "", replyTo);
+            sendData(inp.value, 'text', replyText);
             cancelReply();
-            inp.value = "";
-            document.getElementById('send-ico').style.display='none';
-            document.getElementById('mic-ico').style.display='block';
-        } else {
-            alert("ریکارڈنگ شروع ہو رہی ہے..."); // وائس ریکارڈنگ فنکشن وہی پرانا رہے گا
-        }
+            inp.value = ""; inp.oninput();
+        } else { handleVoice(); }
     };
 
-    const sendData = (v, t, n = "", rep = null) => push(ref(db, roomKey), {
-        s: myNum, v: v, t: t, n: n, rep: rep, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    const sendData = (v, t, rep = null) => push(ref(db, roomKey), {
+        s: "Nasir", v: v, t: t, rep: rep, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    window.setReply = (txt) => {
-        replyTo = txt;
-        document.getElementById('reply-text').innerText = "جواب دیں: " + txt.substring(0, 30) + "...";
+    // --- Voice Recording Fix ---
+    async function handleVoice() {
+        if(!isRec) {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(s); chunks = [];
+                mediaRecorder.start(); isRec = true;
+                document.getElementById('rec-wrap').style.display = 'flex';
+                document.getElementById('msg-input').style.display = 'none';
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    let m = Math.floor(seconds/60).toString().padStart(2,'0'), sec = (seconds%60).toString().padStart(2,'0');
+                    document.getElementById('rec-timer').innerText = `${m}:${sec}`;
+                }, 1000);
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    clearInterval(timerInterval);
+                    const r = new FileReader();
+                    r.onloadend = () => sendData(r.result, 'voice');
+                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
+                };
+            } catch(e) { alert("مائیک پرمیشن درکار ہے!"); }
+        } else {
+            mediaRecorder.stop(); isRec = false;
+            document.getElementById('rec-wrap').style.display = 'none';
+            document.getElementById('msg-input').style.display = 'block';
+            seconds = 0;
+        }
+    }
+
+    // --- Reply & Reactions ---
+    window.initReply = (txt) => {
+        replyText = txt;
+        document.getElementById('reply-target-text').innerText = "جواب دیں: " + txt.substring(0, 35);
         document.getElementById('reply-preview').style.display = 'block';
-        document.getElementById('msg-input').focus();
+        inp.focus();
+    };
+    window.cancelReply = () => { replyText = null; document.getElementById('reply-preview').style.display = 'none'; };
+    window.react = (id, emo) => update(ref(db, roomKey + "/" + id), { react: emo });
+
+    // --- Emojis & Location ---
+    const emos = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","📍","✅"];
+    const ep = document.getElementById('emoji-panel');
+    ep.innerHTML = emos.map(e => `<span style="font-size:24px; padding:8px; cursor:pointer;" onclick="addEmoji('${e}')">${e}</span>`).join('');
+    window.toggleEmoji = () => ep.style.display = ep.style.display === 'grid' ? 'none' : 'grid';
+    window.addEmoji = (e) => { inp.value += e; toggleEmoji(); inp.oninput(); };
+
+    window.toggleLoc = () => { let m = document.getElementById('loc-menu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; };
+    window.sendLoc = (type) => {
+        navigator.geolocation.getCurrentPosition(p => {
+            let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+            sendData(`📍 ${type==='live'?'لائیو':'موجودہ'} لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
+            toggleLoc();
+        });
     };
 
-    window.cancelReply = () => { replyTo = null; document.getElementById('reply-preview').style.display = 'none'; };
-
-    window.react = (id, emo) => {
-        update(ref(db, roomKey + "/" + id), { react: emo });
-    };
-
+    // --- Load Messages ---
     function loadMessages() {
         const flow = document.getElementById('chat-flow');
         onChildAdded(ref(db, roomKey), snap => {
-            const d = snap.val(), isMe = d.s === myNum, k = snap.key;
+            const d = snap.val(), isMe = d.s === "Nasir", k = snap.key;
             const row = document.createElement('div');
             row.className = `msg-row ${isMe ? 'row-sent' : 'row-rec'}`;
-            row.id = `r-${k}`;
             
-            let repMarkup = d.rep ? `<div class="reply-box">${d.rep}</div>` : "";
+            let content = d.v;
+            if(d.t === 'voice') content = `<audio controls preload="metadata" style="width:200px;"><source src="${d.v}"></audio>`;
+            
+            let replyMarkup = d.rep ? `<div class="reply-box">${d.rep}</div>` : "";
             let reactMarkup = d.react ? `<div class="reaction-badge">${d.react}</div>` : "";
-            
+
             row.innerHTML = `
-                <div class="msg ${isMe ? 'sent' : 'received'}" oncontextmenu="event.preventDefault(); setReply('${d.v}')" onclick="setReply('${d.v}')">
-                    <span class="react-btn" onclick="react('${k}', '❤️')">❤️</span>
-                    <span style="font-size:10px; font-weight:bold; color:${isMe?'#075e54':'#34b7f1'}">${d.s}</span>
-                    ${repMarkup}
-                    <div>${d.v}</div>
+                <div class="msg ${isMe ? 'sent' : 'received'}" onclick="initReply('${d.v}')">
+                    <div class="react-btn">
+                        <span onclick="react('${k}', '❤️')">❤️</span>
+                        <span onclick="react('${k}', '😂')">😂</span>
+                        <span onclick="react('${k}', '👍')">👍</span>
+                    </div>
+                    ${replyMarkup}
+                    <div>${content}</div>
                     <div style="font-size:10px; color:#666; text-align:right; margin-top:4px;">${d.time}</div>
                     ${reactMarkup}
                 </div>
             `;
-            flow.appendChild(row);
-            flow.scrollTop = flow.scrollHeight;
+            flow.appendChild(row); flow.scrollTop = flow.scrollHeight;
         });
     }
+    loadMessages();
 </script>
 </body>
     </html>
+    
