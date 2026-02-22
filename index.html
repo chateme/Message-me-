@@ -3,65 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger v23</title>
+    <title>Nasir Messenger v24</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* Setup Screen */
+        #setup-screen { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; flex-direction: column; }
+        .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; }
+        
+        /* Room Form Box - اب یہ بالکل واضح ہے */
+        .login-box { padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .login-box input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
+        .login-box input:focus { border-color: var(--wa-green); }
+        .login-btn { background: var(--wa-green); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Main Chat */
+        #main-chat { display: none; flex-direction: column; height: 100vh; background: var(--bg); }
         .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
 
+        /* Messages */
         .msg { position: relative; padding: 8px 12px 25px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .meta { position: absolute; bottom: 3px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 3px; }
         .tick { color: #34b7f1; font-size: 11px; }
 
-        /* FOOTER FIX - سینڈ بٹن اب باہر نہیں جائے گا */
+        /* Footer */
         .footer { background: #f0f0f0; padding: 5px 8px; display: flex; align-items: center; gap: 6px; border-top: 1px solid #ccc; width: 100%; }
         .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 12px; height: 40px; display: flex; align-items: center; gap: 8px; border: 1px solid #ddd; min-width: 0; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; min-width: 0; }
-        .send-btn { background: var(--wa-green); color: white; width: 40px; height: 40px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+        .send-btn { background: var(--wa-green); color: white; width: 40px; height: 40px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-        /* Audio Design */
+        /* Audio & Timer */
         .audio-row { display: flex; align-items: center; gap: 8px; width: 190px; margin-top: 5px; }
         .audio-row input[type="range"] { flex: 1; accent-color: var(--wa-dark); cursor: pointer; }
-        .atime { font-size: 10px; min-width: 32px; color: #555; font-family: monospace; }
+        .atime { font-size: 10px; min-width: 32px; color: #555; }
         #rec-timer-ui { display: none; align-items: center; gap: 5px; color: red; font-weight: bold; flex: 1; font-size: 14px; }
+        .blink { animation: blk 1s infinite; } @keyframes blk { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div id="setup-screen" style="position:fixed; inset:0; background:white; z-index:2000; display:flex; flex-direction:column;">
-    <div style="background:var(--wa-green); color:white; padding:20px; text-align:center; font-weight:bold;">ناصر میسنجر v23</div>
-    <div id="chat-list" style="flex:1; padding:15px; overflow-y:auto;"></div>
-    <button onclick="document.getElementById('room-form').style.display='flex'" style="margin:20px; padding:15px; background:var(--wa-dark); color:white; border:none; border-radius:10px;">+ نیا روم</button>
-</div>
-
-<div id="room-form" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:3000; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:white; padding:25px; border-radius:20px; width:100%; max-width:320px; text-align:center;">
-        <input type="text" id="u-name" placeholder="نام" style="width:100%; padding:10px; margin-bottom:10px;">
-        <input type="text" id="r-pass" placeholder="کوڈ" style="width:100%; padding:10px; margin-bottom:15px;">
-        <button id="btn-login" style="width:100%; padding:12px; background:var(--wa-green); color:white; border:none; border-radius:8px;">داخل ہوں</button>
+<div id="setup-screen">
+    <div class="setup-header">ناصر میسنجر v24</div>
+    <div class="login-box">
+        <p style="text-align:center; color:#555;">روم میں داخل ہونے کے لیے نام اور کوڈ لکھیں</p>
+        <input type="text" id="u-name" placeholder="آپ کا نام لکھیں">
+        <input type="text" id="r-pass" placeholder="روم کوڈ لکھیں">
+        <button class="login-btn" id="btn-login">داخل ہوں</button>
     </div>
+    <div id="chat-list" style="flex:1; padding:15px; overflow-y:auto;"></div>
 </div>
 
-<div id="main-chat" style="display:none; flex-direction:column; height:100vh;">
+<div id="main-chat">
     <div class="chat-header">
         <i class="fas fa-arrow-left" onclick="location.reload()"></i>
         <div id="room-title" style="font-weight:bold;">چیٹ</div>
     </div>
     <div id="chat-flow"></div>
     <div class="footer">
-        <i class="fas fa-location-dot" onclick="sendLoc()" style="color:#34b7f1; font-size:20px;"></i>
-        <label for="cam-in"><i class="fas fa-camera" style="color:#555; font-size:20px;"></i></label>
+        <i class="fas fa-location-dot" onclick="sendLoc()" style="color:#34b7f1; font-size:20px; cursor:pointer;"></i>
+        <label for="cam-in"><i class="fas fa-camera" style="color:#555; font-size:20px; cursor:pointer;"></i></label>
         <input type="file" id="cam-in" accept="image/*" style="display:none">
         <div class="input-bar">
-            <div id="rec-timer-ui"><i class="fas fa-circle" style="animation:blk 1s infinite;"></i> <span id="r-clock">00:00</span></div>
-            <input type="text" id="msg-input" placeholder="میسج...">
-            <i class="fas fa-microphone" id="mic-btn" style="color:#555; font-size:18px;"></i>
+            <div id="rec-timer-ui"><i class="fas fa-circle blink"></i> <span id="r-clock">00:00</span></div>
+            <input type="text" id="msg-input" placeholder="میسج لکھیں...">
+            <i class="fas fa-microphone" id="mic-btn" style="color:#555; font-size:18px; cursor:pointer;"></i>
         </div>
         <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
     </div>
@@ -80,8 +91,9 @@
     localStorage.setItem('n_uid', myUid);
 
     document.getElementById('btn-login').onclick = () => {
-        const n = document.getElementById('u-name').value.trim(), p = document.getElementById('r-pass').value.trim();
-        if(!n || !p) return;
+        const n = document.getElementById('u-name').value.trim();
+        const p = document.getElementById('r-pass').value.trim();
+        if(!n || !p) return alert("نام اور کوڈ لازمی ہے!");
         myName = n; myRoom = btoa(p);
         document.getElementById('setup-screen').style.display='none';
         document.getElementById('main-chat').style.display='flex';
@@ -89,7 +101,7 @@
         initFirebase();
     };
 
-    const sendMsg = (v, t) => push(ref(db, "final_v23/" + myRoom), {
+    const sendMsg = (v, t) => push(ref(db, "final_v24/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, 
         time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
@@ -107,21 +119,23 @@
 
     document.getElementById('mic-btn').onclick = async function() {
         if (!isRec) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-                r.onloadend = () => sendMsg(r.result, 'voice');
-            };
-            mediaRecorder.start();
-            isRec = true; this.style.color = "red";
-            document.getElementById('rec-timer-ui').style.display = "flex";
-            document.getElementById('msg-input').style.display = "none";
-            let s = 0;
-            recInt = setInterval(() => { s++; document.getElementById('r-clock').innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); }, 1000);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const r = new FileReader();
+                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
+                    r.onloadend = () => sendMsg(r.result, 'voice');
+                };
+                mediaRecorder.start();
+                isRec = true; this.style.color = "red";
+                document.getElementById('rec-timer-ui').style.display = "flex";
+                document.getElementById('msg-input').style.display = "none";
+                let s = 0;
+                recInt = setInterval(() => { s++; document.getElementById('r-clock').innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); }, 1000);
+            } catch(e) { alert("Mic Permission Error!"); }
         } else {
             mediaRecorder.stop(); isRec = false; this.style.color = "#555";
             document.getElementById('rec-timer-ui').style.display = "none";
@@ -130,19 +144,18 @@
         }
     };
 
-    // سیک بار ٹائمر فکس
     window.playAud = (id) => {
         const a = document.getElementById('aud-'+id), s = document.getElementById('seek-'+id), 
               b = document.getElementById('btn-'+id), t = document.getElementById('cur-'+id);
         if(a.paused) { a.play(); b.className = "fas fa-pause"; } else { a.pause(); b.className = "fas fa-play"; }
         
-        a.addEventListener('timeupdate', () => {
+        a.ontimeupdate = () => {
             if(!isNaN(a.duration)){
                 s.value = (a.currentTime / a.duration) * 100;
                 let curM = Math.floor(a.currentTime / 60), curS = Math.floor(a.currentTime % 60);
                 t.innerText = curM.toString().padStart(2,'0') + ":" + curS.toString().padStart(2,'0');
             }
-        });
+        };
         s.oninput = () => a.currentTime = (s.value / 100) * a.duration;
         a.onended = () => { b.className = "fas fa-play"; s.value = 0; t.innerText = "00:00"; };
     };
@@ -154,11 +167,11 @@
     };
 
     function initFirebase() {
-        onChildAdded(ref(db, "final_v23/" + myRoom), snap => {
+        onChildAdded(ref(db, "final_v24/" + myRoom), snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
             let content = d.t === 'text' ? d.v : d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
                           d.t === 'loc' ? `<a href="${d.v}" target="_blank" style="color:blue; font-size:13px;"><i class="fas fa-map-marker-alt"></i> لوکیشن</a>` :
-                          `<div class="audio-row"><i class="fas fa-play" id="btn-${k}" onclick="playAud('${k}')"></i><input type="range" id="seek-${k}" value="0"><span class="atime" id="cur-${k}">00:00</span><audio id="aud-${k}" src="${d.v}"></audio></div>`;
+                          `<div class="audio-row"><i class="fas fa-play" id="btn-${k}" onclick="playAud('${k}')" style="cursor:pointer;"></i><input type="range" id="seek-${k}" value="0"><span class="atime" id="cur-${k}">00:00</span><audio id="aud-${k}" src="${d.v}"></audio></div>`;
             
             const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span style="font-size:11px; font-weight:bold; color:#e67e22; display:block;">${isMe?'آپ':d.user}</span>
@@ -167,9 +180,10 @@
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
-        window.delMsg = (key) => remove(ref(db, `final_v23/${myRoom}/${key}`));
-        onChildRemoved(ref(db, "final_v23/" + myRoom), snap => document.getElementById("m-"+snap.key)?.remove());
+        window.delMsg = (key) => remove(ref(db, `final_v24/${myRoom}/${key}`));
+        onChildRemoved(ref(db, "final_v24/" + myRoom), snap => document.getElementById("m-"+snap.key)?.remove());
     }
 </script>
 </body>
-</html>
+                                       </html>
+            
