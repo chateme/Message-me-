@@ -3,66 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro</title>
+    <title>Nasir Secure Messenger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 60px; z-index: 10; }
-        .p-img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid white; }
+        /* محفوظ لاگ ان اسکرین */
+        #auth-screen { position: fixed; inset: 0; background: #075e54; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .auth-card h2 { margin-bottom: 20px; color: #075e54; }
+        .auth-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1.5px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; }
+        .auth-card input:focus { border-color: #075e54; }
+        .auth-btn { background: #075e54; color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer; }
 
+        /* مین چیٹ انٹرفیس */
+        .header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 80%; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+        
+        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 80%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         
-        /* آڈیو پلیئر ڈیزائن */
-        .audio-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 5px 0; }
-        .play-btn { font-size: 32px; color: var(--wa-green); cursor: pointer; }
-        .track { flex: 1; height: 4px; background: #ccc; border-radius: 2px; position: relative; }
-        .fill { height: 100%; background: var(--wa-green); width: 0%; border-radius: 2px; }
-        .time { font-size: 11px; color: #666; margin-top: 4px; }
-
+        .u-name { font-size: 11px; font-weight: bold; color: #2e7d32; margin-bottom: 3px; display: block; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
-        .tick { color: #34b7f1; }
-        .del-btn { color: #e74c3c; cursor: pointer; margin-right: 5px; font-weight: bold; }
+        .del-icon { color: #d32f2f; cursor: pointer; margin-right: 5px; font-size: 11px; }
 
-        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; }
+        .footer { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 10px; }
+        .input-wrap { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 48px; }
         #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; }
-        
-        #rec-ui { display: none; flex: 1; align-items: center; justify-content: space-between; background: white; border-radius: 25px; padding: 0 15px; height: 45px; color: red; font-weight: bold; }
-        .icon { color: #777; font-size: 22px; cursor: pointer; border: none; background: none; }
-        .send-v { background: var(--wa-green); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; font-size: 20px; }
+        .send-btn { background: #075e54; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
+<div id="auth-screen">
+    <div class="auth-card">
+        <h2>نجی چیٹ 🔐</h2>
+        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">روم میں داخل ہونے کے لیے معلومات درج کریں</p>
+        <input type="text" id="user-name" placeholder="آپ کا نام (مثلاً: ناصر)">
+        <input type="password" id="room-pass" placeholder="خفیہ روم پاس ورڈ">
+        <button class="auth-btn" onclick="initSecureChat()">داخل ہوں</button>
+    </div>
+</div>
+
 <div class="header">
-    <img src="https://chateme.github.io/my-photo.jpg" onerror="this.src='https://github.com/chateme.png'" class="p-img">
-    <div style="font-weight:bold;">ناصر ممتاز میسنجر 🇵🇰</div>
+    <div style="font-weight:bold;"><i class="fas fa-lock"></i> ناصر میسنجر پرو</div>
+    <div id="room-tag" style="font-size: 11px; opacity: 0.8;"></div>
 </div>
 
 <div id="chat-flow"></div>
 
 <div class="footer">
-    <label for="f-in" class="icon"><i class="fas fa-camera"></i></label>
-    <input type="file" id="f-in" accept="image/*" style="display:none" onchange="upImg(this)">
-    
-    <div class="input-bar" id="norm-ui">
+    <div class="input-wrap">
         <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
-        <button class="icon" id="start-btn"><i class="fas fa-microphone"></i></button>
     </div>
-
-    <div id="rec-ui">
-        <span>● <span id="r-timer">00:00</span></span>
-        <span style="color:#666">ریکارڈنگ...</span>
-        <i class="fas fa-stop-circle" id="stop-btn" style="font-size:30px; cursor:pointer;"></i>
-    </div>
-
-    <button class="send-v" onclick="sendT()"><i class="fas fa-paper-plane"></i></button>
+    <button class="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
 </div>
 
 <script type="module">
@@ -72,130 +69,79 @@
     const config = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(config);
     const db = getDatabase(app);
-    const mRef = ref(db, "nasir_final_realtime_v1");
 
-    // پکی یوزر آئی ڈی (ریفریش پر میسج اپنی جگہ رہیں گے)
-    if(!localStorage.getItem('nasir_uid')) localStorage.setItem('nasir_uid', "U-" + Date.now());
-    const myId = localStorage.getItem('nasir_uid');
+    let myName = "";
+    let myRoom = "";
+    let myUid = localStorage.getItem('nasir_uid') || "UID-" + Math.floor(Math.random()*99999);
+    localStorage.setItem('nasir_uid', myUid);
 
-    let recorder, chunks = [], sec = 0, timer;
-
-    // میسج بھیجنے کا فنکشن
-    const post = (v, t) => push(mRef, { u: myId, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-
-    window.sendT = () => {
-        const i = document.getElementById('msg-input');
-        if(i.value.trim()){ post(i.value, 'text'); i.value = ""; }
-    };
-
-    window.upImg = (el) => {
-        const r = new FileReader(); r.onload = (e) => post(e.target.result, 'img');
-        r.readAsDataURL(el.files[0]);
-    };
-
-    // میسج مٹانے کا فنکشن (Real-time فکس)
-    window.del = (k) => { 
-        if(confirm("کیا آپ یہ پیغام مٹانا چاہتے ہیں؟")) {
-            remove(ref(db, `nasir_final_realtime_v1/${k}`));
+    window.initSecureChat = () => {
+        const n = document.getElementById('user-name').value.trim();
+        const p = document.getElementById('room-pass').value.trim();
+        
+        if(n.length < 2 || p.length < 4) {
+            alert("نام اور پاس ورڈ (کم از کم 4 ہندسے) درج کریں");
+            return;
         }
+
+        myName = n;
+        myRoom = btoa(p); // پاس ورڈ کو خفیہ کوڈ میں بدلنا
+        
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('room-tag').innerText = "روم: فعال ہے";
+        
+        startListening();
     };
 
-    // مائیکروفون پرمیشن فکس (Persistent Attempt)
-    let stream;
-    async function getMic() {
-        if (!stream || !stream.active) {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        }
-        return stream;
+    function startListening() {
+        const roomRef = ref(db, "secure_rooms/" + myRoom);
+        
+        onChildAdded(roomRef, (snap) => {
+            const d = snap.val();
+            const isMe = d.uid === myUid;
+            const html = `
+                <div class="msg ${isMe ? 'sent' : 'received'}" id="m-${snap.key}">
+                    <span class="u-name">${isMe ? 'آپ' : d.user}</span>
+                    <div>${d.v}</div>
+                    <div class="meta">
+                        ${isMe ? `<i class="fas fa-trash del-icon" onclick="deleteMsg('${snap.key}')"></i>` : ''}
+                        ${d.time} ${isMe ? '<i class="fas fa-check-double" style="color:#34b7f1"></i>' : ''}
+                    </div>
+                </div>`;
+            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
+            document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        });
+
+        onChildRemoved(roomRef, (snap) => {
+            const el = document.getElementById("m-" + snap.key);
+            if(el) el.remove();
+        });
     }
 
-    document.getElementById('start-btn').onclick = async () => {
-        try {
-            const s = await getMic();
-            recorder = new MediaRecorder(s);
-            recorder.start();
-            document.getElementById('norm-ui').style.display = 'none';
-            document.getElementById('rec-ui').style.display = 'flex';
-            sec = 0;
-            timer = setInterval(() => {
-                sec++;
-                document.getElementById('r-timer').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
-            }, 1000);
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                clearInterval(timer);
-                const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-                r.onloadend = () => post(r.result, 'voice');
-                document.getElementById('norm-ui').style.display = 'flex';
-                document.getElementById('rec-ui').style.display = 'none';
-            };
-        } catch (e) { alert("براہ کرم مائیکروفون کی اجازت دیں"); }
-    };
-
-    document.getElementById('stop-btn').onclick = () => recorder.stop();
-
-    // آڈیو پلے کرنے کا نظام
-    window.playA = (btn, aid) => {
-        const aud = document.getElementById(aid);
-        const fill = btn.parentElement.querySelector('.fill');
-        const txt = btn.parentElement.querySelector('.time');
-        if(aud.paused) {
-            aud.play();
-            btn.className = "fas fa-pause-circle play-btn";
-            aud.ontimeupdate = () => {
-                fill.style.width = (aud.currentTime/aud.duration)*100 + "%";
-                txt.innerText = "00:" + Math.floor(aud.currentTime).toString().padStart(2,'0');
-            };
-            aud.onended = () => { btn.className = "fas fa-play-circle play-btn"; fill.style.width = "0%"; };
-        } else {
-            aud.pause();
-            btn.className = "fas fa-play-circle play-btn";
+    window.sendMsg = () => {
+        const i = document.getElementById('msg-input');
+        if(i.value.trim() && myRoom) {
+            push(ref(db, "secure_rooms/" + myRoom), {
+                uid: myUid,
+                user: myName,
+                v: i.value,
+                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+            });
+            i.value = "";
         }
     };
 
-    // رئیل ٹائم میسج دکھانا
-    onChildAdded(mRef, (snap) => {
-        const d = snap.val();
-        const isMe = d.u === myId;
-        const key = snap.key;
-        let body = "";
-
-        if(d.t === 'text') body = `<div>${d.v}</div>`;
-        else if(d.t === 'img') body = `<img src="${d.v}" style="width:100%; border-radius:5px;">`;
-        else body = `
-            <div class="audio-wrapper">
-                <i class="fas fa-play-circle play-btn" onclick="playA(this, 'a-${key}')"></i>
-                <audio id="a-${key}" src="${d.v}"></audio>
-                <div style="flex:1">
-                    <div class="track"><div class="fill"></div></div>
-                    <div class="time">00:00</div>
-                </div>
-            </div>`;
-
-        const html = `
-            <div class="msg ${isMe?'sent':'received'}" id="msg-${key}">
-                ${body}
-                <div class="meta">
-                    ${isMe ? `<span class="del-btn" onclick="del('${key}')">مٹائیں</span>` : ''}
-                    ${d.time} ${isMe ? '<i class="fas fa-check-double tick"></i>' : ''}
-                </div>
-            </div>`;
-        
-        document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
-        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
-    });
-
-    // رئیل ٹائم میسج مٹانا (بغیر ری فریش کے)
-    onChildRemoved(mRef, (snap) => {
-        const el = document.getElementById(`msg-${snap.key}`);
-        if(el) {
-            el.style.opacity = '0';
-            el.style.transform = 'scale(0.8)';
-            setTimeout(() => el.remove(), 300);
+    window.deleteMsg = (key) => {
+        if(confirm("کیا یہ میسج مٹانا ہے؟")) {
+            remove(ref(db, `secure_rooms/${myRoom}/${key}`));
         }
+    };
+
+    // انٹر کی بورڈ سے میسج بھیجنا
+    document.getElementById('msg-input').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') sendMsg();
     });
 </script>
 </body>
-</html>
+    </html>
+    
