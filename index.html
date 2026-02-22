@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro Fixed</title>
+    <title>Nasir Messenger Pro Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* لسٹ اسکرین */
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; }
         .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; }
         .chat-list-container { flex: 1; padding: 15px; overflow-y: auto; }
         .chat-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; border-left: 5px solid var(--wa-green); }
         .add-new-btn { position: fixed; bottom: 30px; right: 30px; background: var(--wa-dark); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; cursor: pointer; z-index: 2100; }
 
-        /* فارم */
         #room-form { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
         .form-card { background: white; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
         .form-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; }
         
-        /* چیٹ ونڈو */
         #main-chat { display: none; flex-direction: column; height: 100vh; }
         .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
@@ -34,13 +31,11 @@
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 5px; }
         .del-btn { color: #d32f2f; cursor: pointer; font-size: 12px; }
 
-        /* آڈیو پلیئر */
         .audio-box { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 5px 0; }
         .play-btn { font-size: 30px; color: var(--wa-green); cursor: pointer; }
         .track { flex: 1; height: 4px; background: #ccc; border-radius: 2px; overflow: hidden; }
         .fill { height: 100%; background: var(--wa-green); width: 0%; }
 
-        /* فوٹر */
         .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
         .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; }
@@ -63,7 +58,7 @@
 
 <div id="room-form">
     <div class="form-card">
-        <h3 style="color:var(--wa-green)">نئی چیٹ شروع کریں</h3><br>
+        <h3 style="color:var(--wa-green)">نئی چیٹ</h3><br>
         <input type="text" id="u-name" placeholder="آپ کا نام">
         <input type="text" id="r-pass" placeholder="روم آئی ڈی (پاس ورڈ)">
         <button class="send-btn" style="width:100%; border-radius:10px;" onclick="createNewChat()">شروع کریں</button>
@@ -104,12 +99,12 @@
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myName = "", myRoom = "", mediaRecorder, chunks = [], sec = 0, timer;
+    let myName = "", myRoom = "", mediaRecorder, chunks = [], sec = 0, timer, activeStream = null;
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
     function renderList() {
-        const chats = JSON.parse(localStorage.getItem('n_history_v2') || "[]");
+        const chats = JSON.parse(localStorage.getItem('n_history_v3') || "[]");
         const container = document.getElementById('chat-list');
         if(chats.length === 0) return;
         container.innerHTML = "";
@@ -130,10 +125,10 @@
         const p = document.getElementById('r-pass').value.trim();
         if(!n || !p) return alert("نام اور پاس ورڈ لکھیں");
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v2') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v3') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v2', JSON.stringify(history));
+            localStorage.setItem('n_history_v3', JSON.stringify(history));
         }
         openChat(n, rid, p);
         hideForm();
@@ -147,7 +142,7 @@
         initFirebase();
     }
 
-    const post = (v, t) => push(ref(db, "pro_rooms/" + myRoom), {
+    const post = (v, t) => push(ref(db, "final_v3/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
@@ -161,16 +156,19 @@
         r.readAsDataURL(el.files[0]);
     };
 
-    window.delMsg = (k) => { if(confirm("پیغام مٹائیں؟")) remove(ref(db, `pro_rooms/${myRoom}/${k}`)); };
+    window.delMsg = (k) => { if(confirm("مٹائیں؟")) remove(ref(db, `final_v3/${myRoom}/${k}`)); };
 
-    // مائیکروفون فکس (یونیورسل)
+    // مائیکروفون فکس: ایک بار اجازت مل جائے تو اسٹریم محفوظ رکھنا
     document.getElementById('mic-start').onclick = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            if (!activeStream) {
+                activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
+            
             const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/aac'];
             const type = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
             
-            mediaRecorder = new MediaRecorder(stream, { mimeType: type });
+            mediaRecorder = new MediaRecorder(activeStream, { mimeType: type });
             chunks = [];
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
             
@@ -179,7 +177,6 @@
                 const r = new FileReader();
                 r.readAsDataURL(blob);
                 r.onloadend = () => post(r.result, 'voice');
-                stream.getTracks().forEach(t => t.stop());
             };
 
             mediaRecorder.start();
@@ -191,7 +188,7 @@
                 sec++;
                 document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
             }, 1000);
-        } catch(e) { alert("مائیکروفون کی اجازت نہیں ملی۔"); }
+        } catch(e) { alert("مائیکروفون یوز کی اجازت دیں"); }
     };
 
     document.getElementById('mic-stop').onclick = () => {
@@ -214,7 +211,7 @@
     };
 
     function initFirebase() {
-        const rRef = ref(db, "pro_rooms/" + myRoom);
+        const rRef = ref(db, "final_v3/" + myRoom);
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
             let content = d.t === 'text' ? `<div>${d.v}</div>` : 
@@ -223,10 +220,7 @@
             
             const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">
-                    ${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}
-                    ${d.time} ${isMe ? '<i class="fas fa-check-double" style="color:#34b7f1"></i>' : ''}
-                </div>
+                <div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>`:''}${d.time} ${isMe?'<i class="fas fa-check-double" style="color:#34b7f1"></i>':''}</div>
             </div>`;
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
@@ -237,5 +231,5 @@
     renderList();
 </script>
 </body>
-            </html>
-                
+    </html>
+    
