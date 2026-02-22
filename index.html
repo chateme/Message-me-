@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro Final Fix</title>
+    <title>Nasir Messenger Ultimate Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
@@ -23,19 +23,20 @@
         
         #main-chat { display: none; flex-direction: column; height: 100vh; }
         .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
+        #typing-status { font-size: 12px; color: #dcf8c6; font-style: italic; display: block; }
+        
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; margin-bottom: 3px; display: block; }
-        .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 5px; }
+        .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
         .del-btn { color: #d32f2f; cursor: pointer; font-size: 12px; }
 
-        .audio-box { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 5px 0; }
-        .play-btn { font-size: 30px; color: var(--wa-green); cursor: pointer; }
-        .track { flex: 1; height: 4px; background: #ccc; border-radius: 2px; overflow: hidden; }
-        .fill { height: 100%; background: var(--wa-green); width: 0%; }
+        .tick { font-size: 11px; }
+        .tick-grey { color: #888; }
+        .tick-blue { color: #34b7f1; }
 
         .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
         .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; }
@@ -52,26 +53,29 @@
 <div id="setup-screen">
     <div class="setup-header">ناصر میسنجر پرو 🔐</div>
     <div class="chat-list-container" id="chat-list">
-        <p style="text-align: center; color: #666; margin-top: 50px;">کوئی محفوظ چیٹ نہیں ملی۔</p>
+        <p style="text-align: center; color: #666; margin-top: 50px;">کوئی چیٹ نہیں ملی۔</p>
     </div>
-    <button class="add-new-btn" id="master-plus-btn"><i class="fas fa-plus"></i></button>
+    <button class="add-new-btn" id="btn-add"><i class="fas fa-plus"></i></button>
 </div>
 
 <div id="room-form">
     <div class="form-card">
-        <h3 style="color:var(--wa-green)">روم میں داخل ہوں</h3><br>
+        <h3>روم میں داخل ہوں</h3><br>
         <input type="text" id="u-name" placeholder="آپ کا نام">
         <input type="text" id="r-pass" placeholder="کوڈ (کم از کم 4 ہندسے)">
-        <p id="err-msg" style="color:red; font-size:12px; display:none; margin-bottom:10px;">کوڈ کم از کم 4 ہندسوں کا ہونا ضروری ہے!</p>
-        <button class="send-btn" style="width:100%; border-radius:10px;" id="master-start-btn">شروع کریں</button>
-        <button id="master-cancel-btn" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
+        <p id="err-msg" style="color:red; font-size:12px; display:none;">کوڈ 4 ہندسوں کا ہونا ضروری ہے!</p>
+        <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">شروع کریں</button>
+        <button id="btn-cancel" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
     </div>
 </div>
 
 <div id="main-chat">
     <div class="chat-header">
-        <i class="fas fa-arrow-left" onclick="location.reload()" style="cursor:pointer; font-size: 20px;"></i>
-        <div style="font-weight:bold; flex:1;" id="active-room-name">چیٹ</div>
+        <i class="fas fa-arrow-left" onclick="location.reload()" style="cursor:pointer;"></i>
+        <div style="flex:1;">
+            <div style="font-weight:bold;" id="active-room-name">چیٹ</div>
+            <div id="typing-status"></div>
+        </div>
     </div>
     <div id="chat-flow"></div>
     <div class="footer">
@@ -85,13 +89,13 @@
             <span><i class="fas fa-circle blink"></i> <span id="r-time">00:00</span></span>
             <i class="fas fa-stop-circle" id="mic-stop" style="font-size:30px; cursor:pointer;"></i>
         </div>
-        <button class="send-btn" id="final-send"><i class="fas fa-paper-plane"></i></button>
+        <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, onChildChanged, remove, update, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -101,122 +105,144 @@
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
-    // پلس بٹن کا پکا فکس
-    document.getElementById('master-plus-btn').addEventListener('click', () => {
-        document.getElementById('err-msg').style.display = 'none';
-        document.getElementById('room-form').style.display = 'flex';
-    });
+    // بٹنز کا انتظام
+    document.getElementById('btn-add').onclick = () => document.getElementById('room-form').style.display = 'flex';
+    document.getElementById('btn-cancel').onclick = () => document.getElementById('room-form').style.display = 'none';
 
-    document.getElementById('master-cancel-btn').addEventListener('click', () => {
-        document.getElementById('room-form').style.display = 'none';
-    });
-
-    document.getElementById('master-start-btn').addEventListener('click', () => {
+    document.getElementById('btn-start').onclick = () => {
         const n = document.getElementById('u-name').value.trim();
         const p = document.getElementById('r-pass').value.trim();
-        if(!n || p.length < 4) {
-            document.getElementById('err-msg').style.display = 'block';
-            return;
-        }
+        if(!n || p.length < 4) { document.getElementById('err-msg').style.display = 'block'; return; }
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v7') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v9') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v7', JSON.stringify(history));
+            localStorage.setItem('n_history_v9', JSON.stringify(history));
         }
-        enterChat(n, rid, p);
+        openChatWindow(n, rid, p);
         document.getElementById('room-form').style.display = 'none';
-    });
+    };
 
-    function renderChatList() {
-        const chats = JSON.parse(localStorage.getItem('n_history_v7') || "[]");
-        const container = document.getElementById('chat-list');
-        if(chats.length === 0) return;
-        container.innerHTML = "";
-        chats.forEach(c => {
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.innerHTML = `<div><strong>${c.roomName}</strong><br><small>${c.userName}</small></div> <i class="fas fa-lock" style="color:#ccc"></i>`;
-            div.onclick = () => enterChat(c.userName, c.roomId, c.roomName);
-            container.appendChild(div);
-        });
-    }
-
-    function enterChat(name, rid, rName) {
+    function openChatWindow(name, rid, rName) {
         myName = name; myRoom = rid;
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-chat').style.display = 'flex';
         document.getElementById('active-room-name').innerText = rName;
-        initFirebase();
+        initChatSystem();
     }
 
-    const sendMessage = (v, t) => push(ref(db, "final_v7/" + myRoom), {
-        uid: myUid, user: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    const postMsg = (v, t) => push(ref(db, "final_v9/" + myRoom), {
+        uid: myUid, user: myName, v: v, t: t, s: 1, // s1: Sent
+        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    document.getElementById('final-send').onclick = () => {
+    document.getElementById('btn-send').onclick = () => {
         const i = document.getElementById('msg-input');
-        if(i.value.trim()){ sendMessage(i.value, 'text'); i.value = ""; }
+        if(i.value.trim()){ postMsg(i.value, 'text'); i.value = ""; setTyping(false); }
     };
 
+    // ٹائپنگ اسٹیٹس ہینڈلر
+    const setTyping = (isTyping) => {
+        set(ref(db, `typing_v9/${myRoom}/${myUid}`), isTyping ? myName : "");
+    };
+
+    document.getElementById('msg-input').oninput = () => {
+        setTyping(true);
+        clearTimeout(window.typingTimer);
+        window.typingTimer = setTimeout(() => setTyping(false), 2000);
+    };
+
+    function initChatSystem() {
+        const rRef = ref(db, "final_v9/" + myRoom);
+        const tRef = ref(db, "typing_v9/" + myRoom);
+
+        // ٹائپنگ لسنر
+        onValue(tRef, snap => {
+            const data = snap.val();
+            let typers = [];
+            for(let id in data) if(id !== myUid && data[id]) typers.push(data[id]);
+            document.getElementById('typing-status').innerText = typers.length > 0 ? typers.join(', ') + " typing..." : "";
+        });
+
+        onChildAdded(rRef, snap => {
+            const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
+            if(!isMe && d.s < 3) update(ref(db, `final_v9/${myRoom}/${k}`), { s: 3 });
+
+            let content = d.t === 'text' ? `<div>${d.v}</div>` : 
+                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
+                          `<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-play-circle" style="font-size:30px;color:var(--wa-green);cursor:pointer;" onclick="playVoice(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><span>Voice</span></div>`;
+            
+            let tickHtml = isMe ? (d.s === 3 ? '<i class="fas fa-check-double tick tick-blue"></i>' : '<i class="fas fa-check tick tick-grey"></i>') : '';
+
+            const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
+                <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
+                <div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v9/${myRoom}/${k}'))"></i>`:''}${d.time} ${tickHtml}</div>
+            </div>`;
+            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
+            document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        });
+
+        onChildChanged(rRef, snap => {
+            const d = snap.val(), k = snap.key;
+            if(d.uid === myUid && d.s === 3) {
+                const mEl = document.getElementById("m-"+k);
+                if(mEl) {
+                    const meta = mEl.querySelector('.meta');
+                    meta.innerHTML = `<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v9/${myRoom}/${k}'))"></i>${d.time} <i class="fas fa-check-double tick tick-blue"></i>`;
+                }
+            }
+        });
+
+        onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
+    }
+
+    // امیج اپلوڈ
     document.getElementById('img-in').onchange = (e) => {
-        const r = new FileReader(); r.onload = (ev) => sendMessage(ev.target.result, 'img');
+        const r = new FileReader(); r.onload = (ev) => postMsg(ev.target.result, 'img');
         r.readAsDataURL(e.target.files[0]);
     };
 
+    // مائیکروفون
     document.getElementById('mic-start').onclick = async () => {
         try {
             if (!activeStream) activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const type = ['audio/webm', 'audio/mp4', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported(t)) || '';
-            mediaRecorder = new MediaRecorder(activeStream, { mimeType: type });
+            mediaRecorder = new MediaRecorder(activeStream);
             chunks = [];
             mediaRecorder.ondataavailable = e => chunks.push(e.data);
             mediaRecorder.onstop = () => {
                 const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks, { type: type }));
-                r.onloadend = () => sendMessage(r.result, 'voice');
+                r.readAsDataURL(new Blob(chunks));
+                r.onloadend = () => postMsg(r.result, 'voice');
             };
             mediaRecorder.start();
             document.getElementById('norm-ui').style.display = 'none';
             document.getElementById('rec-ui').style.display = 'flex';
             sec = 0; clearInterval(timer);
-            timer = setInterval(() => {
-                sec++;
-                document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
-            }, 1000);
+            timer = setInterval(() => { sec++; document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0'); }, 1000);
         } catch(e) { alert("مائیکروفون کی اجازت دیں"); }
     };
 
-    document.getElementById('mic-stop').onclick = () => {
-        mediaRecorder.stop();
-        document.getElementById('norm-ui').style.display = 'flex';
-        document.getElementById('rec-ui').style.display = 'none';
-        clearInterval(timer);
-    };
+    document.getElementById('mic-stop').onclick = () => { mediaRecorder.stop(); document.getElementById('norm-ui').style.display = 'flex'; document.getElementById('rec-ui').style.display = 'none'; clearInterval(timer); };
 
     window.playVoice = (btn, aid) => {
         const a = document.getElementById(aid);
-        const f = btn.parentElement.querySelector('.fill');
-        if(a.paused) {
-            a.play(); btn.className = "fas fa-pause-circle play-btn";
-            a.ontimeupdate = () => f.style.width = (a.currentTime/a.duration)*100 + "%";
-            a.onended = () => { btn.className = "fas fa-play-circle play-btn"; f.style.width = "0%"; };
-        } else a.pause(), btn.className = "fas fa-play-circle play-btn";
+        if(a.paused) { a.play(); btn.className = "fas fa-pause-circle"; a.onended = () => btn.className = "fas fa-play-circle"; }
+        else { a.pause(); btn.className = "fas fa-play-circle"; }
     };
 
-    function initFirebase() {
-        const rRef = ref(db, "final_v7/" + myRoom);
-        onChildAdded(rRef, snap => {
-            const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
-            let content = d.t === 'text' ? `<div>${d.v}</div>` : 
-                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
-                          `<div class="audio-box"><i class="fas fa-play-circle play-btn" onclick="playVoice(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><div class="track"><div class="fill"></div></div></div>`;
-            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `<div class="msg ${isMe?'sent':'received'}" id="m-${k}"><span class="u-tag">${isMe?'آپ':d.user}</span>${content}<div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v7/${myRoom}/${k}'))"></i>`:''}${d.time}</div></div>`);
-            document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+    // لسٹ رینڈرنگ
+    const saved = JSON.parse(localStorage.getItem('n_history_v9') || "[]");
+    const listCont = document.getElementById('chat-list');
+    if(saved.length > 0) {
+        listCont.innerHTML = "";
+        saved.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'chat-item';
+            div.innerHTML = `<div><strong>${c.roomName}</strong><br><small>${c.userName}</small></div> <i class="fas fa-lock"></i>`;
+            div.onclick = () => openChatWindow(c.userName, c.roomId, c.roomName);
+            listCont.appendChild(div);
         });
-        onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
     }
-    renderChatList();
 </script>
 </body>
 </html>
