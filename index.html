@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir - Fixed 2026</title>
+    <title>WhatsApp Nasir - Ultimate Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #128c7e; --bg: #efe7dd; --msg-sent: #dcf8c6; --msg-rec: #fff; --text: #000; }
@@ -22,23 +22,30 @@
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         .sent { background: var(--msg-sent); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: var(--msg-rec); align-self: flex-start; border-top-left-radius: 0; }
-        .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; gap: 3px; }
+        .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; }
 
-        /* Fixed Footer Design */
-        .footer { padding: 8px; display: flex; align-items: flex-end; gap: 5px; background: transparent; }
-        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; position: relative; }
+        /* Footer & Input Bar */
+        .footer-container { padding: 8px; display: flex; flex-direction: column; background: transparent; }
+        .controls-row { display: flex; align-items: center; gap: 8px; }
+        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 10px 5px; }
         
-        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; padding: 8px; }
-        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; padding: 5px; flex-shrink: 0; }
+        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         
-        /* Attachment Menu */
-        #attach-menu { display: none; position: absolute; bottom: 70px; right: 10px; background: var(--msg-rec); border-radius: 15px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; flex-direction: column; gap: 15px; }
-        .attach-opt { display: flex; align-items: center; gap: 15px; font-weight: 500; cursor: pointer; color: var(--text); }
-        .attach-opt i { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        /* Timer Style */
+        #rec-info { display: none; align-items: center; gap: 10px; flex: 1; color: #e91e63; font-weight: bold; }
+        .dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
 
-        #rec-status { display: none; color: #e91e63; font-weight: bold; flex: 1; padding-left: 10px; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
+        /* Emoji Panel */
+        #emoji-panel { display: none; background: var(--msg-rec); grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 150px; overflow-y: auto; }
+        .emo-btn { font-size: 24px; text-align: center; cursor: pointer; padding: 5px; }
+
+        /* Attachment Menu */
+        #attach-menu { display: none; position: absolute; bottom: 70px; right: 70px; background: var(--msg-rec); border-radius: 15px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; flex-direction: column; gap: 15px; }
+        .attach-opt { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .attach-opt i { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body class="dark-mode">
@@ -47,15 +54,14 @@
     <div id="attach-menu">
         <div class="attach-opt" onclick="sendLoc()"><i class="fas fa-location-dot" style="background:#25d366;"></i> لوکیشن </div>
         <div class="attach-opt" onclick="document.getElementById('gall-in').click()"><i class="fas fa-image" style="background:#007bff;"></i> گیلری </div>
-        <div class="attach-opt" onclick="openCam()"><i class="fas fa-camera" style="background:#e91e63;"></i> کیمرہ </div>
     </div>
 
     <div id="login-screen" class="screen active">
-        <div class="header">WhatsApp Nasir</div>
+        <div class="header">Registration</div>
         <div style="padding:30px; display:flex; flex-direction:column; gap:15px;">
-            <input type="text" id="reg-name" placeholder="اپنا نام لکھیں" style="padding:15px; border-radius:10px;">
-            <input type="number" id="reg-phone" placeholder="فون نمبر" style="padding:15px; border-radius:10px;">
-            <button onclick="register()" style="padding:15px; background:var(--wa-teal); color:white; border:none; border-radius:10px; font-weight:bold;">لاگ ان</button>
+            <input type="text" id="reg-name" placeholder="نام" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
+            <input type="number" id="reg-phone" placeholder="نمبر" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
+            <button onclick="register()" style="padding:15px; background:var(--wa-teal); color:white; border:none; border-radius:10px;">داخل ہوں</button>
         </div>
     </div>
 
@@ -63,23 +69,26 @@
         <div class="header">
             <i class="fas fa-arrow-left" onclick="location.reload()"></i>
             <span style="font-weight:bold; flex:1;">WhatsApp Nasir</span>
-            <i class="fas fa-sun" onclick="document.body.classList.toggle('dark-mode')" style="cursor:pointer;"></i>
+            <i class="fas fa-moon" onclick="document.body.classList.toggle('dark-mode')"></i>
         </div>
         
         <div id="chat-flow"></div>
+        <div id="emoji-panel"></div>
 
-        <div class="footer">
-            <div class="input-bar">
-                <i class="far fa-smile icon-btn"></i>
-                <div id="rec-status">🔴 Recording...</div>
-                <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
-                <i class="fas fa-paperclip icon-btn" onclick="toggleAttach()"></i>
-                <input type="file" id="gall-in" accept="image/*" style="display:none" onchange="handleGall(this)">
+        <div class="footer-container">
+            <div class="controls-row">
+                <div class="input-bar">
+                    <i class="far fa-smile icon-btn" onclick="toggleEmoji()"></i>
+                    <div id="rec-info"><div class="dot"></div> <span id="timer-val">00:00</span></div>
+                    <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
+                    <i class="fas fa-paperclip icon-btn" onclick="toggleAttach()"></i>
+                    <input type="file" id="gall-in" accept="image/*" style="display:none" onchange="handleGall(this)">
+                </div>
+                <button class="main-btn" id="action-btn">
+                    <i class="fas fa-microphone" id="mic-icon"></i>
+                    <i class="fas fa-paper-plane" id="send-icon" style="display:none;"></i>
+                </button>
             </div>
-            <button class="main-btn" id="action-btn">
-                <i class="fas fa-microphone" id="mic-icon" style="font-size: 22px;"></i>
-                <i class="fas fa-paper-plane" id="send-icon" style="display:none; font-size: 20px;"></i>
-            </button>
         </div>
     </div>
 </div>
@@ -94,61 +103,62 @@
 
     let myPhone = localStorage.getItem('u_phone') || "";
     let myName = localStorage.getItem('u_name') || "";
-    let currentRoom = btoa("GlobalRoom"), mediaRecorder, chunks = [], isRecording = false;
+    let currentRoom = btoa("GlobalRoom"), mediaRecorder, chunks = [], isRecording = false, timerInterval, seconds = 0;
 
-    window.onload = () => { if(myPhone) { document.getElementById('login-screen').classList.remove('active'); document.getElementById('chat-screen').classList.add('active'); startChat(); } };
+    window.onload = () => { if(myPhone) { document.getElementById('login-screen').classList.remove('active'); document.getElementById('chat-screen').classList.add('active'); loadEmojis(); startChat(); } };
 
     window.register = () => {
         const n = document.getElementById('reg-name').value, p = document.getElementById('reg-phone').value;
         if(n && p) { localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p); location.reload(); }
     };
 
-    window.toggleAttach = () => {
-        const m = document.getElementById('attach-menu');
-        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-    };
+    // --- Emoji Logic ---
+    function loadEmojis() {
+        const list = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","🌹","✅","📍","🎙️","📸","✨"];
+        const panel = document.getElementById('emoji-panel');
+        panel.innerHTML = list.map(e => `<span class="emo-btn" onclick="addEmoji('${e}')">${e}</span>`).join('');
+    }
+    window.toggleEmoji = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; };
+    window.addEmoji = (e) => { const inp = document.getElementById('msg-input'); inp.value += e; inp.dispatchEvent(new Event('input')); };
 
-    window.sendLoc = () => {
-        toggleAttach();
-        navigator.geolocation.getCurrentPosition(p => {
-            const link = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            sendData(`<a href="${link}" target="_blank" style="color:#007bff; font-weight:bold;">📍 میری لوکیشن</a>`, 'text');
-        }, () => alert("لوکیشن پرمیشن دیں"));
-    };
-
-    // --- Fixed Audio Recording ---
-    async function startRecording() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-                const reader = new FileReader();
-                reader.onloadend = () => sendData(reader.result, 'voice');
-                reader.readAsDataURL(blob);
-                stream.getTracks().forEach(track => track.stop());
-            };
-            mediaRecorder.start();
-            isRecording = true;
-            document.getElementById('rec-status').style.display = 'block';
-            document.getElementById('msg-input').style.display = 'none';
-            document.getElementById('mic-icon').style.color = 'red';
-        } catch (e) { alert("مائیکروفون کی اجازت نہیں ملی"); }
+    // --- Recording Timer Logic ---
+    function startTimer() {
+        seconds = 0;
+        timerInterval = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            let s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-val').innerText = `${m}:${s}`;
+        }, 1000);
     }
 
-    function stopRecording() {
-        if (mediaRecorder) {
-            mediaRecorder.stop();
-            isRecording = false;
-            document.getElementById('rec-status').style.display = 'none';
+    async function handleVoice() {
+        if(!isRecording) {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(s); chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
+                    r.onloadend = () => sendData(r.result, 'voice');
+                };
+                mediaRecorder.start(); isRecording = true;
+                document.getElementById('rec-info').style.display = 'flex';
+                document.getElementById('msg-input').style.display = 'none';
+                document.getElementById('mic-icon').style.color = 'red';
+                startTimer();
+            } catch(e) { alert("Mic Error"); }
+        } else {
+            mediaRecorder.stop(); isRecording = false;
+            clearInterval(timerInterval);
+            document.getElementById('rec-info').style.display = 'none';
             document.getElementById('msg-input').style.display = 'block';
             document.getElementById('mic-icon').style.color = 'white';
+            document.getElementById('timer-val').innerText = "00:00";
         }
     }
 
-    // --- Chat & Buttons ---
+    // --- Core Functions ---
     const inp = document.getElementById('msg-input');
     inp.oninput = () => {
         const hasText = inp.value.trim().length > 0;
@@ -157,39 +167,25 @@
     };
 
     document.getElementById('action-btn').onclick = () => {
-        if(inp.value.trim()) {
-            sendData(inp.value, 'text');
-            inp.value = ""; inp.oninput();
-        } else {
-            if(!isRecording) startRecording();
-            else stopRecording();
-        }
+        if(inp.value.trim()) { sendData(inp.value, 'text'); inp.value = ""; inp.oninput(); }
+        else { handleVoice(); }
     };
 
     function startChat() {
         onChildAdded(ref(db, "msgs/" + currentRoom), snap => {
             const d = snap.val(), isMe = d.p === myPhone;
-            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:200px;"></audio>` : 
+            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:180px;"></audio>` : 
                           d.t === 'img' ? `<img src="${d.v}" style="max-width:200px; border-radius:8px;">` : d.v;
             document.getElementById('chat-flow').innerHTML += `<div class="msg ${isMe?'sent':'received'}">${content}<div class="meta">${d.time}</div></div>`;
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
     }
 
-    function sendData(v, t) {
-        push(ref(db, "msgs/" + currentRoom), { p: myPhone, u: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-        document.getElementById('attach-menu').style.display = 'none';
-    }
-
-    window.handleGall = (input) => {
-        const file = input.files[0];
-        if (file) {
-            const r = new FileReader();
-            r.onload = (e) => { sendData(e.target.result, 'img'); toggleAttach(); };
-            r.readAsDataURL(file);
-        }
-    };
+    function sendData(v, t) { push(ref(db, "msgs/" + currentRoom), { p: myPhone, u: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }); }
+    window.toggleAttach = () => { const m = document.getElementById('attach-menu'); m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; };
+    window.handleGall = (i) => { const f = i.files[0]; if(f){ const r = new FileReader(); r.onload=(e)=>sendData(e.target.result,'img'); r.readAsDataURL(f); } };
+    window.sendLoc = () => { navigator.geolocation.getCurrentPosition(p => { sendData(`📍 Location: https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}`, 'text'); }); };
 </script>
 </body>
     </html>
-    
+                        
