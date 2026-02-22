@@ -3,64 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro 🇵🇰</title>
+    <title>Nasir Messenger Professional 🇵🇰</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --whatsapp-green: #075e54; --chat-bg: #e5ddd5; }
+        :root { --whatsapp-green: #075e54; --bg-color: #e5ddd5; --sent-msg: #dcf8c6; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: var(--chat-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* ہیڈر */
-        .header { background: var(--whatsapp-green); color: white; padding: 10px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; }
-        .p-img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid white; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* چیٹ باکس */
+        /* پروفیشنل ہیڈر */
+        .header { background: var(--whatsapp-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 60px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10; }
+        .p-img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #fff; object-fit: cover; }
+        .user-status { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; font-size: 16px; }
+        .status-online { font-size: 11px; opacity: 0.9; }
+
+        /* چیٹ ایریا */
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 10px; border-radius: 15px; max-width: 85%; font-size: 15px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
-        .sent { background: #dcf8c6; align-self: flex-end; }
-        .received { background: white; align-self: flex-start; }
+        .msg-container { max-width: 85%; position: relative; padding: 8px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; box-shadow: 0 1px 0.5px rgba(0,0,0,0.15); }
+        .sent { background: var(--sent-msg); align-self: flex-end; border-top-right-radius: 2px; }
+        .received { background: white; align-self: flex-start; border-top-left-radius: 2px; }
         
-        /* آڈیو پلیئر ڈیزائن فکس */
-        audio { height: 35px; width: 220px; filter: sepia(20%) saturate(70%) grayscale(100%) contrast(90%) invert(10%); }
-        .msg-time { font-size: 10px; color: #666; margin-top: 5px; text-align: right; }
-        .del-btn { color: red; font-size: 14px; cursor: pointer; float: right; margin-left: 10px; }
+        /* پروفیشنل آڈیو پلیئر */
+        .audio-player { display: flex; align-items: center; gap: 8px; min-width: 200px; padding: 5px 0; }
+        .audio-player i { color: var(--whatsapp-green); font-size: 20px; cursor: pointer; }
+        .progress-bar { flex: 1; height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; position: relative; }
+        
+        .msg-info { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin-top: 4px; }
+        .msg-time { font-size: 10px; color: #666; }
+        .del-icon { color: #e74c3c; font-size: 12px; cursor: pointer; }
 
         /* فوٹر */
-        .footer { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; }
-        .in-box { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; border: 1px solid #ccc; }
-        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; }
-        .btn-act { color: var(--whatsapp-green); font-size: 24px; cursor: pointer; background: none; border: none; }
-        
-        /* ریکارڈنگ ٹائمر */
-        #rec-ui { display: none; flex: 1; align-items: center; justify-content: space-between; color: red; font-weight: bold; background: white; padding: 0 15px; border-radius: 25px; height: 45px; }
-        .dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .footer { background: #f0f0f0; padding: 8px 12px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; }
+        .input-group { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; height: 45px; }
+        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; padding: 8px; }
+        .action-btn { color: #555; font-size: 22px; cursor: pointer; transition: 0.2s; }
+        .action-btn:hover { color: var(--whatsapp-green); }
+        .send-btn { background: var(--whatsapp-green); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* ریکارڈنگ موڈ */
+        #rec-panel { display: none; flex: 1; align-items: center; justify-content: space-between; background: white; padding: 0 15px; border-radius: 25px; height: 45px; color: #e74c3c; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div class="header">
     <img src="https://chateme.github.io/my-photo.jpg" onerror="this.src='https://github.com/chateme.png'" class="p-img">
-    <div style="font-weight:bold;">ناصر ممتاز میسنجر 🇵🇰</div>
+    <div class="user-status">
+        <span class="user-name">ناصر ممتاز میسنجر 🇵🇰</span>
+        <span class="status-online">آن لائن</span>
+    </div>
 </div>
 
 <div id="chat-flow"></div>
 
 <div class="footer">
-    <label for="img" class="btn-act"><i class="fas fa-camera"></i></label>
-    <input type="file" id="img" accept="image/*" style="display:none" onchange="sendImg(this)">
+    <label for="img-in" class="action-btn"><i class="fas fa-camera"></i></label>
+    <input type="file" id="img-in" accept="image/*" style="display:none" onchange="uploadImage(this)">
     
-    <div class="in-box" id="norm-ui">
+    <div class="input-group" id="main-input">
         <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
-        <button class="btn-act" id="mic-btn"><i class="fas fa-microphone"></i></button>
+        <button class="action-btn" id="start-rec"><i class="fas fa-microphone"></i></button>
     </div>
 
-    <div id="rec-ui">
-        <div style="display:flex; align-items:center; gap:10px;"><div class="dot"></div><span id="timer">00:00</span></div>
-        <i class="fas fa-stop-circle" style="font-size:28px; cursor:pointer;" id="stop-btn"></i>
+    <div id="rec-panel">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-circle blink"></i>
+            <span id="timer">00:00</span>
+        </div>
+        <span style="font-size: 14px; color: #666;">ریکارڈنگ ہو رہی ہے...</span>
+        <i class="fas fa-stop-circle" id="stop-rec" style="font-size:28px; cursor:pointer;"></i>
     </div>
 
-    <button onclick="sendText()" style="background:var(--whatsapp-green); color:white; width:45px; height:45px; border-radius:50%; border:none;"><i class="fas fa-paper-plane"></i></button>
+    <button class="send-btn" onclick="sendText()"><i class="fas fa-paper-plane"></i></button>
 </div>
 
 <script type="module">
@@ -70,65 +86,97 @@
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    const mRef = ref(db, "nasir_chat_pro_v1");
-    const myId = "User-" + Math.floor(Math.random() * 999);
-    let rec, chunks = [], sec = 0, tInt;
+    const chatRef = ref(db, "nasir_pro_v1");
+    const myId = "User-" + Math.floor(Math.random() * 1000);
+    let recorder, chunks = [], sec = 0, timer;
 
-    const pushMsg = (v, t) => push(mRef, { u: myId, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-
-    window.sendText = () => {
-        const i = document.getElementById('msg-input');
-        if(i.value.trim()){ pushMsg(i.value, 'text'); i.value = ""; }
+    const post = (val, type) => {
+        push(chatRef, { 
+            uid: myId, 
+            val: val, 
+            type: type, 
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+        });
     };
 
-    window.sendImg = (el) => {
-        const r = new FileReader(); r.onload = (e) => pushMsg(e.target.result, 'image');
+    window.sendText = () => {
+        const input = document.getElementById('msg-input');
+        if(input.value.trim()){ post(input.value, 'text'); input.value = ""; }
+    };
+
+    window.uploadImage = (el) => {
+        const r = new FileReader();
+        r.onload = (e) => post(e.target.result, 'image');
         r.readAsDataURL(el.files[0]);
     };
 
-    document.getElementById('mic-btn').onclick = async () => {
+    // بہتر وائس ریکارڈنگ سسٹم
+    document.getElementById('start-rec').onclick = async () => {
         try {
-            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            rec = new MediaRecorder(s); rec.start();
-            document.getElementById('norm-ui').style.display = 'none';
-            document.getElementById('rec-ui').style.display = 'flex';
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+            
+            document.getElementById('main-input').style.display = 'none';
+            document.getElementById('rec-panel').style.display = 'flex';
+            
             sec = 0;
-            tInt = setInterval(() => {
+            timer = setInterval(() => {
                 sec++;
                 let m = Math.floor(sec/60).toString().padStart(2,'0');
                 let s = (sec%60).toString().padStart(2,'0');
-                document.getElementById('timer').innerText = m+":"+s;
+                document.getElementById('timer').innerText = `${m}:${s}`;
             }, 1000);
+
             chunks = [];
-            rec.ondataavailable = e => chunks.push(e.data);
-            rec.onstop = () => {
-                clearInterval(tInt);
-                const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
-                r.onloadend = () => pushMsg(r.result, 'audio');
-                document.getElementById('norm-ui').style.display = 'flex';
-                document.getElementById('rec-ui').style.display = 'none';
+            recorder.ondataavailable = (e) => chunks.push(e.data);
+            recorder.onstop = () => {
+                clearInterval(timer);
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                const r = new FileReader();
+                r.readAsDataURL(blob);
+                r.onloadend = () => post(r.result, 'audio');
+                document.getElementById('main-input').style.display = 'flex';
+                document.getElementById('rec-panel').style.display = 'none';
+                stream.getTracks().forEach(track => track.stop());
             };
-        } catch (e) { alert("مائیکروفون کی اجازت دیں!"); }
+        } catch (err) { alert("ریکارڈنگ کے لیے مائیکروفون کی اجازت ضروری ہے۔"); }
     };
 
-    document.getElementById('stop-btn').onclick = () => rec.stop();
+    document.getElementById('stop-rec').onclick = () => recorder.stop();
 
-    window.del = (k) => { if(confirm("مٹائیں؟")) remove(ref(db, `nasir_chat_pro_v1/${k}`)); location.reload(); };
+    window.deleteMsg = (key) => {
+        if(confirm("کیا آپ یہ میسج مٹانا چاہتے ہیں؟")) remove(ref(db, `nasir_pro_v1/${key}`));
+    };
 
-    onChildAdded(mRef, (snap) => {
+    onChildAdded(chatRef, (snap) => {
         const d = snap.val();
-        const isMe = d.u === myId;
-        let body = d.t === 'text' ? d.v : (d.t === 'image' ? `<img src="${d.v}" style="width:100%; border-radius:10px;">` : `<audio src="${d.v}" controls></audio>`);
+        const isMe = d.uid === myId;
+        let content = "";
+
+        if(d.type === 'text') content = `<div>${d.val}</div>`;
+        else if(d.type === 'image') content = `<img src="${d.val}" style="width:100%; border-radius:8px; margin-top:5px;">`;
+        else content = `
+            <div class="audio-player">
+                <i class="fas fa-play-circle" onclick="this.nextElementSibling.play()"></i>
+                <audio src="${d.val}"></audio>
+                <div class="progress-bar"><div style="width:100%; height:100%; background:var(--whatsapp-green); opacity:0.3;"></div></div>
+            </div>`;
+
+        const html = `
+            <div class="msg-container ${isMe ? 'sent' : 'received'}" id="${snap.key}">
+                ${content}
+                <div class="msg-info">
+                    <span class="msg-time">${d.time}</span>
+                    ${isMe ? `<i class="fas fa-trash-alt del-icon" onclick="deleteMsg('${snap.key}')"></i>` : ''}
+                </div>
+            </div>`;
         
-        document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `
-            <div class="msg ${isMe?'sent':'received'}">
-                ${isMe ? `<span class="del-btn" onclick="del('${snap.key}')"><i class="fas fa-trash"></i></span>` : ''}
-                ${body}
-                <div class="msg-time">${d.time}</div>
-            </div>`);
-        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        const flow = document.getElementById('chat-flow');
+        flow.insertAdjacentHTML('beforeend', html);
+        flow.scrollTop = flow.scrollHeight;
     });
 </script>
 </body>
-                                                                                                                                                     </html>
-                                                                                                                                                     
+        </html>
+                                                      
