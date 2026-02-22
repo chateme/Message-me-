@@ -6,76 +6,138 @@
     <title>Nasir Messenger Pro 🇵🇰</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: sans-serif; background: #e5ddd5; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .hdr { background: #075e54; color: white; padding: 10px; text-align: center; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        :root { --green: #075e54; --light-green: #dcf8c6; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e5ddd5; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* ہیڈر ڈیزائن */
+        .header { background: var(--green); color: white; padding: 10px; text-align: center; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2); flex-shrink: 0; }
         .p-box { position: relative; display: inline-block; }
-        .p-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; object-fit: cover; }
-        .flag { position: absolute; bottom: 0; right: 0; width: 18px; border: 1px solid white; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px; border-radius: 10px; max-width: 75%; font-size: 15px; background: white; align-self: flex-start; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .me { align-self: flex-end; background: #dcf8c6; }
-        .ftr { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
-        input { flex: 1; border: none; padding: 12px; border-radius: 25px; outline: none; font-size: 16px; }
-        .btn { background: #075e54; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .mic-on { color: red !important; }
+        .p-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid white; object-fit: cover; background: #fff; }
+        .flag { position: absolute; bottom: 0; right: 0; width: 20px; border: 1px solid white; border-radius: 2px; }
+        .nasir-title { font-weight: bold; margin-top: 5px; font-size: 16px; display: block; }
+
+        /* چیٹ ایریا */
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
+        .bubble { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 15px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
+        .sent { background: var(--light-green); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .received { background: white; align-self: flex-start; border-bottom-left-radius: 2px; }
+        
+        /* ان پٹ ایریا */
+        .footer { position: fixed; bottom: 0; width: 100%; background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
+        .input-container { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; border: 1px solid #ccc; }
+        #msg-input { flex: 1; border: none; padding: 12px 5px; outline: none; font-size: 16px; background: transparent; }
+        .action-btn { color: var(--green); font-size: 22px; cursor: pointer; background: none; border: none; padding: 5px; }
+        .send-btn { background: var(--green); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        
+        /* وائس ریکارڈنگ اینیمیشن */
+        .recording { color: red !important; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
 
-<div class="hdr">
+<div class="header">
     <div class="p-box">
         <img src="https://chateme.github.io/my-photo.jpg" onerror="this.src='https://github.com/chateme.png'" class="p-img">
         <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" class="flag">
     </div>
-    <div style="font-weight:bold; margin-top:5px;">ناصر ممتاز میسنجر 🇵🇰</div>
+    <span class="nasir-title">ناصر ممتاز میسنجر 🇵🇰</span>
 </div>
 
-<div id="chat"></div>
+<div id="chat-flow"></div>
 
-<div class="ftr">
-    <input type="text" id="inp" placeholder="پیغام لکھیں...">
-    <button style="background:none; border:none; color:#075e54; font-size:22px;" id="mic"><i class="fas fa-microphone"></i></button>
-    <button class="btn" id="snd"><i class="fas fa-paper-plane"></i></button>
+<div class="footer">
+    <div class="input-container">
+        <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
+        <button class="action-btn" id="mic-btn"><i class="fas fa-microphone"></i></button>
+    </div>
+    <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
 </div>
 
 <script type="module">
+    // Firebase Libraries
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
-    const app = initializeApp(cfg);
+    // آپ کے پروجیکٹ کی درست کنفیگریشن
+    const firebaseConfig = {
+        apiKey: "AIzaSyAaLNT4BuuvHeJTEqSBg52BbWxKYPHPYes",
+        authDomain: "message-me-bbd25.firebaseapp.com",
+        databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/", 
+        projectId: "message-me-bbd25",
+        storageBucket: "message-me-bbd25.firebasestorage.app",
+        messagingSenderId: "284942258094",
+        appId: "1:284942258094:web:e4b6154626ec44e1f6c23f"
+    };
+
+    const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const mRef = ref(db, "nasir_final_chat_2026");
-    let rec, chunks = [], myId = "N-" + Math.floor(Math.random() * 99);
+    const chatRef = ref(db, "nasir_chat_v2026");
+    
+    // عارضی یوزر آئی ڈی
+    const myId = "User-" + Math.floor(Math.random() * 1000);
+    let recorder, chunks = [];
 
-    document.getElementById('snd').onclick = () => {
-        const i = document.getElementById('inp');
-        if(i.value.trim()){ push(mRef, { u: myId, v: i.value, t: 't' }); i.value = ""; }
+    // میسج بھیجنے کا عمل
+    const sendMessage = (val, type) => {
+        if (!val) return;
+        push(chatRef, { 
+            sender: myId, 
+            content: val, 
+            type: type, 
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+        });
     };
 
-    document.getElementById('mic').onclick = async function() {
+    document.getElementById('send-btn').onclick = () => {
+        const input = document.getElementById('msg-input');
+        if (input.value.trim()) {
+            sendMessage(input.value, 'text');
+            input.value = "";
+        }
+    };
+
+    // وائس ریکارڈنگ کا عمل (مکمل ورکنگ)
+    document.getElementById('mic-btn').onclick = async function() {
         const icon = this.querySelector('i');
-        if (!rec || rec.state === 'inactive') {
+        if (!recorder || recorder.state === 'inactive') {
             try {
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                rec = new MediaRecorder(s); rec.start();
-                icon.classList.add('mic-on'); chunks = [];
-                rec.ondataavailable = e => chunks.push(e.data);
-                rec.onstop = () => {
-                    const r = new FileReader();
-                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-                    r.onloadend = () => push(mRef, { u: myId, v: r.result, t: 'v' });
-                    icon.classList.remove('mic-on');
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recorder = new MediaRecorder(stream);
+                recorder.start();
+                icon.classList.add('recording');
+                chunks = [];
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
+                    reader.onloadend = () => sendMessage(reader.result, 'audio');
+                    icon.classList.remove('recording');
                 };
-            } catch (err) { alert("براہ کرم مائیک کی اجازت دیں!"); }
-        } else rec.stop();
+            } catch (err) {
+                alert("براہ کرم مائیکروفون کی اجازت (Allow) دیں!");
+            }
+        } else {
+            recorder.stop();
+        }
     };
 
-    onChildAdded(mRef, (s) => {
-        const d = s.val();
-        const content = d.t === 't' ? d.v : `<audio src="${d.v}" controls style="width:180px"></audio>`;
-        document.getElementById('chat').insertAdjacentHTML('beforeend', `<div class="msg ${d.u === myId ? 'me' : ''}">${content}</div>`);
-        document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    // ڈیٹا بیس سے میسجز دکھانا
+    onChildAdded(chatRef, (snapshot) => {
+        const data = snapshot.val();
+        const chatBox = document.getElementById('chat-flow');
+        const isMe = data.sender === myId;
+        
+        let messageBody = data.type === 'text' ? data.content : `<audio src="${data.content}" controls style="width:200px"></audio>`;
+        
+        const html = `
+            <div class="bubble ${isMe ? 'sent' : 'received'}">
+                ${messageBody}
+                <div style="font-size:9px; color:#666; text-align:right; margin-top:5px;">${data.time}</div>
+            </div>`;
+        
+        chatBox.insertAdjacentHTML('beforeend', html);
+        chatBox.scrollTop = chatBox.scrollHeight;
     });
 </script>
 </body>
