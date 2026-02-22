@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir - Fixed v3</title>
+    <title>WhatsApp Nasir - Separated Controls</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #128c7e; --bg: #efe7dd; --msg-sent: #dcf8c6; --msg-rec: #fff; --text: #000; }
@@ -25,53 +25,77 @@
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; gap: 3px; }
         .tick { color: #34b7f1; }
 
-        /* Footer & Extra Panel */
-        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: transparent; }
-        .input-group { flex: 1; background: var(--msg-rec); border-radius: 25px; padding: 0 12px; display: flex; align-items: center; min-height: 48px; }
-        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 8px 5px; }
-        
-        #extra-panel { display: none; background: var(--msg-rec); border-top: 1px solid #ddd; padding: 10px; max-height: 200px; overflow-y: auto; }
-        .emoji-list { font-size: 24px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; cursor: pointer; }
+        /* Camera Overlay */
+        #cam-overlay { display: none; position: absolute; inset: 0; background: black; z-index: 100; flex-direction: column; }
+        #cam-video { width: 100%; flex: 1; object-fit: cover; }
+        .cam-btns { height: 100px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.8); }
 
-        .btn-round { background: var(--wa-teal); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        #rec-status { display: none; color: red; font-weight: bold; flex: 1; padding-left: 10px; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        /* Footer */
+        .footer { padding: 8px; display: flex; align-items: center; gap: 6px; background: transparent; }
+        .input-group { flex: 1; background: var(--msg-rec); border-radius: 25px; padding: 0 10px; display: flex; align-items: center; min-height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 8px 4px; min-width: 0; }
+        
+        .icon-btn { color: #8696a0; font-size: 19px; cursor: pointer; padding: 5px; }
+        .btn-round { background: var(--wa-teal); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        
+        #rec-status { display: none; color: #e91e63; font-weight: bold; flex: 1; padding-left: 10px; animation: blink 1s infinite; font-size: 14px; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+
+        /* Emoji Panel */
+        #emoji-panel { display: none; background: var(--msg-rec); padding: 10px; border-top: 1px solid #ddd; max-height: 150px; overflow-y: auto; text-align: center; }
+        .emoji-item { font-size: 24px; cursor: pointer; margin: 5px; display: inline-block; }
     </style>
 </head>
 <body class="dark-mode">
 
 <div id="app-container">
+    <div id="cam-overlay">
+        <video id="cam-video" autoplay playsinline></video>
+        <div class="cam-btns">
+            <button onclick="closeCam()" style="color:white; background:none; border:none; font-size:20px;"><i class="fas fa-times"></i></button>
+            <button onclick="takeSnap()" style="width:70px; height:70px; border-radius:50%; border:5px solid white; background:red;"></button>
+            <button onclick="switchCam()" style="color:white; background:none; border:none; font-size:20px;"><i class="fas fa-sync"></i></button>
+        </div>
+    </div>
+
     <div id="login-screen" class="screen active">
-        <div class="header">WhatsApp Registration</div>
+        <div class="header">WhatsApp Nasir Registration</div>
         <div style="padding:30px; display:flex; flex-direction:column; gap:15px;">
-            <input type="text" id="reg-name" placeholder="نام" style="padding:12px; border-radius:8px; border:1px solid #ccc;">
+            <input type="text" id="reg-name" placeholder="آپ کا نام" style="padding:12px; border-radius:8px; border:1px solid #ccc;">
             <input type="number" id="reg-phone" placeholder="فون نمبر" style="padding:12px; border-radius:8px; border:1px solid #ccc;">
-            <button onclick="register()" style="padding:12px; background:#00a884; color:white; border:none; border-radius:8px; font-weight:bold;">شروع کریں</button>
+            <button onclick="register()" style="padding:12px; background:#00a884; color:white; border:none; border-radius:8px;">لاگ ان کریں</button>
         </div>
     </div>
 
     <div id="chat-screen" class="screen">
         <div class="header">
             <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-            <span id="chat-title" style="font-weight:bold;">WhatsApp Nasir</span>
-            <i class="fas fa-sun" onclick="document.body.classList.toggle('dark-mode')" style="margin-left:auto; cursor:pointer;"></i>
+            <span id="chat-title" style="font-weight:bold; flex:1;">چیٹ</span>
+            <i class="fas fa-sun" onclick="document.body.classList.toggle('dark-mode')" style="cursor:pointer;"></i>
         </div>
         
         <div id="chat-flow"></div>
 
-        <div id="extra-panel">
-            <div class="emoji-list" id="emoji-container">
-                😂 ❤️ 👍 😊 😍 🙏 🔥 👏 😭 ✨ 🌹 ✅ 📍 🎙️ 📸
-            </div>
+        <div id="emoji-panel">
+            <span class="emoji-item" onclick="addEmoji('😂')">😂</span>
+            <span class="emoji-item" onclick="addEmoji('❤️')">❤️</span>
+            <span class="emoji-item" onclick="addEmoji('👍')">👍</span>
+            <span class="emoji-item" onclick="addEmoji('😊')">😊</span>
+            <span class="emoji-item" onclick="addEmoji('😍')">😍</span>
+            <span class="emoji-item" onclick="addEmoji('🙏')">🙏</span>
+            <span class="emoji-item" onclick="addEmoji('🌹')">🌹</span>
+            <span class="emoji-item" onclick="addEmoji('🔥')">🔥</span>
         </div>
 
         <div class="footer">
             <div class="input-group">
-                <i class="far fa-smile" onclick="toggleExtra()" style="color:#8696a0; cursor:pointer; font-size:20px;"></i>
-                <div id="rec-status">Recording...</div>
-                <input type="text" id="msg-input" placeholder="Message" autocomplete="off">
-                <i class="fas fa-camera" onclick="document.getElementById('file-in').click()" style="color:#8696a0; cursor:pointer; margin-left:10px;"></i>
-                <input type="file" id="file-in" accept="image/*" style="display:none">
+                <i class="far fa-smile icon-btn" onclick="toggleEmoji()"></i>
+                <div id="rec-status">🔴 Recording...</div>
+                <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
+                <i class="fas fa-paperclip icon-btn" onclick="document.getElementById('gallery-in').click()" title="گیلری"></i>
+                <i class="fas fa-camera icon-btn" onclick="openCam()" title="کیمرہ"></i>
+                
+                <input type="file" id="gallery-in" accept="image/*" style="display:none" onchange="handleGallery(this)">
             </div>
             <button class="btn-round" id="main-btn">
                 <i class="fas fa-microphone" id="mic-icon"></i>
@@ -90,7 +114,7 @@
     const db = getDatabase(app);
 
     let myPhone = localStorage.getItem('u_phone') || "", myName = localStorage.getItem('u_name') || "", currentRoom = btoa("GlobalRoom");
-    let mediaRecorder, chunks = [], isRecording = false;
+    let stream, currentFacing = "user", mediaRecorder, chunks = [], isRecording = false;
 
     window.onload = () => { if(myPhone) { document.getElementById('login-screen').style.display='none'; document.getElementById('chat-screen').classList.add('active'); startChat(); } };
 
@@ -99,10 +123,60 @@
         if(n && p) { localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p); location.reload(); }
     };
 
+    // --- Gallery & Camera Separation ---
+    window.handleGallery = (input) => {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => sendData(e.target.result, 'img');
+            reader.readAsDataURL(file);
+        }
+    };
+
+    window.openCam = async () => {
+        try {
+            document.getElementById('cam-overlay').style.display = 'flex';
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacing }, audio: false });
+            document.getElementById('cam-video').srcObject = stream;
+        } catch (e) { alert("کیمرہ نہیں کھل سکا"); closeCam(); }
+    };
+
+    window.closeCam = () => {
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        document.getElementById('cam-overlay').style.display = 'none';
+    };
+
+    window.takeSnap = () => {
+        const video = document.getElementById('cam-video');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        sendData(canvas.toDataURL('image/jpeg'), 'img');
+        closeCam();
+    };
+
+    window.switchCam = () => {
+        currentFacing = currentFacing === "user" ? "environment" : "user";
+        closeCam(); openCam();
+    };
+
+    // --- Emoji & Voice ---
+    window.toggleEmoji = () => {
+        const p = document.getElementById('emoji-panel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    };
+
+    window.addEmoji = (emo) => {
+        const inp = document.getElementById('msg-input');
+        inp.value += emo;
+        inp.dispatchEvent(new Event('input'));
+    };
+
+    // --- Core Functions ---
     function startChat() {
         onChildAdded(ref(db, "msgs/" + currentRoom), snap => {
             const d = snap.val(), isMe = d.p === myPhone;
-            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:200px;"></audio>` : d.t === 'img' ? `<img src="${d.v}" style="max-width:200px;border-radius:8px;">` : d.v;
+            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:180px;"></audio>` : d.t === 'img' ? `<img src="${d.v}" style="max-width:200px;border-radius:8px;">` : d.v;
             document.getElementById('chat-flow').innerHTML += `<div class="msg ${isMe?'sent':'received'}">${content}<div class="meta">${d.time} ${isMe?'<i class="fas fa-check-double tick"></i>':''}</div></div>`;
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
@@ -115,7 +189,7 @@
         document.getElementById('mic-icon').style.display = hasText ? 'none' : 'block';
     };
 
-    document.getElementById('main-btn').onclick = async () => {
+    document.getElementById('main-btn').onclick = () => {
         if(inp.value.trim()) { sendData(inp.value, 'text'); inp.value = ""; inp.oninput(); }
         else { handleVoice(); }
     };
@@ -123,52 +197,13 @@
     async function handleVoice() {
         if(!isRecording) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                chunks = [];
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(s); chunks = [];
                 mediaRecorder.ondataavailable = e => chunks.push(e.data);
                 mediaRecorder.onstop = () => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(new Blob(chunks, { type: 'audio/ogg; codecs=opus' }));
-                    reader.onloadend = () => sendData(reader.result, 'voice');
+                    const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
+                    r.onloadend = () => sendData(r.result, 'voice');
                 };
-                mediaRecorder.start();
-                isRecording = true;
+                mediaRecorder.start(); isRecording = true;
                 document.getElementById('rec-status').style.display = 'block';
-                inp.style.display = 'none';
-                document.getElementById('mic-icon').style.color = 'red';
-            } catch(err) { alert("Mic permission error!"); }
-        } else {
-            mediaRecorder.stop();
-            isRecording = false;
-            document.getElementById('rec-status').style.display = 'none';
-            inp.style.display = 'block';
-            document.getElementById('mic-icon').style.color = 'white';
-        }
-    }
-
-    document.getElementById('file-in').onchange = (e) => {
-        const r = new FileReader();
-        r.onload = (ev) => sendData(ev.target.result, 'img');
-        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
-    };
-
-    function sendData(v, t) {
-        push(ref(db, "msgs/" + currentRoom), { p: myPhone, u: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-        document.getElementById('extra-panel').style.display = 'none';
-    }
-
-    window.toggleExtra = () => {
-        const p = document.getElementById('extra-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
-    };
-
-    document.getElementById('emoji-container').onclick = (e) => {
-        if(e.target.innerText.length <= 2) {
-            inp.value += e.target.innerText;
-            inp.oninput();
-        }
-    };
-</script>
-</body>
-</html>
+    
