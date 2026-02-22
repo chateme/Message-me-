@@ -3,220 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir Private - Secure v32</title>
+    <title>WhatsApp Nasir Pro v34 - Status Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; --sent: #dcf8c6; }
+        :root { --wa-teal: #075e54; --wa-green: #25d366; --wa-light: #dcf8c6; --bg: #efe7dd; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+        #app-wrapper { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
+        
+        .screen { display: none; height: 100%; flex-direction: column; }
+        .active { display: flex; }
 
-        /* Login UI */
-        #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
-        .inp { width: 100%; max-width: 300px; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; background: #2a3942; color: white; outline: none; }
-        .btn { background: var(--wa-green); color: #111b21; padding: 15px 40px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .header { background: var(--wa-teal); color: white; padding: 12px 15px; display: flex; align-items: center; gap: 15px; height: 60px; z-index: 10; }
+        .tabs { display: flex; background: var(--wa-teal); color: rgba(255,255,255,0.7); font-weight: bold; text-align: center; }
+        .tab { flex: 1; padding: 12px; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab.active-tab { color: white; border-bottom: 3px solid white; }
 
-        /* Header */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; z-index: 10; }
-        .header h4 { flex: 1; font-size: 18px; }
+        /* Status Styling */
+        .status-item { padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #eee; background: white; cursor: pointer; }
+        .status-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid #25d366; padding: 2px; }
+        .status-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        /* Chat Area */
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; }
-        .msg { position: relative; padding: 8px 12px 25px 12px; border-radius: 8px; max-width: 80%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); line-height: 1.4; }
-        .sent { background: var(--sent); align-self: flex-end; border-top-right-radius: 0; }
-        .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
-        .meta { position: absolute; bottom: 3px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 3px; }
+        /* Chat Styling */
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        .msg-container { display: flex; flex-direction: column; max-width: 85%; }
+        .sent { align-self: flex-end; }
+        .received { align-self: flex-start; }
+        .msg-box { padding: 8px 12px 22px 12px; border-radius: 8px; background: white; box-shadow: 0 1px 1px rgba(0,0,0,0.1); position: relative; }
+        .sent .msg-box { background: var(--wa-light); }
 
         /* Footer */
-        .footer { padding: 8px; display: flex; align-items: flex-end; gap: 8px; background: transparent; }
-        .input-area { flex: 1; background: white; border-radius: 25px; display: flex; align-items: flex-end; padding: 5px 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        #msg-input { flex: 1; border: none; outline: none; padding: 10px 5px; font-size: 16px; max-height: 120px; overflow-y: auto; resize: none; }
-        .icon { color: #8696a0; font-size: 22px; cursor: pointer; padding: 10px 5px; }
+        .footer { padding: 8px; display: flex; align-items: flex-end; gap: 8px; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 45px; }
+        #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 16px; max-height: 100px; overflow-y: auto; resize: none; }
+        .circle-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
 
-        /* Recording UI */
-        #rec-ui { display: none; flex: 1; align-items: center; gap: 10px; color: #ea0038; font-weight: bold; padding: 10px 0; }
-        .dot { width: 10px; height: 10px; background: #ea0038; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        /* Action Button */
-        .circle-btn { background: var(--wa-teal); color: white; width: 50px; height: 50px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; cursor: pointer; }
-
-        /* Map Preview */
-        .map-link { display: block; background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; color: #000; border: 1px solid #ddd; }
-        .map-img { width: 100%; height: 120px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--wa-teal); }
-        .map-text { padding: 8px; font-size: 13px; font-weight: bold; }
-
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 200px; overflow-y: auto; }
-        .emo { font-size: 25px; text-align: center; cursor: pointer; padding: 8px; }
+        /* Status Viewer */
+        #status-viewer { display: none; position: fixed; inset: 0; background: black; z-index: 2000; flex-direction: column; color: white; }
+        .status-progress { height: 3px; background: #555; width: 90%; margin: 10px auto; border-radius: 2px; }
+        #status-bar { height: 100%; background: white; width: 0%; transition: width 0.1s linear; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <i class="fab fa-whatsapp" style="font-size: 60px; color: var(--wa-green); margin-bottom: 20px;"></i>
-    <h2>Secure Login</h2>
-    <input type="text" id="my-num" class="inp" placeholder="آپ کا نمبر">
-    <input type="text" id="his-num" class="inp" placeholder="دوست کا نمبر">
-    <button class="btn" onclick="initApp()">چیٹ شروع کریں</button>
-</div>
-
-<div id="chat-app" style="display:none; flex-direction:column; height:100vh;">
-    <div class="header">
-        <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <h4 id="target-name">چیٹ</h4>
-        <i class="fas fa-phone"></i>
-        <i class="fas fa-ellipsis-v"></i>
+<div id="app-wrapper">
+    <div id="login-screen" class="screen active" style="justify-content:center; padding:30px; background:#111b21; color:white;">
+        <h2 style="text-align:center; margin-bottom:20px;">WhatsApp Nasir Pro</h2>
+        <input type="text" id="my-phone" placeholder="آپ کا موبائل نمبر" style="width:100%; padding:15px; margin-bottom:15px; border-radius:8px; border:none;">
+        <button onclick="login()" style="width:100%; padding:15px; background:#25d366; color:white; border:none; border-radius:8px; font-weight:bold;">شروع کریں</button>
     </div>
 
-    <div id="chat-flow"></div>
-    <div id="emoji-panel"></div>
-
-    <div class="footer">
-        <div class="input-area">
-            <i class="far fa-smile icon" onclick="toggleEmoji()"></i>
-            <div id="rec-ui"><div class="dot"></div> <span id="r-time">00:00</span></div>
-            <textarea id="msg-input" placeholder="Message" rows="1"></textarea>
-            <i class="fas fa-paperclip icon" onclick="sendLocation()"></i>
-            <i class="fas fa-camera icon" onclick="document.getElementById('cam-in').click()"></i>
-            <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
+    <div id="main-screen" class="screen">
+        <div class="header"><h4>WhatsApp</h4></div>
+        <div class="tabs">
+            <div class="tab active-tab" onclick="switchTab('chats')">CHATS</div>
+            <div class="tab" onclick="switchTab('status')">STATUS</div>
         </div>
-        <button class="circle-btn" id="main-action" onclick="handleAction()">
-            <i class="fas fa-microphone" id="mic-icon"></i>
-            <i class="fas fa-paper-plane" id="send-icon" style="display:none;"></i>
-        </button>
+
+        <div id="chats-list" class="tab-content active" style="flex:1; background:white; overflow-y:auto;"></div>
+
+        <div id="status-list" class="tab-content" style="display:none; flex:1; background:#f0f2f5; overflow-y:auto;">
+            <div class="status-item" onclick="document.getElementById('st-upload').click()">
+                <div class="status-circle"><img id="my-st-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
+                <div><b>میرا اسٹیٹس</b><br><small>اسٹیٹس اپ لوڈ کریں</small></div>
+                <input type="file" id="st-upload" accept="image/*" style="display:none" onchange="uploadStatus(this)">
+            </div>
+            <div style="padding:10px; font-size:12px; font-weight:bold; color:#666;">حالیہ اپ ڈیٹس</div>
+            <div id="other-status"></div>
+        </div>
+
+        <div onclick="startNewChat()" style="position:absolute; bottom:20px; right:20px; background:#25d366; width:55px; height:55px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer;"><i class="fas fa-plus"></i></div>
+    </div>
+
+    <div id="chat-screen" class="screen">
+        <div class="header">
+            <i class="fas fa-arrow-left" onclick="showMain()"></i>
+            <div style="flex:1;"><h4 id="chat-name">نام</h4><small id="last-seen">online</small></div>
+        </div>
+        <div id="chat-flow"></div>
+        <div class="footer">
+            <div class="input-bar">
+                <textarea id="msg-input" placeholder="Message" rows="1"></textarea>
+                <i class="fas fa-camera" style="color:#8696a0; cursor:pointer;" onclick="document.getElementById('chat-cam').click()"></i>
+                <input type="file" id="chat-cam" accept="image/*" capture="environment" style="display:none">
+            </div>
+            <button class="circle-btn" onclick="handleSend()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="status-viewer">
+        <div class="status-progress"><div id="status-bar"></div></div>
+        <div style="display:flex; align-items:center; padding:10px; gap:10px;">
+            <i class="fas fa-arrow-left" onclick="closeStatus()"></i>
+            <b id="st-viewer-name">نام</b>
+        </div>
+        <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+            <img id="st-viewer-img" style="max-width:100%; max-height:80%;">
+        </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myID = "", hisID = "", roomKey = "", isRec = false, mediaRecorder, chunks = [], recInterval;
+    let myPhone = "", targetPhone = "", roomID = "";
 
-    window.initApp = () => {
-        myID = document.getElementById('my-num').value.trim();
-        hisID = document.getElementById('his-num').value.trim();
-        if(!myID || !hisID) return alert("دونوں نمبر درج کریں");
-        
-        // سکیورٹی: الفابیٹیکل آرڈر میں روم کی بنائی جائے گی تاکہ دونوں یوزرز ایک ہی روم میں ہوں
-        roomKey = "SECURE_" + [myID, hisID].sort().join("_");
-        
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('chat-app').style.display = 'flex';
-        document.getElementById('target-name').innerText = hisID;
+    window.login = () => {
+        myPhone = document.getElementById('my-phone').value;
+        if(myPhone) {
+            document.getElementById('login-screen').classList.remove('active');
+            document.getElementById('main-screen').classList.add('active');
+            loadStatus();
+        }
+    };
+
+    window.switchTab = (t) => {
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active-tab'));
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        if(t === 'chats') {
+            document.querySelector('.tab:nth-child(1)').classList.add('active-tab');
+            document.getElementById('chats-list').style.display = 'block';
+        } else {
+            document.querySelector('.tab:nth-child(2)').classList.add('active-tab');
+            document.getElementById('status-list').style.display = 'block';
+        }
+    };
+
+    window.uploadStatus = (input) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            set(ref(db, 'status_posts/' + myPhone), {
+                img: e.target.result,
+                name: myPhone,
+                time: Date.now()
+            });
+            alert("اسٹیٹس اپ لوڈ ہو گیا!");
+        };
+        reader.readAsDataURL(input.files[0]);
+    };
+
+    function loadStatus() {
+        onValue(ref(db, 'status_posts'), snap => {
+            const container = document.getElementById('other-status');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const s = child.val();
+                if(child.key !== myPhone) {
+                    container.innerHTML += `<div class="status-item" onclick="viewStatus('${s.img}', '${s.name}')">
+                        <div class="status-circle"><img src="${s.img}"></div>
+                        <div><b>${s.name}</b><br><small>آج ابھی</small></div>
+                    </div>`;
+                }
+            });
+        });
+    }
+
+    window.viewStatus = (img, name) => {
+        document.getElementById('status-viewer').style.display = 'flex';
+        document.getElementById('st-viewer-img').src = img;
+        document.getElementById('st-viewer-name').innerText = name;
+        let bar = document.getElementById('status-bar');
+        bar.style.width = '0%';
+        setTimeout(() => bar.style.width = '100%', 100);
+        setTimeout(closeStatus, 5000);
+    };
+
+    window.closeStatus = () => document.getElementById('status-viewer').style.display = 'none';
+
+    window.startNewChat = () => {
+        let p = prompt("نمبر درج کریں:");
+        if(p) openChat(p);
+    };
+
+    window.openChat = (phone) => {
+        targetPhone = phone;
+        roomID = [myPhone, targetPhone].sort().join("_");
+        document.getElementById('chat-name').innerText = phone;
+        document.getElementById('main-screen').classList.remove('active');
+        document.getElementById('chat-screen').classList.add('active');
         loadMessages();
     };
 
-    const inp = document.getElementById('msg-input');
-    inp.oninput = () => {
-        const hasText = inp.value.trim().length > 0;
-        document.getElementById('send-icon').style.display = hasText ? 'block' : 'none';
-        document.getElementById('mic-icon').style.display = hasText ? 'none' : 'block';
-    };
-
-    window.handleAction = () => {
-        if(inp.value.trim()) {
-            sendMessage(inp.value, 'text');
-            inp.value = ""; inp.oninput();
-        } else {
-            handleVoice();
-        }
-    };
-
-    const sendMessage = (val, type) => {
-        push(ref(db, roomKey), {
-            sender: myID, v: val, t: type, 
-            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        });
-    };
-
-    // لوکیشن سسٹم (وٹس ایپ اسٹائل)
-    window.sendLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                const locURL = `https://www.google.com/maps?q=${lat},${lon}`;
-                sendMessage(locURL, 'location');
-            }, () => alert("لوکیشن آن کریں!"));
-        }
-    };
-
-    // کیمرہ سسٹم
-    document.getElementById('cam-in').onchange = (e) => {
-        const file = e.target.files[0];
-        if(file) {
-            const r = new FileReader();
-            r.onload = (ev) => sendMessage(ev.target.result, 'image');
-            r.readAsDataURL(file);
-        }
-    };
-
-    // وائس ریکارڈنگ سسٹم
-    async function handleVoice() {
-        const ui = document.getElementById('rec-ui'), clock = document.getElementById('r-time'), mic = document.getElementById('mic-icon');
-        if(!isRec) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                chunks = [];
-                mediaRecorder.start();
-                isRec = true;
-                mic.className = "fas fa-stop"; mic.style.color = "red";
-                ui.style.display = "flex"; inp.style.display = "none";
-                let s = 0;
-                recInterval = setInterval(() => { s++; clock.innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); }, 1000);
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
-                    const reader = new FileReader();
-                    reader.onloadend = () => sendMessage(reader.result, 'voice');
-                    reader.readAsDataURL(blob);
-                };
-            } catch(e) { alert("Mic Permission Denied!"); }
-        } else {
-            mediaRecorder.stop(); isRec = false;
-            mic.className = "fas fa-microphone"; mic.style.color = "white";
-            ui.style.display = "none"; inp.style.display = "block";
-            clearInterval(recInterval);
-        }
-    }
-
     function loadMessages() {
         const flow = document.getElementById('chat-flow');
-        onChildAdded(ref(db, roomKey), snap => {
+        flow.innerHTML = "";
+        onChildAdded(ref(db, 'chats/' + roomID), snap => {
             const d = snap.val();
-            const isMe = d.sender === myID;
-            let content = "";
-
-            if(d.t === 'text') content = d.v;
-            else if(d.t === 'image') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
-            else if(d.t === 'voice') content = `<audio controls src="${d.v}" style="width:200px; height:40px;"></audio>`;
-            else if(d.t === 'location') {
-                content = `<a href="${d.v}" target="_blank" class="map-link">
-                            <div class="map-img"><i class="fas fa-map-marker-alt"></i></div>
-                            <div class="map-text">میری لائیو لوکیشن</div>
-                           </a>`;
-            }
-
-            flow.innerHTML += `<div class="msg ${isMe?'sent':'received'}">
-                ${content}<div class="meta">${d.time} ${isMe?'<i class="fas fa-check-double" style="color:#34b7f1"></i>':''}</div>
-            </div>`;
+            const isMe = d.sender === myPhone;
+            flow.insertAdjacentHTML('beforeend', `<div class="msg-container ${isMe?'sent':'received'}">
+                <div class="msg-box">${d.val}<div style="font-size:10px; text-align:right; color:#666;">${d.time}</div></div>
+            </div>`);
             flow.scrollTop = flow.scrollHeight;
         });
     }
 
-    window.toggleEmoji = () => {
-        const p = document.getElementById('emoji-panel');
-        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
+    window.handleSend = () => {
+        const inp = document.getElementById('msg-input');
+        if(inp.value) {
+            push(ref(db, 'chats/' + roomID), {
+                sender: myPhone,
+                val: inp.value,
+                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+            });
+            inp.value = "";
+        }
     };
-    const emos = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","🌹","✅","📍","📸","🎙️","✨","🎂","😭"];
-    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<span class="emo" onclick="addEmo('${e}')">${e}</span>`).join('');
-    window.addEmo = (e) => { inp.value += e; inp.oninput(); };
+
+    window.showMain = () => {
+        document.getElementById('chat-screen').classList.remove('active');
+        document.getElementById('main-screen').classList.add('active');
+    };
 </script>
 </body>
-    </html>
-    
+                                           </html>
+                
