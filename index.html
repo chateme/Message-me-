@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Ultimate Pro</title>
+    <title>Nasir Messenger Pro - Audio Fixed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
@@ -14,7 +14,6 @@
         .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; }
         .chat-list-container { flex: 1; padding: 15px; overflow-y: auto; }
         .chat-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; border-left: 5px solid var(--wa-green); }
-        
         .add-new-btn { position: fixed; bottom: 30px; right: 30px; background: var(--wa-dark); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; cursor: pointer; z-index: 2100; }
 
         #room-form { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
@@ -23,27 +22,24 @@
         
         #main-chat { display: none; flex-direction: column; height: 100vh; }
         .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
-        #typing-status { font-size: 12px; color: #dcf8c6; font-style: italic; display: block; }
+        #typing-status { font-size: 12px; color: #dcf8c6; font-style: italic; display: block; height: 15px; }
         
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; margin-bottom: 3px; display: block; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
         .del-btn { color: #d32f2f; cursor: pointer; font-size: 12px; }
+        .tick { font-size: 11px; } .tick-grey { color: #888; } .tick-blue { color: #34b7f1; }
 
-        .tick { font-size: 11px; }
-        .tick-grey { color: #888; }
-        .tick-blue { color: #34b7f1; }
+        .audio-box { display: flex; align-items: center; gap: 10px; min-width: 150px; padding: 5px 0; }
+        .play-btn { font-size: 25px; color: var(--wa-green); cursor: pointer; }
 
         .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
         .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; }
-        
         #rec-ui { display: none; flex: 1; align-items: center; justify-content: space-between; background: white; border-radius: 25px; padding: 0 15px; height: 45px; color: red; font-weight: bold; }
-        .act-icon { color: #555; font-size: 22px; cursor: pointer; border: none; background: none; }
         .send-btn { background: var(--wa-green); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; }
         .blink { animation: blk 1s infinite; } @keyframes blk { 50% { opacity: 0; } }
     </style>
@@ -52,9 +48,7 @@
 
 <div id="setup-screen">
     <div class="setup-header">ناصر میسنجر پرو 🔐</div>
-    <div class="chat-list-container" id="chat-list">
-        <p style="text-align: center; color: #666; margin-top: 50px;">کوئی چیٹ نہیں ملی۔</p>
-    </div>
+    <div class="chat-list-container" id="chat-list"></div>
     <button class="add-new-btn" id="btn-add"><i class="fas fa-plus"></i></button>
 </div>
 
@@ -62,8 +56,8 @@
     <div class="form-card">
         <h3>روم میں داخل ہوں</h3><br>
         <input type="text" id="u-name" placeholder="آپ کا نام">
-        <input type="text" id="r-pass" placeholder="کوڈ (کم از کم 4 ہندسے)">
-        <p id="err-msg" style="color:red; font-size:12px; display:none;">کوڈ 4 ہندسوں کا ہونا ضروری ہے!</p>
+        <input type="text" id="r-pass" placeholder="کوڈ (4+ ہندسے)">
+        <p id="err-msg" style="color:red; font-size:12px; display:none; margin-bottom:10px;">کوڈ 4 ہندسوں کا ہونا ضروری ہے!</p>
         <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">شروع کریں</button>
         <button id="btn-cancel" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
     </div>
@@ -71,7 +65,7 @@
 
 <div id="main-chat">
     <div class="chat-header">
-        <i class="fas fa-arrow-left" onclick="location.reload()" style="cursor:pointer;"></i>
+        <i class="fas fa-arrow-left" onclick="location.reload()"></i>
         <div style="flex:1;">
             <div style="font-weight:bold;" id="active-room-name">چیٹ</div>
             <div id="typing-status"></div>
@@ -79,16 +73,19 @@
     </div>
     <div id="chat-flow"></div>
     <div class="footer">
-        <label for="img-in" class="act-icon"><i class="fas fa-camera"></i></label>
+        <label for="img-in" style="cursor:pointer; color:#555; font-size:22px;"><i class="fas fa-camera"></i></label>
         <input type="file" id="img-in" accept="image/*" style="display:none">
+        
         <div class="input-bar" id="norm-ui">
             <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
-            <button class="act-icon" id="mic-start"><i class="fas fa-microphone"></i></button>
+            <i class="fas fa-microphone" id="mic-start" style="cursor:pointer; color:#555; font-size:22px;"></i>
         </div>
+
         <div id="rec-ui">
             <span><i class="fas fa-circle blink"></i> <span id="r-time">00:00</span></span>
             <i class="fas fa-stop-circle" id="mic-stop" style="font-size:30px; cursor:pointer;"></i>
         </div>
+
         <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
@@ -101,11 +98,10 @@
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myName = "", myRoom = "", mediaRecorder, chunks = [], sec = 0, timer, activeStream = null;
+    let myName = "", myRoom = "", mediaRecorder, audioChunks = [], timer, sec = 0, activeStream = null;
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
-    // بٹنز کا انتظام
     document.getElementById('btn-add').onclick = () => document.getElementById('room-form').style.display = 'flex';
     document.getElementById('btn-cancel').onclick = () => document.getElementById('room-form').style.display = 'none';
 
@@ -114,135 +110,128 @@
         const p = document.getElementById('r-pass').value.trim();
         if(!n || p.length < 4) { document.getElementById('err-msg').style.display = 'block'; return; }
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v9') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v10') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v9', JSON.stringify(history));
+            localStorage.setItem('n_history_v10', JSON.stringify(history));
         }
-        openChatWindow(n, rid, p);
+        openChat(n, rid, p);
         document.getElementById('room-form').style.display = 'none';
     };
 
-    function openChatWindow(name, rid, rName) {
+    function openChat(name, rid, rName) {
         myName = name; myRoom = rid;
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-chat').style.display = 'flex';
         document.getElementById('active-room-name').innerText = rName;
-        initChatSystem();
+        initFirebase();
     }
 
-    const postMsg = (v, t) => push(ref(db, "final_v9/" + myRoom), {
-        uid: myUid, user: myName, v: v, t: t, s: 1, // s1: Sent
-        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    const send = (v, t) => push(ref(db, "final_v10/" + myRoom), {
+        uid: myUid, user: myName, v: v, t: t, s: 1, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
     document.getElementById('btn-send').onclick = () => {
         const i = document.getElementById('msg-input');
-        if(i.value.trim()){ postMsg(i.value, 'text'); i.value = ""; setTyping(false); }
+        if(i.value.trim()){ send(i.value, 'text'); i.value = ""; setTyping(false); }
     };
 
-    // ٹائپنگ اسٹیٹس ہینڈلر
-    const setTyping = (isTyping) => {
-        set(ref(db, `typing_v9/${myRoom}/${myUid}`), isTyping ? myName : "");
-    };
-
+    // ٹائپنگ
+    const setTyping = (st) => set(ref(db, `typing_v10/${myRoom}/${myUid}`), st ? myName : "");
     document.getElementById('msg-input').oninput = () => {
         setTyping(true);
-        clearTimeout(window.typingTimer);
-        window.typingTimer = setTimeout(() => setTyping(false), 2000);
+        clearTimeout(window.tTime);
+        window.tTime = setTimeout(() => setTyping(false), 2000);
     };
 
-    function initChatSystem() {
-        const rRef = ref(db, "final_v9/" + myRoom);
-        const tRef = ref(db, "typing_v9/" + myRoom);
+    // مائیکروفون فکس
+    document.getElementById('mic-start').onclick = async () => {
+        try {
+            audioChunks = [];
+            if (!activeStream) activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(activeStream);
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => send(reader.result, 'voice');
+            };
+            mediaRecorder.start();
+            document.getElementById('norm-ui').style.display = 'none';
+            document.getElementById('rec-ui').style.display = 'flex';
+            sec = 0; clearInterval(timer);
+            timer = setInterval(() => { sec++; document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0')+":"+(sec%60).toString().padStart(2,'0'); }, 1000);
+        } catch(e) { alert("Mic Error: " + e); }
+    };
 
-        // ٹائپنگ لسنر
-        onValue(tRef, snap => {
-            const data = snap.val();
-            let typers = [];
-            for(let id in data) if(id !== myUid && data[id]) typers.push(data[id]);
-            document.getElementById('typing-status').innerText = typers.length > 0 ? typers.join(', ') + " typing..." : "";
+    document.getElementById('mic-stop').onclick = () => {
+        if(mediaRecorder) mediaRecorder.stop();
+        document.getElementById('norm-ui').style.display = 'flex';
+        document.getElementById('rec-ui').style.display = 'none';
+        clearInterval(timer);
+    };
+
+    // امیج
+    document.getElementById('img-in').onchange = (e) => {
+        const r = new FileReader(); r.onload = (ev) => send(ev.target.result, 'img');
+        r.readAsDataURL(e.target.files[0]);
+    };
+
+    function initFirebase() {
+        const rRef = ref(db, "final_v10/" + myRoom);
+        onValue(ref(db, "typing_v10/" + myRoom), snap => {
+            let typers = []; const d = snap.val();
+            for(let id in d) if(id !== myUid && d[id]) typers.push(d[id]);
+            document.getElementById('typing-status').innerText = typers.length ? typers.join(', ') + " typing..." : "";
         });
 
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
-            if(!isMe && d.s < 3) update(ref(db, `final_v9/${myRoom}/${k}`), { s: 3 });
-
-            let content = d.t === 'text' ? `<div>${d.v}</div>` : 
-                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
-                          `<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-play-circle" style="font-size:30px;color:var(--wa-green);cursor:pointer;" onclick="playVoice(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><span>Voice</span></div>`;
+            if(!isMe && d.s < 3) update(ref(db, `final_v10/${myRoom}/${k}`), { s: 3 });
             
-            let tickHtml = isMe ? (d.s === 3 ? '<i class="fas fa-check-double tick tick-blue"></i>' : '<i class="fas fa-check tick tick-grey"></i>') : '';
-
-            const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
+            let content = d.t === 'text' ? d.v : 
+                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
+                          `<div class="audio-box"><i class="fas fa-play-circle play-btn" onclick="playA(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><span>آڈیو میسج</span></div>`;
+            
+            let ticks = isMe ? (d.s === 3 ? '<i class="fas fa-check-double tick tick-blue"></i>' : '<i class="fas fa-check tick tick-grey"></i>') : '';
+            
+            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v9/${myRoom}/${k}'))"></i>`:''}${d.time} ${tickHtml}</div>
-            </div>`;
-            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
+                <div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v10/${myRoom}/${k}'))"></i>`:''}${d.time} ${ticks}</div>
+            </div>`);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
 
         onChildChanged(rRef, snap => {
             const d = snap.val(), k = snap.key;
             if(d.uid === myUid && d.s === 3) {
-                const mEl = document.getElementById("m-"+k);
-                if(mEl) {
-                    const meta = mEl.querySelector('.meta');
-                    meta.innerHTML = `<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v9/${myRoom}/${k}'))"></i>${d.time} <i class="fas fa-check-double tick tick-blue"></i>`;
-                }
+                const el = document.getElementById("m-"+k);
+                if(el) el.querySelector('.tick').className = "fas fa-check-double tick tick-blue";
             }
         });
-
         onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
     }
 
-    // امیج اپلوڈ
-    document.getElementById('img-in').onchange = (e) => {
-        const r = new FileReader(); r.onload = (ev) => postMsg(ev.target.result, 'img');
-        r.readAsDataURL(e.target.files[0]);
-    };
-
-    // مائیکروفون
-    document.getElementById('mic-start').onclick = async () => {
-        try {
-            if (!activeStream) activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(activeStream);
-            chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks));
-                r.onloadend = () => postMsg(r.result, 'voice');
-            };
-            mediaRecorder.start();
-            document.getElementById('norm-ui').style.display = 'none';
-            document.getElementById('rec-ui').style.display = 'flex';
-            sec = 0; clearInterval(timer);
-            timer = setInterval(() => { sec++; document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0'); }, 1000);
-        } catch(e) { alert("مائیکروفون کی اجازت دیں"); }
-    };
-
-    document.getElementById('mic-stop').onclick = () => { mediaRecorder.stop(); document.getElementById('norm-ui').style.display = 'flex'; document.getElementById('rec-ui').style.display = 'none'; clearInterval(timer); };
-
-    window.playVoice = (btn, aid) => {
+    window.playA = (btn, aid) => {
         const a = document.getElementById(aid);
-        if(a.paused) { a.play(); btn.className = "fas fa-pause-circle"; a.onended = () => btn.className = "fas fa-play-circle"; }
-        else { a.pause(); btn.className = "fas fa-play-circle"; }
+        if(a.paused) { a.play(); btn.className = "fas fa-pause-circle play-btn"; a.onended = () => btn.className = "fas fa-play-circle play-btn"; }
+        else { a.pause(); btn.className = "fas fa-play-circle play-btn"; }
     };
 
-    // لسٹ رینڈرنگ
-    const saved = JSON.parse(localStorage.getItem('n_history_v9') || "[]");
-    const listCont = document.getElementById('chat-list');
-    if(saved.length > 0) {
-        listCont.innerHTML = "";
+    // لسٹ دکھانا
+    const saved = JSON.parse(localStorage.getItem('n_history_v10') || "[]");
+    const list = document.getElementById('chat-list');
+    if(saved.length) {
+        list.innerHTML = "";
         saved.forEach(c => {
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.innerHTML = `<div><strong>${c.roomName}</strong><br><small>${c.userName}</small></div> <i class="fas fa-lock"></i>`;
-            div.onclick = () => openChatWindow(c.userName, c.roomId, c.roomName);
-            listCont.appendChild(div);
+            const d = document.createElement('div'); d.className = 'chat-item';
+            d.innerHTML = `<div><strong>${c.roomName}</strong><br><small>${c.userName}</small></div> <i class="fas fa-lock"></i>`;
+            d.onclick = () => openChat(c.userName, c.roomId, c.roomName);
+            list.appendChild(d);
         });
     }
 </script>
 </body>
-</html>
+    </html>
+        
