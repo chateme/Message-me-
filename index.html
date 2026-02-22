@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir - Fixed & Final</title>
+    <title>WhatsApp Nasir - Full Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #128c7e; --bg: #efe7dd; --msg-sent: #dcf8c6; --msg-rec: #fff; --text: #000; }
@@ -19,27 +19,31 @@
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; z-index: 10; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: var(--bg); }
         
-        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; }
+        /* Message Style */
+        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         .sent { background: var(--msg-sent); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: var(--msg-rec); align-self: flex-start; border-top-left-radius: 0; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; gap: 3px; }
         .tick { color: #34b7f1; }
 
-        /* Camera & Emoji UI */
+        /* Camera UI */
         #cam-overlay { display: none; position: absolute; inset: 0; background: black; z-index: 100; flex-direction: column; }
         #cam-video { width: 100%; flex: 1; object-fit: cover; }
-        #emoji-panel { display: none; background: var(--msg-rec); border-top: 1px solid #ddd; padding: 10px; max-height: 180px; overflow-y: auto; grid-template-columns: repeat(8, 1fr); gap: 10px; display: none; }
-        .emoji { font-size: 22px; cursor: pointer; text-align: center; }
 
-        .footer { padding: 8px; display: flex; align-items: center; gap: 6px; background: transparent; flex-shrink: 0; }
-        .input-group { flex: 1; background: var(--msg-rec); border-radius: 25px; padding: 0 12px; display: flex; align-items: center; min-height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 8px 4px; }
+        /* Footer & Input Controls */
+        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: transparent; }
+        .input-wrapper { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 8px 5px; }
         
-        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; padding: 5px; }
-        .btn-round { background: var(--wa-teal); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; padding: 8px; }
+        .main-btn { background: var(--wa-teal); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         
-        #rec-status { display: none; color: #e91e63; font-weight: bold; flex: 1; animation: blink 1s infinite; font-size: 14px; }
+        #rec-info { display: none; color: #e91e63; font-weight: bold; flex: 1; text-align: left; padding-left: 10px; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
+
+        /* Emoji/Media Panels */
+        #emoji-panel { display: none; background: var(--msg-rec); grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 180px; overflow-y: auto; }
+        .emo-item { font-size: 22px; cursor: pointer; text-align: center; padding: 5px; }
     </style>
 </head>
 <body class="dark-mode">
@@ -55,35 +59,36 @@
     </div>
 
     <div id="login-screen" class="screen active">
-        <div class="header">WhatsApp Nasir - لاگ ان</div>
-        <div style="padding:40px 20px; display:flex; flex-direction:column; gap:20px;">
-            <input type="text" id="reg-name" placeholder="آپ کا نام" style="padding:15px; border-radius:10px; border:1px solid #ccc; font-size:16px;">
-            <input type="number" id="reg-phone" placeholder="فون نمبر" style="padding:15px; border-radius:10px; border:1px solid #ccc; font-size:16px;">
-            <button onclick="register()" style="padding:15px; background:#128c7e; color:white; border:none; border-radius:10px; font-weight:bold; font-size:18px;">داخل ہوں</button>
+        <div class="header">Registration</div>
+        <div style="padding:30px; display:flex; flex-direction:column; gap:15px;">
+            <input type="text" id="reg-name" placeholder="نام" style="padding:15px; border-radius:8px; border:1px solid #ccc;">
+            <input type="number" id="reg-phone" placeholder="نمبر" style="padding:15px; border-radius:8px; border:1px solid #ccc;">
+            <button onclick="register()" style="padding:15px; background:#128c7e; color:white; border:none; border-radius:8px; font-weight:bold;">لاگ ان کریں</button>
         </div>
     </div>
 
     <div id="chat-screen" class="screen">
         <div class="header">
-            <i class="fas fa-arrow-left" onclick="logout()" style="cursor:pointer;"></i>
+            <i class="fas fa-arrow-left" onclick="location.reload()"></i>
             <span style="font-weight:bold; flex:1;">WhatsApp Nasir</span>
-            <i class="fas fa-moon" onclick="document.body.classList.toggle('dark-mode')" style="cursor:pointer;"></i>
+            <i class="fas fa-sun" onclick="document.body.classList.toggle('dark-mode')" style="cursor:pointer;"></i>
         </div>
-        <div id="chat-flow"></div>
         
-        <div id="emoji-panel" style="display: none; grid-template-columns: repeat(8, 1fr); background: white; padding: 10px; border-top: 1px solid #ccc;">
-            </div>
+        <div id="chat-flow"></div>
+
+        <div id="emoji-panel"></div>
 
         <div class="footer">
-            <div class="input-group">
+            <div class="input-wrapper">
                 <i class="far fa-smile icon-btn" onclick="toggleEmoji()"></i>
-                <div id="rec-status">🔴 Recording...</div>
+                <div id="rec-info">🔴 Recording...</div>
                 <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
+                <i class="fas fa-location-dot icon-btn" onclick="sendLocation()" title="لوکیشن"></i>
                 <i class="fas fa-paperclip icon-btn" onclick="document.getElementById('gallery-in').click()"></i>
                 <i class="fas fa-camera icon-btn" onclick="openCam()"></i>
                 <input type="file" id="gallery-in" accept="image/*" style="display:none" onchange="handleGallery(this)">
             </div>
-            <button class="btn-round" id="main-btn">
+            <button class="main-btn" id="action-btn">
                 <i class="fas fa-microphone" id="mic-icon"></i>
                 <i class="fas fa-paper-plane" id="send-icon" style="display:none;"></i>
             </button>
@@ -103,46 +108,71 @@
     let myName = localStorage.getItem('u_name') || "";
     let currentRoom = btoa("GlobalRoom"), stream, currentFacing = "user", mediaRecorder, chunks = [], isRecording = false;
 
-    // --- Auth Logic ---
-    function init() {
-        if(myPhone && myName) {
+    window.onload = () => {
+        if(myPhone) {
             document.getElementById('login-screen').classList.remove('active');
             document.getElementById('chat-screen').classList.add('active');
-            loadEmojis();
-            startChat();
+            loadEmojis(); startChat();
+        }
+    };
+
+    window.register = () => {
+        const n = document.getElementById('reg-name').value;
+        const p = document.getElementById('reg-phone').value;
+        if(n && p) { localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p); location.reload(); }
+    };
+
+    // --- Location Feature ---
+    window.sendLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                sendData(`<a href="${mapLink}" target="_blank" style="color:#00a884; text-decoration:none;">📍 میری لوکیشن چیک کریں</a>`, 'text');
+            }, () => alert("لوکیشن حاصل کرنے کے لیے پرمیشن دیں"));
+        } else { alert("آپ کا براؤزر لوکیشن سپورٹ نہیں کرتا"); }
+    };
+
+    // --- Voice Recording ---
+    async function handleVoice() {
+        if(!isRecording) {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(s); chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
+                    r.onloadend = () => sendData(r.result, 'voice');
+                };
+                mediaRecorder.start(); isRecording = true;
+                document.getElementById('rec-info').style.display = 'block';
+                document.getElementById('msg-input').style.display = 'none';
+                document.getElementById('mic-icon').style.color = 'red';
+            } catch(e) { alert("Mic Permission Denied"); }
+        } else {
+            mediaRecorder.stop(); isRecording = false;
+            document.getElementById('rec-info').style.display = 'none';
+            document.getElementById('msg-input').style.display = 'block';
+            document.getElementById('mic-icon').style.color = 'white';
         }
     }
 
-    window.register = () => {
-        const n = document.getElementById('reg-name').value.trim();
-        const p = document.getElementById('reg-phone').value.trim();
-        if(n && p) {
-            localStorage.setItem('u_name', n);
-            localStorage.setItem('u_phone', p);
-            myPhone = p; myName = n;
-            init();
-        } else { alert("Please enter name and phone!"); }
-    };
-
-    window.logout = () => { localStorage.clear(); location.reload(); };
-
-    // --- Emojis ---
-    function loadEmojis() {
-        const list = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","😭","✨","🌹","✅","📍","🎙️","📸","⭐","🎁","🎂","☕","🍎"];
-        const panel = document.getElementById('emoji-panel');
-        panel.innerHTML = list.map(e => `<span class="emoji" onclick="addEmoji('${e}')">${e}</span>`).join('');
-    }
-    window.toggleEmoji = () => {
-        const p = document.getElementById('emoji-panel');
-        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
-    };
-    window.addEmoji = (e) => {
-        const inp = document.getElementById('msg-input');
-        inp.value += e;
-        inp.dispatchEvent(new Event('input'));
-    };
-
     // --- Camera & Gallery ---
+    window.openCam = async () => {
+        try {
+            document.getElementById('cam-overlay').style.display = 'flex';
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacing } });
+            document.getElementById('cam-video').srcObject = stream;
+        } catch (e) { alert("Camera Error"); closeCam(); }
+    };
+    window.closeCam = () => { if (stream) stream.getTracks().forEach(t => t.stop()); document.getElementById('cam-overlay').style.display = 'none'; };
+    window.takeSnap = () => {
+        const v = document.getElementById('cam-video');
+        const c = document.createElement('canvas');
+        c.width = v.videoWidth; c.height = v.videoHeight;
+        c.getContext('2d').drawImage(v, 0, 0);
+        sendData(c.toDataURL('image/jpeg'), 'img'); closeCam();
+    };
+    window.switchCam = () => { currentFacing = currentFacing === "user" ? "environment" : "user"; closeCam(); openCam(); };
     window.handleGallery = (input) => {
         const file = input.files[0];
         if (file) {
@@ -151,34 +181,13 @@
             r.readAsDataURL(file);
         }
     };
-    window.openCam = async () => {
-        try {
-            document.getElementById('cam-overlay').style.display = 'flex';
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacing } });
-            document.getElementById('cam-video').srcObject = stream;
-        } catch (e) { alert("Camera Error"); closeCam(); }
-    };
-    window.closeCam = () => {
-        if (stream) stream.getTracks().forEach(t => t.stop());
-        document.getElementById('cam-overlay').style.display = 'none';
-    };
-    window.takeSnap = () => {
-        const v = document.getElementById('cam-video');
-        const c = document.createElement('canvas');
-        c.width = v.videoWidth; c.height = v.videoHeight;
-        c.getContext('2d').drawImage(v, 0, 0);
-        sendData(c.toDataURL('image/jpeg'), 'img');
-        closeCam();
-    };
-    window.switchCam = () => { currentFacing = currentFacing === "user" ? "environment" : "user"; closeCam(); openCam(); };
 
-    // --- Chat & Voice ---
+    // --- Core Functions ---
     function startChat() {
         onChildAdded(ref(db, "msgs/" + currentRoom), snap => {
-            const d = snap.val();
-            const isMe = d.p === myPhone;
-            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:200px;"></audio>` : 
-                          d.t === 'img' ? `<img src="${d.v}" style="max-width:220px; border-radius:10px;">` : d.v;
+            const d = snap.val(), isMe = d.p === myPhone;
+            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:180px;"></audio>` : 
+                          d.t === 'img' ? `<img src="${d.v}" style="max-width:200px; border-radius:8px;">` : d.v;
             document.getElementById('chat-flow').innerHTML += `<div class="msg ${isMe?'sent':'received'}">${content}<div class="meta">${d.time} ${isMe?'<i class="fas fa-check-double tick"></i>':''}</div></div>`;
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
@@ -191,39 +200,22 @@
         document.getElementById('mic-icon').style.display = hasText ? 'none' : 'block';
     };
 
-    document.getElementById('main-btn').onclick = () => {
+    document.getElementById('action-btn').onclick = () => {
         if(inp.value.trim()) { sendData(inp.value, 'text'); inp.value = ""; inp.oninput(); }
         else { handleVoice(); }
     };
 
-    async function handleVoice() {
-        if(!isRecording) {
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(s); chunks = [];
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
-                    r.onloadend = () => sendData(r.result, 'voice');
-                };
-                mediaRecorder.start(); isRecording = true;
-                document.getElementById('rec-status').style.display = 'block';
-                inp.style.display = 'none';
-            } catch(e) { alert("Mic Permission Error"); }
-        } else {
-            mediaRecorder.stop(); isRecording = false;
-            document.getElementById('rec-status').style.display = 'none';
-            inp.style.display = 'block';
-        }
-    }
-
     function sendData(v, t) {
         push(ref(db, "msgs/" + currentRoom), { p: myPhone, u: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-        document.getElementById('emoji-panel').style.display = 'none';
     }
 
-    window.onload = init;
+    function loadEmojis() {
+        const list = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","🌹","✅","📍","🎙️","📸"];
+        const panel = document.getElementById('emoji-panel');
+        panel.innerHTML = list.map(e => `<span class="emo-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
+    }
+    window.toggleEmoji = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; };
+    window.addEmoji = (e) => { inp.value += e; inp.dispatchEvent(new Event('input')); };
 </script>
 </body>
-                    </html>
-                                
+</html>
