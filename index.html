@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v54</title>
+    <title>WhatsApp Nasir v56</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; --sent: #dcf8c6; --rec: #ffffff; }
@@ -12,87 +12,70 @@
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
         /* Header */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; z-index: 100; }
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-
-        /* Login Screen */
-        #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
-        .login-input { width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none; outline:none; font-size:16px; }
 
         /* Messages */
         .msg-row { display: flex; width: 100%; margin-bottom: 12px; position: relative; }
         .row-sent { justify-content: flex-end; }
         .row-rec { justify-content: flex-start; }
-        .msg { position: relative; padding: 8px 10px 22px 10px; border-radius: 8px; max-width: 85%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 100px; }
+        .msg { position: relative; padding: 8px 10px 22px 10px; border-radius: 8px; max-width: 85%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 100px; background: white; cursor: pointer; }
         .sent { background: var(--sent); border-top-right-radius: 0; }
         .received { background: var(--rec); border-top-left-radius: 0; }
-        .reply-box { background: rgba(0,0,0,0.06); border-left: 4px solid var(--wa-teal); padding: 5px; font-size: 11px; margin-bottom: 6px; border-radius: 4px; }
-        #reply-preview { display: none; background: #f0f2f5; padding: 10px; border-left: 5px solid var(--wa-teal); width: 100%; }
-
-        /* Reaction Badge */
-        .reaction-badge { position: absolute; bottom: -8px; left: 10px; background: white; border-radius: 10px; padding: 1px 5px; font-size: 11px; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-
-        /* Footer */
-        .footer { padding: 8px; background: #f0f2f5; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; }
-        #msg-input { flex: 1; border: none; outline: none; padding: 10px 5px; font-size: 16px; background: transparent; }
-        .btn-circle { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         
-        #rec-wrap { display: none; flex: 1; align-items: center; gap: 10px; color: red; font-weight: bold; }
+        /* Reply & Reaction UI */
+        .reply-box { background: rgba(0,0,0,0.06); border-left: 4px solid var(--wa-teal); padding: 5px; font-size: 11px; margin-bottom: 5px; border-radius: 4px; }
+        #reply-preview { display: none; background: #f0f2f5; padding: 10px; border-left: 5px solid var(--wa-teal); width: 100%; }
+        .reaction-badge { position: absolute; bottom: -8px; left: 10px; background: white; border-radius: 10px; padding: 1px 5px; font-size: 11px; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .react-options { position: absolute; top: -30px; background: white; border-radius: 15px; display: none; gap: 8px; padding: 5px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; }
+        .msg:hover .react-options { display: flex; }
+
+        /* Footer & Panels */
+        .footer { padding: 8px; background: #f0f2f5; display: flex; align-items: center; gap: 8px; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
+        #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 16px; background: transparent; }
+        .btn-circle { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; max-height: 150px; overflow-y: auto; border-top: 1px solid #ddd; }
+        .emoji-btn { font-size: 22px; padding: 5px; cursor: pointer; text-align: center; }
+
+        #rec-wrap { display: none; align-items: center; gap: 10px; color: red; font-weight: bold; flex: 1; }
         .dot { height: 10px; width: 10px; background-color: red; border-radius: 50%; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        
-        #loc-menu { display: none; position: absolute; bottom: 75px; left: 10px; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); z-index: 1000; }
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 150px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
 <div id="app-wrap">
-    <div id="login-screen">
-        <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green);"></i>
-        <h2 style="margin: 20px 0;">WhatsApp Nasir v54</h2>
-        <input type="text" id="my-num" class="login-input" placeholder="آپ کا نام یا نمبر">
-        <input type="password" id="room-pass" class="login-input" placeholder="6 ہندسوں کا کوڈ">
-        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border-radius:30px; font-weight:bold; border:none; cursor:pointer; color:black;">چیٹ شروع کریں</button>
-    </div>
-
-    <div id="chat-app" style="display:none; flex-direction:column; height:100%;">
+    <div id="chat-app" style="display:flex; flex-direction:column; height:100%;">
         <div class="header">
-            <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-            <div style="flex:1;"><h4>WhatsApp Nasir</h4><small>آن لائن</small></div>
+            <i class="fas fa-arrow-left"></i>
+            <div style="flex:1;"><h4>WhatsApp Nasir v56</h4><small>آن لائن</small></div>
         </div>
 
         <div id="chat-flow"></div>
 
         <div id="reply-preview">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <small id="reply-target-text" style="color:var(--wa-teal); font-weight:bold;"></small>
+                <small id="reply-text" style="color:var(--wa-teal); font-weight:bold;"></small>
                 <i class="fas fa-times" onclick="cancelReply()"></i>
             </div>
         </div>
 
-        <div id="loc-menu">
-            <div style="padding:15px; border-bottom:1px solid #eee;" onclick="sendLoc('current')">📍 موجودہ لوکیشن</div>
-            <div style="padding:15px;" onclick="sendLoc('live')">🛰️ لائیو لوکیشن</div>
-        </div>
         <div id="emoji-panel"></div>
 
         <div class="footer">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <div class="input-bar">
-                    <i class="far fa-smile" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="toggleEmoji()"></i>
-                    <div id="rec-wrap"><div class="dot"></div> <span id="rec-timer">00:00</span></div>
-                    <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
-                    <i class="fas fa-location-dot" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="toggleLoc()"></i>
-                    <i class="fas fa-camera" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="document.getElementById('cam-in').click()"></i>
-                    <i class="fas fa-paperclip" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="document.getElementById('file-in').click()"></i>
-                </div>
-                <button class="btn-circle" onclick="handleAction()">
-                    <i class="fas fa-microphone" id="mic-ico"></i>
-                    <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
-                </button>
+            <div class="input-bar">
+                <i class="far fa-smile" style="color:#8696a0; padding:10px; cursor:pointer; font-size: 20px;" onclick="toggleEmoji()"></i>
+                <div id="rec-wrap"><div class="dot"></div> <span id="rec-timer">00:00</span></div>
+                <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
+                <i class="fas fa-camera" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="document.getElementById('cam-in').click()"></i>
+                <i class="fas fa-paperclip" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="document.getElementById('file-in').click()"></i>
             </div>
+            <button class="btn-circle" id="action-btn" onclick="handleAction()">
+                <i class="fas fa-microphone" id="mic-ico"></i>
+                <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
+            </button>
         </div>
     </div>
     <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
@@ -106,53 +89,45 @@
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
+    const roomKey = "V56_STABLE_CHAT";
 
-    let myNum = "", roomKey = "", isRec = false, mediaRecorder, chunks = [], timerInterval, seconds = 0, replyText = null;
+    let isRec = false, mediaRecorder, chunks = [], timerInterval, seconds = 0, replyTarget = null;
 
-    // --- Login Logic ---
-    window.login = () => {
-        myNum = document.getElementById('my-num').value.trim();
-        let pass = document.getElementById('room-pass').value.trim();
-        if(!myNum || pass.length < 6) return alert("6 ہندسوں کا کوڈ درج کریں!");
-        roomKey = "V54_FINAL_" + btoa(pass).substring(0,10);
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('chat-app').style.display = 'flex';
-        loadMessages();
+    // --- Emoji Logic ---
+    const emojis = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","📍","✅","💯","🌹","✨","🤔","🙌","😢"];
+    const ep = document.getElementById('emoji-panel');
+    ep.innerHTML = emojis.map(e => `<div class="emoji-btn" onclick="addEmoji('${e}')">${e}</div>`).join('');
+    window.toggleEmoji = () => ep.style.display = (ep.style.display === 'grid' ? 'none' : 'grid');
+    window.addEmoji = (e) => { 
+        document.getElementById('msg-input').value += e; 
+        document.getElementById('msg-input').focus();
+        updateUI();
     };
 
-    // --- Input & Send Logic ---
+    // --- Core UI Functions ---
     const inp = document.getElementById('msg-input');
-    inp.oninput = () => {
+    const updateUI = () => {
         const hasT = inp.value.trim().length > 0;
         document.getElementById('send-ico').style.display = hasT ? 'block' : 'none';
         document.getElementById('mic-ico').style.display = hasT ? 'none' : 'block';
     };
+    inp.oninput = updateUI;
 
     window.handleAction = () => {
         if(inp.value.trim()) {
-            sendData(inp.value, 'text', replyText);
+            sendData(inp.value, 'text', replyTarget);
             cancelReply();
-            inp.value = ""; inp.oninput();
-        } else { handleVoice(); }
+            inp.value = ""; updateUI();
+            ep.style.display = 'none';
+        } else { startVoice(); }
     };
 
-    const sendData = (v, t, rep = null, fileName = "") => push(ref(db, roomKey), {
-        s: myNum, v: v, t: t, rep: rep, n: fileName, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    const sendData = (v, t, rep = null, n = "") => push(ref(db, roomKey), {
+        s: "Nasir", v: v, t: t, rep: rep, n: n, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    // --- File Handling (Camera & Paperclip) ---
-    const handleFile = (e, type) => {
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => sendData(ev.target.result, type, null, file.name);
-        reader.readAsDataURL(file);
-    };
-    document.getElementById('cam-in').onchange = (e) => handleFile(e, 'img');
-    document.getElementById('file-in').onchange = (e) => handleFile(e, 'doc');
-
     // --- Voice Recording ---
-    async function handleVoice() {
+    async function startVoice() {
         if(!isRec) {
             try {
                 const s = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -181,64 +156,45 @@
         }
     }
 
-    // --- Reply & Reactions ---
-    window.initReply = (txt) => {
-        replyText = txt;
-        document.getElementById('reply-target-text').innerText = "جواب: " + txt.substring(0, 30);
+    // --- Reply & Reaction Functions ---
+    window.setReply = (txt) => {
+        replyTarget = txt;
+        document.getElementById('reply-text').innerText = "جواب دیں: " + txt.substring(0, 30);
         document.getElementById('reply-preview').style.display = 'block';
         inp.focus();
     };
-    window.cancelReply = () => { replyText = null; document.getElementById('reply-preview').style.display = 'none'; };
+    window.cancelReply = () => { replyTarget = null; document.getElementById('reply-preview').style.display = 'none'; };
     window.react = (id, emo) => update(ref(db, roomKey + "/" + id), { react: emo });
-
-    // --- Emojis & Loc ---
-    const emos = ["😂","❤️","👍","😊","🙏","🔥","👏","📍","✅","💯"];
-    const ep = document.getElementById('emoji-panel');
-    ep.innerHTML = emos.map(e => `<span style="font-size:24px; padding:8px; cursor:pointer;" onclick="addEmoji('${e}')">${e}</span>`).join('');
-    window.toggleEmoji = () => ep.style.display = ep.style.display === 'grid' ? 'none' : 'grid';
-    window.addEmoji = (e) => { inp.value += e; toggleEmoji(); inp.oninput(); };
-
-    window.toggleLoc = () => { let m = document.getElementById('loc-menu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; };
-    window.sendLoc = (type) => {
-        navigator.geolocation.getCurrentPosition(p => {
-            let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            sendData(`📍 ${type==='live'?'لائیو':'موجودہ'} لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
-            toggleLoc();
-        });
-    };
 
     // --- Load Messages ---
     function loadMessages() {
         const flow = document.getElementById('chat-flow');
         onChildAdded(ref(db, roomKey), snap => {
-            const d = snap.val(), isMe = d.s === myNum, k = snap.key;
+            const d = snap.val(), isMe = d.s === "Nasir", k = snap.key;
             const row = document.createElement('div');
             row.className = `msg-row ${isMe ? 'row-sent' : 'row-rec'}`;
             
             let content = d.v;
-            if(d.t === 'voice') content = `<audio controls style="width:200px;"><source src="${d.v}"></audio>`;
-            else if(d.t === 'img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
-            else if(d.t === 'doc') content = `<div style="background:#0001; padding:10px; border-radius:5px;"><i class="fas fa-file"></i> <a href="${d.v}" download="${d.n}">${d.n}</a></div>`;
+            if(d.t==='voice') content = `<audio controls style="width:180px;"><source src="${d.v}"></audio>`;
+            else if(d.t==='img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
             
-            let replyMarkup = d.rep ? `<div class="reply-box">${d.rep}</div>` : "";
-            let reactMarkup = d.react ? `<div class="reaction-badge">${d.react}</div>` : "";
-
             row.innerHTML = `
-                <div class="msg ${isMe ? 'sent' : 'received'}" onclick="initReply('${d.t==='text'?d.v:d.t}')">
-                    <div style="position:absolute; top:-15px; right:0; display:flex; gap:5px;" onclick="event.stopPropagation()">
+                <div class="msg ${isMe ? 'sent' : 'received'}" onclick="setReply('${d.t==='text'?d.v:d.t}')">
+                    <div class="react-options">
                         <span onclick="react('${k}', '❤️')">❤️</span>
                         <span onclick="react('${k}', '😂')">😂</span>
+                        <span onclick="react('${k}', '👍')">👍</span>
                     </div>
-                    ${replyMarkup}
+                    ${d.rep ? `<div class="reply-box">${d.rep}</div>` : ""}
                     <div>${content}</div>
                     <div style="font-size:10px; color:#666; text-align:right; margin-top:4px;">${d.time}</div>
-                    ${reactMarkup}
+                    ${d.react ? `<div class="reaction-badge">${d.react}</div>` : ""}
                 </div>
             `;
             flow.appendChild(row); flow.scrollTop = flow.scrollHeight;
         });
     }
+    loadMessages();
 </script>
 </body>
-    </html>
-    
+</html>
