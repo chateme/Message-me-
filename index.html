@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro - V13 Final</title>
+    <title>Nasir Messenger v14</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
@@ -21,9 +21,8 @@
         .form-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; }
         
         #main-chat { display: none; flex-direction: column; height: 100vh; }
-        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 65px; }
+        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 65px; }
         #status-text { font-size: 11px; color: #dcf8c6; }
-        .online-dot { width: 8px; height: 8px; background: #45f045; border-radius: 50%; display: inline-block; margin-right: 4px; }
         
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
@@ -32,16 +31,13 @@
         .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; margin-bottom: 3px; display: block; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
         .del-btn { color: #d32f2f; cursor: pointer; font-size: 13px; margin-right: 5px; }
-        .tick { font-size: 11px; } .tick-blue { color: #34b7f1; } .tick-grey { color: #888; }
 
-        /* آڈیو ڈیزائن */
-        .audio-container { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 5px 0; }
-        .play-btn { font-size: 30px; color: var(--wa-green); cursor: pointer; }
-        .audio-track { flex: 1; height: 5px; background: #ccc; border-radius: 5px; position: relative; overflow: hidden; }
-        .audio-fill { height: 100%; background: var(--wa-green); width: 0%; transition: width 0.1s linear; }
+        /* آڈیو پلیئر فکس */
+        .audio-msg { width: 220px; height: 40px; margin-top: 5px; }
 
         .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; gap: 10px; }
+        .cam-btn { color: #555; font-size: 24px; cursor: pointer; padding: 0 5px; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; }
         #rec-ui { display: none; flex: 1; align-items: center; justify-content: space-between; background: white; border-radius: 25px; padding: 0 15px; height: 45px; color: red; font-weight: bold; }
         .send-btn { background: var(--wa-green); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; }
@@ -51,7 +47,7 @@
 <body>
 
 <div id="setup-screen">
-    <div class="setup-header">ناصر میسنجر v13 🔐</div>
+    <div class="setup-header">ناصر میسنجر v14 🔐</div>
     <div class="chat-list-container" id="chat-list"></div>
     <button class="add-new-btn" id="btn-add"><i class="fas fa-plus"></i></button>
 </div>
@@ -60,7 +56,7 @@
     <div class="form-card">
         <h3>روم میں داخل ہوں</h3><br>
         <input type="text" id="u-name" placeholder="آپ کا نام">
-        <input type="text" id="r-pass" placeholder="کوڈ (4+ ہندسے)">
+        <input type="text" id="r-pass" placeholder="کوڈ (4 ہندسے)">
         <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">شروع کریں</button>
         <button id="btn-cancel" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
     </div>
@@ -76,10 +72,8 @@
     </div>
     <div id="chat-flow"></div>
     <div class="footer">
-        <label for="camera-in" style="cursor:pointer; color:#555; font-size:22px; padding: 5px;">
-            <i class="fas fa-camera"></i>
-        </label>
-        <input type="file" id="camera-in" accept="image/*" capture="environment" style="display:none">
+        <label for="cam-in" class="cam-btn"><i class="fas fa-camera"></i></label>
+        <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
         
         <div class="input-bar" id="norm-ui">
             <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
@@ -97,7 +91,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, onChildChanged, remove, update, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, update, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -115,10 +109,10 @@
         const p = document.getElementById('r-pass').value.trim();
         if(!n || p.length < 4) return;
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v13') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v14') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v13', JSON.stringify(history));
+            localStorage.setItem('n_history_v14', JSON.stringify(history));
         }
         openChat(n, rid, p);
         document.getElementById('room-form').style.display = 'none';
@@ -130,14 +124,13 @@
         document.getElementById('main-chat').style.display = 'flex';
         document.getElementById('active-room-name').innerText = rName;
         
-        const myPresenceRef = ref(db, `presence_v13/${myRoom}/${myUid}`);
+        const myPresenceRef = ref(db, `presence_v14/${myRoom}/${myUid}`);
         set(myPresenceRef, { name: myName, status: "online" });
         onDisconnect(myPresenceRef).remove();
-
         initFirebase();
     }
 
-    const sendMsg = (v, t) => push(ref(db, "final_v13/" + myRoom), {
+    const sendMsg = (v, t) => push(ref(db, "final_v14/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, s: 1, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
@@ -146,14 +139,14 @@
         if(i.value.trim()){ sendMsg(i.value, 'text'); i.value = ""; setTyping(false); }
     };
 
-    const setTyping = (st) => set(ref(db, `typing_v13/${myRoom}/${myUid}`), st ? myName : "");
+    const setTyping = (st) => set(ref(db, `typing_v14/${myRoom}/${myUid}`), st ? myName : "");
     document.getElementById('msg-input').oninput = () => {
         setTyping(true);
         clearTimeout(window.tTime);
         window.tTime = setTimeout(() => setTyping(false), 2000);
     };
 
-    // مائیکروفون فکس
+    // مائیکروفون
     document.getElementById('mic-start').onclick = async () => {
         try {
             audioChunks = [];
@@ -170,7 +163,7 @@
             document.getElementById('rec-ui').style.display = 'flex';
             sec = 0; clearInterval(timer);
             timer = setInterval(() => { sec++; document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0')+":"+(sec%60).toString().padStart(2,'0'); }, 1000);
-        } catch(e) { alert("Mic Error: " + e); }
+        } catch(e) { alert("Mic Error!"); }
     };
 
     document.getElementById('mic-stop').onclick = () => {
@@ -181,82 +174,49 @@
     };
 
     // کیمرہ فکس
-    document.getElementById('camera-in').onchange = (e) => {
+    document.getElementById('cam-in').onchange = (e) => {
         const r = new FileReader();
         r.onload = (ev) => sendMsg(ev.target.result, 'img');
         if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
     };
 
-    window.delMsg = (key) => { if(confirm('مٹائیں؟')) remove(ref(db, `final_v13/${myRoom}/${key}`)); };
+    window.delMsg = (key) => { if(confirm('مٹائیں؟')) remove(ref(db, `final_v14/${myRoom}/${key}`)); };
 
     function initFirebase() {
-        const rRef = ref(db, "final_v13/" + myRoom);
+        const rRef = ref(db, "final_v14/" + myRoom);
         
-        // اسٹیٹس لسنر
-        onValue(ref(db, `typing_v13/${myRoom}`), tSnap => {
-            onValue(ref(db, `presence_v13/${myRoom}`), pSnap => {
+        onValue(ref(db, `typing_v14/${myRoom}`), tSnap => {
+            onValue(ref(db, `presence_v14/${myRoom}`), pSnap => {
                 const tData = tSnap.val() || {}, pData = pSnap.val() || {};
-                let typingNames = [];
-                for(let id in tData) if(id !== myUid && tData[id]) typingNames.push(tData[id]);
-                let onlineCount = 0;
-                for(let id in pData) if(id !== myUid) onlineCount++;
+                let typers = [];
+                for(let id in tData) if(id !== myUid && tData[id]) typers.push(tData[id]);
+                let online = 0;
+                for(let id in pData) if(id !== myUid) online++;
 
-                if(typingNames.length) document.getElementById('status-text').innerText = typingNames.join(', ') + " typing...";
-                else if(onlineCount > 0) document.getElementById('status-text').innerHTML = '<span class="online-dot"></span> online';
+                if(typers.length) document.getElementById('status-text').innerText = typers.join(', ') + " typing...";
+                else if(online > 0) document.getElementById('status-text').innerHTML = '<span style="color:#45f045">●</span> online';
                 else document.getElementById('status-text').innerText = "";
             });
         });
 
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
-            if(!isMe && d.s < 3) update(ref(db, `final_v13/${myRoom}/${k}`), { s: 3 });
-            
-            let content = d.t === 'text' ? d.v : 
-                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
-                          `<div class="audio-container">
-                              <i class="fas fa-play-circle play-btn" onclick="playVoice(this, 'a-${k}')"></i>
-                              <div class="audio-track"><div id="f-${k}" class="audio-fill"></div></div>
-                              <span style="font-size:10px;" id="d-${k}">0:00</span>
-                              <audio id="a-${k}" src="${d.v}" onloadedmetadata="document.getElementById('d-${k}').innerText=Math.floor(this.duration/60)+':'+Math.floor(this.duration%60).toString().padStart(2,'0')"></audio>
-                           </div>`;
-            
-            let ticks = isMe ? (d.s === 3 ? '<i class="fas fa-check-double tick tick-blue"></i>' : '<i class="fas fa-check tick tick-grey"></i>') : '';
+            let content = "";
+            if(d.t === 'text') content = `<div>${d.v}</div>`;
+            else if(d.t === 'img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
+            else if(d.t === 'voice') content = `<audio controls class="audio-msg"><source src="${d.v}" type="audio/webm"></audio>`;
             
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}${d.time} ${ticks}</div>
+                <div class="meta">${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}${d.time}</div>
             </div>`);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
 
-        onChildChanged(rRef, snap => {
-            const d = snap.val(), k = snap.key;
-            if(d.uid === myUid && d.s === 3) {
-                const el = document.getElementById("m-"+k);
-                if(el && el.querySelector('.tick')) el.querySelector('.tick').className = "fas fa-check-double tick tick-blue";
-            }
-        });
         onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
     }
 
-    // آڈیو پروگریس فکس
-    window.playVoice = (btn, aid) => {
-        const a = document.getElementById(aid);
-        const fill = document.getElementById('f-' + aid.split('-')[1]);
-        const durDisp = document.getElementById('d-' + aid.split('-')[1]);
-        
-        if(a.paused) { 
-            a.play(); btn.className = "fas fa-pause-circle play-btn";
-            a.ontimeupdate = () => {
-                const per = (a.currentTime / a.duration) * 100;
-                fill.style.width = per + "%";
-                durDisp.innerText = Math.floor(a.currentTime/60) + ":" + Math.floor(a.currentTime%60).toString().padStart(2,'0');
-            };
-            a.onended = () => { btn.className = "fas fa-play-circle play-btn"; fill.style.width = "0%"; };
-        } else { a.pause(); btn.className = "fas fa-play-circle play-btn"; }
-    };
-
-    const saved = JSON.parse(localStorage.getItem('n_history_v13') || "[]");
+    const saved = JSON.parse(localStorage.getItem('n_history_v14') || "[]");
     const list = document.getElementById('chat-list');
     if(saved.length) {
         list.innerHTML = "";
@@ -269,4 +229,5 @@
     }
 </script>
 </body>
-</html>
+    </html>
+    
