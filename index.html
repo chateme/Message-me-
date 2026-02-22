@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v48</title>
+    <title>WhatsApp Nasir v49</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; --sent: #dcf8c6; --rec: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
-
-        /* Header */
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; z-index: 10; }
-        
-        /* Chat Flow */
         #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         .msg-row { display: flex; width: 100%; margin-bottom: 8px; }
         .row-sent { justify-content: flex-end; }
@@ -23,23 +19,16 @@
         .sent { background: var(--sent); border-top-right-radius: 0; }
         .received { background: var(--rec); border-top-left-radius: 0; }
         .meta { position: absolute; bottom: 2px; right: 6px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
-
-        /* Emoji Panel */
         #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; max-height: 180px; overflow-y: auto; border-top: 1px solid #ddd; z-index: 100; }
         .emoji-item { font-size: 24px; cursor: pointer; padding: 8px; text-align: center; }
-
-        /* Footer */
         .footer { padding: 8px; background: #f0f2f5; position: relative; }
         .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
         #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 16px; max-height: 100px; resize: none; background: transparent; }
         .btn-circle { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         .icon { color: #8696a0; padding: 8px; cursor: pointer; font-size: 20px; }
-        
-        /* Rec Status */
         #rec-wrap { display: none; flex: 1; align-items: center; gap: 8px; color: red; font-weight: bold; }
         .dot { height: 10px; width: 10px; background-color: red; border-radius: 50%; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
         #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
     </style>
 </head>
@@ -48,30 +37,27 @@
 <div id="app-wrap">
     <div id="login-screen">
         <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green);"></i>
-        <h2 style="margin: 20px 0;">WhatsApp Nasir Pro</h2>
-        <input type="text" id="my-num" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none;" placeholder="آپ کا نام یا نمبر">
-        <input type="password" id="room-pass" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none;" placeholder="6 ہندسوں کا کوڈ">
-        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border:none; border-radius:30px; font-weight:bold; color:black;">چیٹ شروع کریں</button>
+        <h2 style="margin: 20px 0;">WhatsApp Pro</h2>
+        <input type="text" id="my-num" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none;" placeholder="نمبر">
+        <input type="password" id="room-pass" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none;" placeholder="روم کوڈ">
+        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border:none; border-radius:30px; font-weight:bold; color:black;">لاگ ان</button>
     </div>
 
     <div id="chat-app" style="display:none; flex-direction:column; height:100%;">
         <div class="header">
             <i class="fas fa-arrow-left" onclick="location.reload()"></i>
             <div style="flex:1;"><h4 id="room-title">چیٹ</h4><small>آن لائن</small></div>
+            <i class="fas fa-location-dot" title="لوکیشن" onclick="sendLoc()" style="cursor:pointer; font-size:20px;"></i>
         </div>
-
         <div id="chat-flow"></div>
-        
         <div id="emoji-panel"></div>
-
         <div class="footer">
             <div style="display:flex; align-items:center; gap:8px;">
                 <div class="input-bar">
                     <i class="far fa-smile icon" onclick="toggleEmoji()"></i>
                     <div id="rec-wrap"><div class="dot"></div> <span id="rec-timer">00:00</span></div>
-                    <textarea id="msg-input" placeholder="میسج لکھیں..." rows="1"></textarea>
+                    <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
                     <i class="fas fa-paperclip icon" onclick="document.getElementById('file-in').click()"></i>
-                    <i class="fas fa-camera icon" onclick="document.getElementById('cam-in').click()"></i>
                 </div>
                 <button class="btn-circle" onclick="handleAction()">
                     <i class="fas fa-microphone" id="mic-ico"></i>
@@ -79,7 +65,6 @@
                 </button>
             </div>
         </div>
-        <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
         <input type="file" id="file-in" style="display:none">
     </div>
 </div>
@@ -97,26 +82,20 @@
     window.login = () => {
         myNum = document.getElementById('my-num').value.trim();
         let pass = document.getElementById('room-pass').value.trim();
-        if(!myNum || pass.length < 6) return alert("درست معلومات دیں!");
-        roomKey = "V48_STABLE_" + btoa(pass).replace(/=/g, "");
+        if(!myNum || pass.length < 6) return alert("6 ہندسوں کا کوڈ دیں!");
+        roomKey = "V49_FINAL_" + btoa(pass).replace(/=/g, "");
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('chat-app').style.display = 'flex';
         loadMessages();
     };
 
-    // Emojis Setup
-    const emojis = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","📍","📸","😢","😡","✅","🌹","✨","💯","😂","💔","🤔","🙌"];
+    // Emojis Fix
+    const emojis = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","📸","😢","😡","✅","🌹","✨","💯","🤔","🙌","🤝"];
     const ep = document.getElementById('emoji-panel');
     ep.innerHTML = emojis.map(e => `<div class="emoji-item" onclick="addEmoji('${e}')">${e}</div>`).join('');
-
     window.toggleEmoji = () => ep.style.display = (ep.style.display === 'grid' ? 'none' : 'grid');
-
     window.addEmoji = (e) => {
-        const i = document.getElementById('msg-input');
-        i.value += e;
-        i.focus();
-        i.oninput(); // اپ ڈیٹ بٹن (سینڈ آئیکون دکھانے کے لیے)
-        ep.style.display = 'none'; // خود بخود بند ہو جائے گا
+        const i = document.getElementById('msg-input'); i.value += e; i.focus(); i.oninput(); ep.style.display = 'none';
     };
 
     const inp = document.getElementById('msg-input');
@@ -135,6 +114,7 @@
         s: myNum, v: v, t: t, n: n, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
+    // Seek Bar & Voice Fix
     async function handleVoice() {
         if(!isRec) {
             try {
@@ -147,8 +127,7 @@
                 document.getElementById('mic-ico').style.color = 'red';
                 timerInterval = setInterval(() => {
                     seconds++;
-                    let m = Math.floor(seconds/60).toString().padStart(2,'0');
-                    let sec = (seconds%60).toString().padStart(2,'0');
+                    let m = Math.floor(seconds/60).toString().padStart(2,'0'), sec = (seconds%60).toString().padStart(2,'0');
                     document.getElementById('rec-timer').innerText = `${m}:${sec}`;
                 }, 1000);
                 mediaRecorder.ondataavailable = e => chunks.push(e.data);
@@ -156,9 +135,9 @@
                     clearInterval(timerInterval);
                     const r = new FileReader();
                     r.onloadend = () => sendData(r.result, 'voice');
-                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
+                    r.readAsDataURL(new Blob(chunks, { type: 'audio/mpeg' })); // MP3 فارمیٹ فار سیک بار
                 };
-            } catch(e) { alert("مائیک آن کریں!"); }
+            } catch(e) { alert("مائیک پرمیشن دیں!"); }
         } else {
             mediaRecorder.stop(); isRec = false;
             document.getElementById('rec-wrap').style.display = 'none';
@@ -167,24 +146,30 @@
         }
     }
 
-    const handleFile = (e, type) => {
-        const file = e.target.files[0];
-        const r = new FileReader();
-        r.onload = (ev) => sendData(ev.target.result, type, file.name);
+    // Location Fix
+    window.sendLoc = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+                let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+                sendData(`<a href="${url}" target="_blank" style="color:blue;">📍 میری موجودہ لوکیشن</a>`, 'text');
+            }, (err) => alert("لوکیشن نہیں مل سکی، براؤزر سیٹنگ چیک کریں!"), {enableHighAccuracy: true});
+        } else { alert("آپ کا براؤزر لوکیشن سپورٹ نہیں کرتا۔"); }
+    };
+
+    document.getElementById('file-in').onchange = (e) => {
+        const file = e.target.files[0], r = new FileReader();
+        r.onload = (ev) => sendData(ev.target.result, file.type.includes('image') ? 'img' : 'doc', file.name);
         if(file) r.readAsDataURL(file);
     };
-    document.getElementById('cam-in').onchange = (e) => handleFile(e, 'img');
-    document.getElementById('file-in').onchange = (e) => handleFile(e, 'doc');
 
     function loadMessages() {
         const flow = document.getElementById('chat-flow');
         onChildAdded(ref(db, roomKey), snap => {
             const d = snap.val(), isMe = d.s === myNum, k = snap.key;
             const row = document.createElement('div');
-            row.className = `msg-row ${isMe ? 'row-sent' : 'row-rec'}`;
-            row.id = `r-${k}`;
+            row.className = `msg-row ${isMe ? 'row-sent' : 'row-rec'}`; row.id = `r-${k}`;
             let content = d.v;
-            if(d.t==='voice') content = `<audio controls style="width:210px;"><source src="${d.v}" type="audio/webm"></audio>`;
+            if(d.t==='voice') content = `<audio controls preload="metadata" style="width:210px;"><source src="${d.v}" type="audio/mpeg"></audio>`;
             else if(d.t==='img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
             else if(d.t==='doc') content = `<div style="background:#0001; padding:8px; border-radius:5px;"><i class="fas fa-file"></i> <a href="${d.v}" download="${d.n}">${d.n}</a></div>`;
             row.innerHTML = `<div class="msg ${isMe ? 'sent' : 'received'}">
@@ -192,11 +177,10 @@
                 <div>${content}</div>
                 <div class="meta">${isMe?`<i class="fas fa-trash" onclick="del('${k}')" style="color:red;"></i>`:''} ${d.time}</div>
             </div>`;
-            flow.appendChild(row);
-            flow.scrollTop = flow.scrollHeight;
+            flow.appendChild(row); flow.scrollTop = flow.scrollHeight;
         });
     }
     window.del = (k) => { if(confirm("ڈیلیٹ؟")) remove(ref(db, roomKey+"/"+k)).then(()=>document.getElementById('r-'+k).remove()); };
 </script>
 </body>
-    </html>
+</html>
