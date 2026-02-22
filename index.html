@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir - Ultimate Fix</title>
+    <title>WhatsApp Nasir - Multi Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #128c7e; --bg: #efe7dd; --msg-sent: #dcf8c6; --msg-rec: #fff; --text: #000; }
@@ -17,6 +17,13 @@
         .active { display: flex; }
 
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; z-index: 10; }
+        
+        /* Contact List Styles */
+        #contact-list { flex: 1; overflow-y: auto; background: white; }
+        .contact-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .contact-item:hover { background: #f5f5f5; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-color: var(--bg); background-blend-mode: overlay; }
         
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
@@ -24,78 +31,64 @@
         .received { background: var(--msg-rec); align-self: flex-start; border-top-left-radius: 0; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; }
 
-        /* Footer & Input Bar */
-        .footer-container { padding: 8px; display: flex; flex-direction: column; background: transparent; }
-        .controls-row { display: flex; align-items: center; gap: 8px; }
-        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 10px 5px; }
+        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; }
+        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 48px; }
+        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); padding: 5px; }
         
-        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; padding: 5px; flex-shrink: 0; }
-        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        .main-btn { background: var(--wa-teal); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        #rec-info { display: none; color: #e91e63; font-weight: bold; flex: 1; align-items: center; gap: 5px; }
         
-        /* Timer Style */
-        #rec-info { display: none; align-items: center; gap: 10px; flex: 1; color: #e91e63; font-weight: bold; }
-        .dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        /* Emoji Panel */
-        #emoji-panel { display: none; background: var(--msg-rec); grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 150px; overflow-y: auto; }
-        .emo-btn { font-size: 24px; text-align: center; cursor: pointer; padding: 5px; }
-
-        /* Attachment Menu */
-        #attach-menu { display: none; position: absolute; bottom: 70px; right: 70px; background: var(--msg-rec); border-radius: 15px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; flex-direction: column; gap: 15px; }
-        .attach-opt { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .attach-opt i { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 150px; overflow-y: auto; }
+        .emo { font-size: 24px; text-align: center; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body class="dark-mode">
 
 <div id="app-container">
-    <div id="attach-menu">
-        <div class="attach-opt" onclick="sendLoc()"><i class="fas fa-location-dot" style="background:#25d366;"></i> لوکیشن </div>
-        <div class="attach-opt" onclick="document.getElementById('gall-in').click()"><i class="fas fa-image" style="background:#007bff;"></i> گیلری </div>
+    <div id="login-screen" class="screen active">
+        <div class="header">WhatsApp Nasir - لاگ ان</div>
+        <div style="padding:30px; display:flex; flex-direction:column; gap:15px;">
+            <input type="text" id="reg-name" placeholder="آپ کا نام" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
+            <input type="number" id="reg-phone" placeholder="فون نمبر" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
+            <button onclick="register()" style="padding:15px; background:var(--wa-teal); color:white; border:none; border-radius:10px;">شروع کریں</button>
+        </div>
     </div>
 
-    <div id="login-screen" class="screen active">
-        <div class="header">Registration</div>
-        <div style="padding:30px; display:flex; flex-direction:column; gap:15px;">
-            <input type="text" id="reg-name" placeholder="نام" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
-            <input type="number" id="reg-phone" placeholder="نمبر" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
-            <button onclick="register()" style="padding:15px; background:var(--wa-teal); color:white; border:none; border-radius:10px;">داخل ہوں</button>
+    <div id="contacts-screen" class="screen">
+        <div class="header">
+            <span style="font-weight:bold; flex:1;">چیٹس (Contacts)</span>
+            <i class="fas fa-sign-out-alt" onclick="logout()"></i>
         </div>
+        <div id="contact-list"></div>
     </div>
 
     <div id="chat-screen" class="screen">
         <div class="header">
-            <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-            <span style="font-weight:bold; flex:1;">WhatsApp Nasir</span>
+            <i class="fas fa-arrow-left" onclick="showContacts()"></i>
+            <span id="chat-with-name" style="font-weight:bold; flex:1;">نام</span>
             <i class="fas fa-moon" onclick="document.body.classList.toggle('dark-mode')"></i>
         </div>
-        
         <div id="chat-flow"></div>
         <div id="emoji-panel"></div>
-
-        <div class="footer-container">
-            <div class="controls-row">
-                <div class="input-bar">
-                    <i class="far fa-smile icon-btn" onclick="toggleEmoji()"></i>
-                    <div id="rec-info"><div class="dot"></div> <span id="timer-val">00:00</span></div>
-                    <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
-                    <i class="fas fa-paperclip icon-btn" onclick="toggleAttach()"></i>
-                    <input type="file" id="gall-in" accept="image/*" style="display:none" onchange="handleGall(this)">
-                </div>
-                <button class="main-btn" id="action-btn">
-                    <i class="fas fa-microphone" id="mic-icon"></i>
-                    <i class="fas fa-paper-plane" id="send-icon" style="display:none;"></i>
-                </button>
+        <div class="footer">
+            <div class="input-bar">
+                <i class="far fa-smile" style="color:#8696a0; cursor:pointer;" onclick="toggleEmoji()"></i>
+                <div id="rec-info">🔴 <span id="timer">00:00</span></div>
+                <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
+                <i class="fas fa-paperclip" style="color:#8696a0; cursor:pointer; margin-left:10px;" onclick="document.getElementById('img-in').click()"></i>
+                <input type="file" id="img-in" accept="image/*" style="display:none" onchange="handleImg(this)">
             </div>
+            <button class="main-btn" id="action-btn">
+                <i class="fas fa-microphone" id="mic-icon"></i>
+                <i class="fas fa-paper-plane" id="send-icon" style="display:none;"></i>
+            </button>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -103,62 +96,67 @@
 
     let myPhone = localStorage.getItem('u_phone') || "";
     let myName = localStorage.getItem('u_name') || "";
-    let currentRoom = btoa("GlobalRoom"), mediaRecorder, chunks = [], isRecording = false, timerInterval, seconds = 0;
+    let targetPhone = "";
+    let mediaRecorder, chunks = [], isRecording = false, timerInt;
 
-    window.onload = () => { if(myPhone) { document.getElementById('login-screen').classList.remove('active'); document.getElementById('chat-screen').classList.add('active'); loadEmojis(); startChat(); } };
+    window.onload = () => { if(myPhone) showContacts(); };
 
     window.register = () => {
         const n = document.getElementById('reg-name').value, p = document.getElementById('reg-phone').value;
-        if(n && p) { localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p); location.reload(); }
+        if(n && p) {
+            localStorage.setItem('u_name', n);
+            localStorage.setItem('u_phone', p);
+            set(ref(db, 'users/' + p), { name: n, phone: p });
+            location.reload();
+        }
     };
 
-    // --- Emoji Logic ---
-    function loadEmojis() {
-        const list = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","🌹","✅","📍","🎙️","📸","✨"];
-        const panel = document.getElementById('emoji-panel');
-        panel.innerHTML = list.map(e => `<span class="emo-btn" onclick="addEmoji('${e}')">${e}</span>`).join('');
-    }
-    window.toggleEmoji = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; };
-    window.addEmoji = (e) => { const inp = document.getElementById('msg-input'); inp.value += e; inp.dispatchEvent(new Event('input')); };
+    window.logout = () => { localStorage.clear(); location.reload(); };
 
-    // --- Recording Timer Logic ---
-    function startTimer() {
-        seconds = 0;
-        timerInterval = setInterval(() => {
-            seconds++;
-            let m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            let s = (seconds % 60).toString().padStart(2, '0');
-            document.getElementById('timer-val').innerText = `${m}:${s}`;
-        }, 1000);
-    }
-
-    async function handleVoice() {
-        if(!isRecording) {
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(s); chunks = [];
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
-                    r.onloadend = () => sendData(r.result, 'voice');
-                };
-                mediaRecorder.start(); isRecording = true;
-                document.getElementById('rec-info').style.display = 'flex';
-                document.getElementById('msg-input').style.display = 'none';
-                document.getElementById('mic-icon').style.color = 'red';
-                startTimer();
-            } catch(e) { alert("Mic Error"); }
-        } else {
-            mediaRecorder.stop(); isRecording = false;
-            clearInterval(timerInterval);
-            document.getElementById('rec-info').style.display = 'none';
-            document.getElementById('msg-input').style.display = 'block';
-            document.getElementById('mic-icon').style.color = 'white';
-            document.getElementById('timer-val').innerText = "00:00";
-        }
+    function showContacts() {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('contacts-screen').classList.add('active');
+        const list = document.getElementById('contact-list');
+        list.innerHTML = "";
+        onValue(ref(db, 'users'), snap => {
+            list.innerHTML = "";
+            snap.forEach(userSnap => {
+                const u = userSnap.val();
+                if(u.phone !== myPhone) {
+                    list.innerHTML += `<div class="contact-item" onclick="openChat('${u.phone}', '${u.name}')">
+                        <div class="avatar">${u.name[0]}</div>
+                        <div><b>${u.name}</b><br><small>${u.phone}</small></div>
+                    </div>`;
+                }
+            });
+        });
     }
 
-    // --- Core Functions ---
+    window.openChat = (phone, name) => {
+        targetPhone = phone;
+        document.getElementById('chat-with-name').innerText = name;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('chat-screen').classList.add('active');
+        startChat();
+    };
+
+    window.showContacts = showContacts;
+
+    function startChat() {
+        const chatFlow = document.getElementById('chat-flow');
+        chatFlow.innerHTML = "";
+        const roomID = [myPhone, targetPhone].sort().join("_");
+        onChildAdded(ref(db, "chats/" + roomID), snap => {
+            const d = snap.val();
+            const isMe = d.sender === myPhone;
+            let content = d.type === 'voice' ? `<audio controls src="${d.val}" style="width:180px;"></audio>` : 
+                          d.type === 'img' ? `<img src="${d.val}" style="max-width:200px; border-radius:8px;">` : d.val;
+            chatFlow.innerHTML += `<div class="msg ${isMe?'sent':'received'}">${content}<div class="meta">${d.time}</div></div>`;
+            chatFlow.scrollTop = chatFlow.scrollHeight;
+        });
+    }
+
+    // --- Media & Emoji ---
     const inp = document.getElementById('msg-input');
     inp.oninput = () => {
         const hasText = inp.value.trim().length > 0;
@@ -171,21 +169,41 @@
         else { handleVoice(); }
     };
 
-    function startChat() {
-        onChildAdded(ref(db, "msgs/" + currentRoom), snap => {
-            const d = snap.val(), isMe = d.p === myPhone;
-            let content = d.t === 'voice' ? `<audio controls src="${d.v}" style="width:180px;"></audio>` : 
-                          d.t === 'img' ? `<img src="${d.v}" style="max-width:200px; border-radius:8px;">` : d.v;
-            document.getElementById('chat-flow').innerHTML += `<div class="msg ${isMe?'sent':'received'}">${content}<div class="meta">${d.time}</div></div>`;
-            document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
-        });
+    async function handleVoice() {
+        if(!isRecording) {
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(s); chunks = [];
+            mediaRecorder.start(); isRecording = true;
+            document.getElementById('rec-info').style.display = 'flex';
+            inp.style.display = 'none';
+            let sec = 0; startTimer();
+            function startTimer(){ timerInt = setInterval(()=>{ sec++; document.getElementById('timer').innerText = `00:${sec.toString().padStart(2,'0')}`; },1000); }
+            mediaRecorder.onstop = () => {
+                const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
+                r.onloadend = () => sendData(r.result, 'voice');
+            };
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        } else {
+            mediaRecorder.stop(); isRecording = false;
+            clearInterval(timerInt);
+            document.getElementById('rec-info').style.display = 'none';
+            inp.style.display = 'block';
+        }
     }
 
-    function sendData(v, t) { push(ref(db, "msgs/" + currentRoom), { p: myPhone, u: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }); }
-    window.toggleAttach = () => { const m = document.getElementById('attach-menu'); m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; };
-    window.handleGall = (i) => { const f = i.files[0]; if(f){ const r = new FileReader(); r.onload=(e)=>sendData(e.target.result,'img'); r.readAsDataURL(f); } };
-    window.sendLoc = () => { navigator.geolocation.getCurrentPosition(p => { sendData(`📍 Location: https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}`, 'text'); }); };
+    function sendData(val, type) {
+        const roomID = [myPhone, targetPhone].sort().join("_");
+        push(ref(db, "chats/" + roomID), { sender: myPhone, val: val, type: type, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    }
+
+    window.toggleEmoji = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; };
+    window.addEmoji = (e) => { inp.value += e; inp.dispatchEvent(new Event('input')); };
+    window.handleImg = (i) => { const f = i.files[0]; if(f){ const r = new FileReader(); r.onload=(e)=>sendData(e.target.result,'img'); r.readAsDataURL(f); } };
+    function loadEmojis() {
+        const list = ["😂","❤️","👍","😊","😍","🙏","🔥","👏","🌹","✅","📍"];
+        document.getElementById('emoji-panel').innerHTML = list.map(e => `<span class="emo" onclick="addEmoji('${e}')">${e}</span>`).join('');
+    }
+    loadEmojis();
 </script>
 </body>
-    </html>
-                        
+</html>
