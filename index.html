@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir Ultimate</title>
+    <title>WhatsApp Nasir Ultimate - Blue Tick Fixed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { 
@@ -15,39 +15,39 @@
             --msg-sent: #005c4b; --msg-rec: #202c33; --footer: #111b21;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; color: var(--text); }
-        #app-container { width: 100%; max-width: 500px; height: 100vh; background: var(--bg); position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; color: var(--text); overflow: hidden; }
+        
+        #app-container { width: 100%; max-width: 500px; height: 100vh; background: var(--bg); position: relative; display: flex; flex-direction: column; }
 
-        .screen { display: none; height: 100%; flex-direction: column; }
+        .screen { display: none; height: 100%; flex-direction: column; overflow: hidden; }
         .active { display: flex; }
 
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
-        .chat-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; background: var(--msg-rec); color: var(--text); }
-
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 60px; flex-shrink: 0; z-index: 10; }
+        
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: var(--bg); }
-        .msg { position: relative; padding: 8px 12px 20px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        
+        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.15); word-wrap: break-word; }
         .sent { background: var(--msg-sent); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: var(--msg-rec); align-self: flex-start; border-top-left-radius: 0; }
-        .meta { position: absolute; bottom: 3px; right: 7px; font-size: 10px; color: #666; }
+        
+        /* Time and Tick Style */
+        .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 3px; }
+        .tick { color: #34b7f1; font-size: 12px; }
 
-        #extra-panel { display: none; background: var(--footer); padding: 10px; border-top: 1px solid #ddd; }
-        .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .footer { padding: 6px 10px; display: flex; align-items: center; background: transparent; gap: 8px; margin-bottom: 5px; flex-shrink: 0; }
+        .input-group { flex: 1; background: var(--msg-rec); border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); overflow: hidden; }
+        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 0 5px; min-width: 0; }
         
-        .footer { padding: 10px; display: flex; align-items: center; background: var(--footer); gap: 8px; }
-        .input-group { flex: 1; background: var(--msg-rec); border-radius: 25px; padding: 0 15px; display: flex; align-items: center; height: 45px; }
-        #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; }
+        .icon-btn { color: #8696a0; font-size: 18px; cursor: pointer; padding: 5px; }
+        .send-btn { background: var(--wa-teal); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         
-        .icon-btn { color: #8696a0; font-size: 20px; cursor: pointer; }
-        .send-btn { background: #00a884; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
-        
-        #rec-ui { display: none; color: red; font-weight: bold; flex: 1; align-items: center; gap: 10px; }
+        #rec-ui { display: none; color: #ea0038; font-weight: bold; flex: 1; align-items: center; gap: 8px; font-size: 14px; }
+        @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.3;} 100% {opacity: 1;} }
     </style>
 </head>
-<body>
-
-<div id="app-container" id="main-body">
+<body class="dark-mode"> <div id="app-container">
     <div id="login-screen" class="screen active">
-        <div class="header">WhatsApp Registration</div>
+        <div class="header">Registration</div>
         <div style="padding:40px 20px; display:flex; flex-direction:column; gap:15px;">
             <input type="text" id="reg-name" placeholder="آپ کا نام" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
             <input type="number" id="reg-phone" placeholder="فون نمبر" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
@@ -57,31 +57,38 @@
 
     <div id="list-screen" class="screen">
         <div class="header">
-            <span>WhatsApp</span>
-            <i class="fas fa-moon" id="theme-btn" onclick="toggleTheme()" style="margin-left:auto; cursor:pointer;"></i>
+            <span>WhatsApp Nasir</span>
+            <div style="margin-left:auto; display:flex; gap:15px;">
+                <i class="fas fa-sun" onclick="toggleTheme()" style="cursor:pointer;"></i>
+                <i class="fas fa-plus" onclick="newChat()" style="cursor:pointer;"></i>
+            </div>
         </div>
         <div id="inbox-list" style="flex:1; overflow-y:auto;"></div>
-        <button onclick="newChat()" style="position:absolute; bottom:20px; right:20px; width:55px; height:55px; border-radius:50%; background:#25d366; color:white; border:none; font-size:24px; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fas fa-plus"></i></button>
     </div>
 
     <div id="chat-screen" class="screen">
         <div class="header">
             <i class="fas fa-arrow-left" onclick="backToInbox()"></i>
-            <span id="chat-title">نام</span>
-            <div style="margin-left:auto; display:flex; gap:15px;">
+            <div style="flex:1;">
+                <p id="chat-title" style="font-weight:bold; font-size:16px;">نام</p>
+                <p style="font-size:11px; opacity:0.8;">آن لائن</p>
+            </div>
+            <div style="display:flex; gap:15px;">
                 <i class="fas fa-video"></i><i class="fas fa-phone"></i>
             </div>
         </div>
+        
         <div id="chat-flow"></div>
-        <div id="extra-panel">
-            <div class="sticker-grid" id="stk-list"></div>
-        </div>
+
         <div class="footer">
             <div class="input-group">
-                <i class="far fa-smile icon-btn" onclick="toggleExtra()"></i>
-                <div id="rec-ui"><i class="fas fa-circle" style="animation:blink 1s infinite;"></i> <span id="r-clock">00:00</span></div>
-                <input type="text" id="msg-input" placeholder="Message">
-                <i class="fas fa-paperclip icon-btn" onclick="document.getElementById('file-in').click()"></i>
+                <i class="far fa-smile icon-btn"></i>
+                <div id="rec-ui">
+                    <i class="fas fa-circle" style="animation:blink 1s infinite;"></i> 
+                    <span id="r-clock">00:00</span>
+                </div>
+                <input type="text" id="msg-input" placeholder="Message" autocomplete="off">
+                <i class="fas fa-camera icon-btn" onclick="document.getElementById('file-in').click()"></i>
                 <input type="file" id="file-in" accept="image/*" style="display:none">
                 <i class="fas fa-location-dot icon-btn" onclick="sendLoc()"></i>
             </div>
@@ -105,23 +112,18 @@
 
     window.onload = () => {
         if(myPhone) { showScreen('list-screen'); renderInbox(); }
-        if(localStorage.getItem('dark') === 'true') document.body.classList.add('dark-mode');
-        loadStickers();
     };
 
     window.register = () => {
         const n = document.getElementById('reg-name').value, p = document.getElementById('reg-phone').value;
-        if(!n || !p) return;
+        if(!n || !p) return alert("معلومات مکمل کریں");
         localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p);
         location.reload();
     };
 
-    window.toggleTheme = () => {
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('dark', isDark);
-    };
+    window.toggleTheme = () => { document.body.classList.toggle('dark-mode'); };
 
-    window.newChat = () => { const r = prompt("روم کوڈ درج کریں:"); if(r) openChat(r); };
+    window.newChat = () => { const r = prompt("روم کوڈ لکھیں:"); if(r) openChat(r); };
 
     window.openChat = (r) => {
         currentRoom = btoa(r); showScreen('chat-screen'); document.getElementById('chat-title').innerText = r;
@@ -132,8 +134,16 @@
         const cRef = ref(db, "msgs/" + currentRoom); off(cRef);
         onChildAdded(cRef, snap => {
             const d = snap.val(), isMe = d.p === myPhone;
-            let content = d.t === 'img' ? `<img src="${d.v}" width="100%">` : d.t === 'loc' ? `<a href="${d.v}">📍 میری لوکیشن</a>` : d.t === 'voice' ? `<audio controls src="${d.v}" style="width:150px;"></audio>` : d.v;
-            flow.innerHTML += `<div class="msg ${isMe?'sent':'received'}">${content}<div class="meta">${d.time}</div></div>`;
+            let content = d.t === 'img' ? `<img src="${d.v}" style="max-width:200px; border-radius:8px;">` : 
+                          d.t === 'voice' ? `<audio controls src="${d.v}" style="width:180px;"></audio>` : d.v;
+
+            // ٹک کا نشان صرف بھیجے گئے میسج پر آئے گا
+            const tickHtml = isMe ? '<i class="fas fa-check-double tick"></i>' : '';
+            
+            flow.innerHTML += `<div class="msg ${isMe?'sent':'received'}">
+                ${content}
+                <div class="meta">${d.time} ${tickHtml}</div>
+            </div>`;
             flow.scrollTop = flow.scrollHeight;
         });
     };
@@ -152,40 +162,52 @@
 
     async function handleMic() {
         if(!isRec) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream); chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
-                r.onloadend = () => sendData(r.result, 'voice');
-            };
-            mediaRecorder.start(); isRec = true; document.getElementById('rec-ui').style.display='flex';
-        } else { mediaRecorder.stop(); isRec = false; document.getElementById('rec-ui').style.display='none'; }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream); chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
+                    r.onloadend = () => sendData(r.result, 'voice');
+                };
+                mediaRecorder.start(); isRec = true;
+                document.getElementById('rec-ui').style.display='flex';
+                document.getElementById('msg-input').style.display='none';
+            } catch(e) { alert("Mic Permission Denied"); }
+        } else {
+            mediaRecorder.stop(); isRec = false;
+            document.getElementById('rec-ui').style.display='none';
+            document.getElementById('msg-input').style.display='block';
+        }
     }
-
-    window.sendLoc = () => {
-        navigator.geolocation.getCurrentPosition(p => sendData(`https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`, 'loc'));
-    };
 
     document.getElementById('file-in').onchange = (e) => {
         const r = new FileReader(); r.onload = (ev) => sendData(ev.target.result, 'img');
-        r.readAsDataURL(e.target.files[0]);
+        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
     };
 
     function sendData(v, t) {
-        push(ref(db, "msgs/" + currentRoom), { p: myPhone, u: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-        document.getElementById('extra-panel').style.display = 'none';
+        push(ref(db, "msgs/" + currentRoom), { 
+            p: myPhone, u: myName, v: v, t: t, 
+            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) 
+        });
     }
 
-    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function showScreen(id) { 
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+    }
+    
     window.backToInbox = () => { showScreen('list-screen'); renderInbox(); };
+
     function renderInbox() {
         const list = document.getElementById('inbox-list'); list.innerHTML = "";
         const chats = JSON.parse(localStorage.getItem('my_chats') || "[]");
-        chats.forEach(c => { list.innerHTML += `<div class="chat-item" onclick="openChat('${c}')"><div style="width:40px;height:40px;border-radius:50%;background:#075e54;margin-right:10px;display:flex;align-items:center;justify-content:center;color:white;">${c[0]}</div><b>${c}</b></div>`; });
+        chats.forEach(c => { 
+            list.innerHTML += `<div style="padding:15px; border-bottom:1px solid #ddd; cursor:pointer;" onclick="openChat('${c}')"><b>${c}</b></div>`; 
+        });
     }
-    function loadStickers() { /* Stickers logic same as before */ }
-    window.toggleExtra = () => { const p = document.getElementById('extra-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
 </script>
 </body>
-</html>
+    </html>
+                
