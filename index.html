@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro - Audio Fixed</title>
+    <title>Nasir Messenger Pro - Camera & Online</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
@@ -21,8 +21,10 @@
         .form-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; outline: none; }
         
         #main-chat { display: none; flex-direction: column; height: 100vh; }
-        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 15px; height: 60px; }
-        #typing-status { font-size: 12px; color: #dcf8c6; font-style: italic; display: block; height: 15px; }
+        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 65px; }
+        .header-info { flex: 1; }
+        .online-dot { width: 10px; height: 10px; background: #45f045; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        #status-text { font-size: 11px; color: #dcf8c6; }
         
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
@@ -30,11 +32,13 @@
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; margin-bottom: 3px; display: block; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
-        .del-btn { color: #d32f2f; cursor: pointer; font-size: 12px; }
-        .tick { font-size: 11px; } .tick-grey { color: #888; } .tick-blue { color: #34b7f1; }
+        .del-btn { color: #d32f2f; cursor: pointer; font-size: 13px; margin-right: 5px; }
+        .tick { font-size: 11px; } .tick-blue { color: #34b7f1; } .tick-grey { color: #888; }
 
-        .audio-box { display: flex; align-items: center; gap: 10px; min-width: 150px; padding: 5px 0; }
-        .play-btn { font-size: 25px; color: var(--wa-green); cursor: pointer; }
+        .audio-box { display: flex; align-items: center; gap: 10px; min-width: 180px; padding: 5px 0; }
+        .play-btn { font-size: 28px; color: var(--wa-green); cursor: pointer; }
+        .track-bg { flex: 1; height: 4px; background: #bbb; border-radius: 2px; position: relative; }
+        .track-fill { height: 100%; background: var(--wa-green); width: 0%; border-radius: 2px; }
 
         .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
         .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; }
@@ -57,7 +61,7 @@
         <h3>روم میں داخل ہوں</h3><br>
         <input type="text" id="u-name" placeholder="آپ کا نام">
         <input type="text" id="r-pass" placeholder="کوڈ (4+ ہندسے)">
-        <p id="err-msg" style="color:red; font-size:12px; display:none; margin-bottom:10px;">کوڈ 4 ہندسوں کا ہونا ضروری ہے!</p>
+        <p id="err-msg" style="color:red; font-size:12px; display:none;">کوڈ 4 ہندسوں کا ہونا ضروری ہے!</p>
         <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">شروع کریں</button>
         <button id="btn-cancel" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
     </div>
@@ -65,16 +69,16 @@
 
 <div id="main-chat">
     <div class="chat-header">
-        <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <div style="flex:1;">
+        <i class="fas fa-arrow-left" onclick="location.reload()" style="cursor:pointer; font-size:20px;"></i>
+        <div class="header-info">
             <div style="font-weight:bold;" id="active-room-name">چیٹ</div>
-            <div id="typing-status"></div>
+            <div id="status-text"></div>
         </div>
     </div>
     <div id="chat-flow"></div>
     <div class="footer">
         <label for="img-in" style="cursor:pointer; color:#555; font-size:22px;"><i class="fas fa-camera"></i></label>
-        <input type="file" id="img-in" accept="image/*" style="display:none">
+        <input type="file" id="img-in" accept="image/*" capture="environment" style="display:none">
         
         <div class="input-bar" id="norm-ui">
             <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
@@ -92,7 +96,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, onChildChanged, remove, update, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, onChildChanged, remove, update, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -110,10 +114,10 @@
         const p = document.getElementById('r-pass').value.trim();
         if(!n || p.length < 4) { document.getElementById('err-msg').style.display = 'block'; return; }
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v10') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v12') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v10', JSON.stringify(history));
+            localStorage.setItem('n_history_v12', JSON.stringify(history));
         }
         openChat(n, rid, p);
         document.getElementById('room-form').style.display = 'none';
@@ -124,27 +128,31 @@
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-chat').style.display = 'flex';
         document.getElementById('active-room-name').innerText = rName;
+        
+        // آن لائن اسٹیٹس سیٹ کریں
+        const myPresenceRef = ref(db, `presence_v12/${myRoom}/${myUid}`);
+        set(myPresenceRef, { name: myName, status: "online" });
+        onDisconnect(myPresenceRef).remove();
+
         initFirebase();
     }
 
-    const send = (v, t) => push(ref(db, "final_v10/" + myRoom), {
+    const sendMsg = (v, t) => push(ref(db, "final_v12/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, s: 1, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
     document.getElementById('btn-send').onclick = () => {
         const i = document.getElementById('msg-input');
-        if(i.value.trim()){ send(i.value, 'text'); i.value = ""; setTyping(false); }
+        if(i.value.trim()){ sendMsg(i.value, 'text'); i.value = ""; setTyping(false); }
     };
 
-    // ٹائپنگ
-    const setTyping = (st) => set(ref(db, `typing_v10/${myRoom}/${myUid}`), st ? myName : "");
+    const setTyping = (st) => set(ref(db, `typing_v12/${myRoom}/${myUid}`), st ? myName : "");
     document.getElementById('msg-input').oninput = () => {
         setTyping(true);
         clearTimeout(window.tTime);
         window.tTime = setTimeout(() => setTyping(false), 2000);
     };
 
-    // مائیکروفون فکس
     document.getElementById('mic-start').onclick = async () => {
         try {
             audioChunks = [];
@@ -152,10 +160,9 @@
             mediaRecorder = new MediaRecorder(activeStream);
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
             mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunks, { type: 'audio/webm' });
                 const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => send(reader.result, 'voice');
+                reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
+                reader.onloadend = () => sendMsg(reader.result, 'voice');
             };
             mediaRecorder.start();
             document.getElementById('norm-ui').style.display = 'none';
@@ -172,33 +179,61 @@
         clearInterval(timer);
     };
 
-    // امیج
     document.getElementById('img-in').onchange = (e) => {
-        const r = new FileReader(); r.onload = (ev) => send(ev.target.result, 'img');
-        r.readAsDataURL(e.target.files[0]);
+        const r = new FileReader(); 
+        r.onload = (ev) => sendMsg(ev.target.result, 'img');
+        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
+    };
+
+    window.delMsg = (key) => {
+        if(confirm('مٹائیں؟')) remove(ref(db, `final_v12/${myRoom}/${key}`));
     };
 
     function initFirebase() {
-        const rRef = ref(db, "final_v10/" + myRoom);
-        onValue(ref(db, "typing_v10/" + myRoom), snap => {
-            let typers = []; const d = snap.val();
-            for(let id in d) if(id !== myUid && d[id]) typers.push(d[id]);
-            document.getElementById('typing-status').innerText = typers.length ? typers.join(', ') + " typing..." : "";
+        const rRef = ref(db, "final_v12/" + myRoom);
+        
+        // آن لائن اور ٹائپنگ اسٹیٹس چیکر
+        onValue(ref(db, `typing_v12/${myRoom}`), tSnap => {
+            onValue(ref(db, `presence_v12/${myRoom}`), pSnap => {
+                let statusArr = [];
+                const tData = tSnap.val() || {};
+                const pData = pSnap.val() || {};
+                
+                // ٹائپنگ چیک
+                let typingNames = [];
+                for(let id in tData) if(id !== myUid && tData[id]) typingNames.push(tData[id]);
+                
+                // آن لائن چیک
+                let onlineCount = 0;
+                for(let id in pData) if(id !== myUid) onlineCount++;
+
+                if(typingNames.length > 0) {
+                    document.getElementById('status-text').innerText = typingNames.join(', ') + " typing...";
+                } else if(onlineCount > 0) {
+                    document.getElementById('status-text').innerHTML = '<span class="online-dot"></span> online';
+                } else {
+                    document.getElementById('status-text').innerText = "";
+                }
+            });
         });
 
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
-            if(!isMe && d.s < 3) update(ref(db, `final_v10/${myRoom}/${k}`), { s: 3 });
+            if(!isMe && d.s < 3) update(ref(db, `final_v12/${myRoom}/${k}`), { s: 3 });
             
-            let content = d.t === 'text' ? d.v : 
+            let content = d.t === 'text' ? `<div>${d.v}</div>` : 
                           d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
-                          `<div class="audio-box"><i class="fas fa-play-circle play-btn" onclick="playA(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><span>آڈیو میسج</span></div>`;
+                          `<div class="audio-box">
+                              <i class="fas fa-play-circle play-btn" onclick="playA(this, 'a-${k}')"></i>
+                              <div class="track-bg"><div id="f-${k}" class="track-fill"></div></div>
+                              <audio id="a-${k}" src="${d.v}"></audio>
+                           </div>`;
             
             let ticks = isMe ? (d.s === 3 ? '<i class="fas fa-check-double tick tick-blue"></i>' : '<i class="fas fa-check tick tick-grey"></i>') : '';
             
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v10/${myRoom}/${k}'))"></i>`:''}${d.time} ${ticks}</div>
+                <div class="meta">${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}${d.time} ${ticks}</div>
             </div>`);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
@@ -207,7 +242,7 @@
             const d = snap.val(), k = snap.key;
             if(d.uid === myUid && d.s === 3) {
                 const el = document.getElementById("m-"+k);
-                if(el) el.querySelector('.tick').className = "fas fa-check-double tick tick-blue";
+                if(el && el.querySelector('.tick')) el.querySelector('.tick').className = "fas fa-check-double tick tick-blue";
             }
         });
         onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
@@ -215,12 +250,15 @@
 
     window.playA = (btn, aid) => {
         const a = document.getElementById(aid);
-        if(a.paused) { a.play(); btn.className = "fas fa-pause-circle play-btn"; a.onended = () => btn.className = "fas fa-play-circle play-btn"; }
-        else { a.pause(); btn.className = "fas fa-play-circle play-btn"; }
+        const fill = document.getElementById('f-' + aid.split('-')[1]);
+        if(a.paused) { 
+            a.play(); btn.className = "fas fa-pause-circle play-btn";
+            a.ontimeupdate = () => fill.style.width = (a.currentTime / a.duration) * 100 + "%";
+            a.onended = () => { btn.className = "fas fa-play-circle play-btn"; fill.style.width = "0%"; };
+        } else { a.pause(); btn.className = "fas fa-play-circle play-btn"; }
     };
 
-    // لسٹ دکھانا
-    const saved = JSON.parse(localStorage.getItem('n_history_v10') || "[]");
+    const saved = JSON.parse(localStorage.getItem('n_history_v12') || "[]");
     const list = document.getElementById('chat-list');
     if(saved.length) {
         list.innerHTML = "";
