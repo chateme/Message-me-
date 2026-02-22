@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger v17</title>
+    <title>Nasir Messenger Pro v18</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* Setup & Layout */
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; }
         .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; }
         .chat-list-container { flex: 1; padding: 15px; overflow-y: auto; }
@@ -31,29 +32,33 @@
 
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 5px; }
         .del-btn { color: #d32f2f; cursor: pointer; font-size: 13px; margin-right: 8px; }
-        audio { height: 35px; width: 200px; margin-top: 5px; }
 
-        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
-        .cam-btn { color: #555; font-size: 24px; cursor: pointer; padding: 5px; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; gap: 10px; }
+        /* Audio & Seekbar */
+        .audio-player { display: flex; align-items: center; gap: 8px; min-width: 180px; margin-top: 5px; }
+        .audio-player input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--wa-dark); }
+        
+        /* Footer */
+        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 5px; border-top: 1px solid #ddd; }
+        .tool-btn { color: #555; font-size: 22px; cursor: pointer; padding: 5px; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; gap: 8px; position: relative; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; }
+        #rec-timer { font-size: 14px; color: red; font-weight: bold; display: none; }
         .send-btn { background: var(--wa-green); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .rec-active { color: red !important; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        .loc-btn { color: #34b7f1; }
     </style>
 </head>
 <body>
 
 <div id="setup-screen">
-    <div class="setup-header">ناصر میسنجر v17 🔐</div>
+    <div class="setup-header">ناصر میسنجر v18 🔐</div>
     <div class="chat-list-container" id="chat-list"></div>
     <button class="add-new-btn" id="btn-add"><i class="fas fa-plus"></i></button>
 </div>
 
 <div id="room-form">
     <div class="form-card">
-        <h3>روم میں داخل ہوں</h3><br>
-        <input type="text" id="u-name" placeholder="آپ کا نام">
+        <h3>روم سیٹ اپ</h3><br>
+        <input type="text" id="u-name" placeholder="نام لکھیں">
         <input type="text" id="r-pass" placeholder="کوڈ (4 ہندسے)">
         <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">شروع کریں</button>
         <button id="btn-cancel" style="border:none; background:none; margin-top:10px; color:red;">کینسل</button>
@@ -69,10 +74,13 @@
     <div id="chat-flow"></div>
 
     <div class="footer">
-        <label for="cam-in" class="cam-btn"><i class="fas fa-camera"></i></label>
-        <input type="file" id="cam-in" accept="image/*" capture="camera" style="display:none">
+        <i class="fas fa-location-dot tool-btn loc-btn" onclick="sendLocation()" title="لوکیشن بھیجیں"></i>
+        
+        <label for="cam-in" class="tool-btn"><i class="fas fa-camera"></i></label>
+        <input type="file" id="cam-in" accept="image/*" style="display:none">
         
         <div class="input-bar">
+            <span id="rec-timer">00:00</span>
             <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
             <i class="fas fa-microphone" id="mic-btn" style="cursor:pointer; color:#555; font-size:20px;"></i>
         </div>
@@ -88,7 +96,7 @@
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myName = "", myRoom = "", isRecording = false, mediaRecorder, chunks = [];
+    let myName = "", myRoom = "", isRecording = false, mediaRecorder, chunks = [], recInt;
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
@@ -100,10 +108,10 @@
         const p = document.getElementById('r-pass').value.trim();
         if(!n || p.length < 4) return;
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v17') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v18') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v17', JSON.stringify(history));
+            localStorage.setItem('n_history_v18', JSON.stringify(history));
         }
         openChat(n, rid, p);
         document.getElementById('room-form').style.display = 'none';
@@ -117,20 +125,21 @@
         initFirebase();
     }
 
-    const sendMsg = (v, t) => {
-        push(ref(db, "final_v17/" + myRoom), {
-            uid: myUid, user: myName, v: v, t: t, 
-            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        });
-    };
+    const sendMsg = (v, t) => push(ref(db, "final_v18/" + myRoom), {
+        uid: myUid, user: myName, v: v, t: t, 
+        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    });
 
     document.getElementById('btn-send').onclick = () => {
         const i = document.getElementById('msg-input');
         if(i.value.trim()){ sendMsg(i.value, 'text'); i.value = ""; }
     };
 
-    // مائیکروفون فکس (بغیر پاپ اپ)
+    // --- آڈیو ریکارڈنگ اور ٹائمر ---
     document.getElementById('mic-btn').onclick = async function() {
+        const timerTxt = document.getElementById('rec-timer');
+        const inputF = document.getElementById('msg-input');
+        
         if (!isRecording) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -138,44 +147,85 @@
                 chunks = [];
                 mediaRecorder.ondataavailable = e => chunks.push(e.data);
                 mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
                     const r = new FileReader();
-                    r.readAsDataURL(blob);
+                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
                     r.onloadend = () => sendMsg(r.result, 'voice');
                 };
                 mediaRecorder.start();
                 isRecording = true;
-                this.classList.add('rec-active');
+                this.style.color = "red";
+                timerTxt.style.display = "inline";
+                inputF.style.display = "none";
+                let s = 0;
+                recInt = setInterval(() => {
+                    s++;
+                    timerTxt.innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0');
+                }, 1000);
             } catch(e) { alert("Mic Error!"); }
         } else {
             mediaRecorder.stop();
             isRecording = false;
-            this.classList.remove('rec-active');
+            this.style.color = "#555";
+            timerTxt.style.display = "none";
+            inputF.style.display = "block";
+            clearInterval(recInt);
+            timerTxt.innerText = "00:00";
         }
     };
 
-    // کیمرہ فکس
+    // --- لوکیشن ---
+    window.sendLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const url = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                sendMsg(url, 'loc');
+            }, () => alert("Location denied!"));
+        }
+    };
+
+    // --- کیمرہ ---
     document.getElementById('cam-in').onchange = (e) => {
-        const file = e.target.files[0];
-        if(file) {
-            const r = new FileReader();
-            r.onload = (ev) => sendMsg(ev.target.result, 'img');
-            r.readAsDataURL(file);
-        }
+        const r = new FileReader();
+        r.onload = (ev) => sendMsg(ev.target.result, 'img');
+        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
     };
 
-    // ڈیلیٹ فکس
-    window.delMsg = (key) => {
-        if(confirm('مٹائیں؟')) remove(ref(db, `final_v17/${myRoom}/${key}`));
+    window.delMsg = (key) => { if(confirm('مٹائیں؟')) remove(ref(db, `final_v18/${myRoom}/${key}`)); };
+
+    // --- آڈیو پلے اور سیک بار فکس ---
+    window.playVoice = (id) => {
+        const aud = document.getElementById('aud-'+id);
+        const seek = document.getElementById('seek-'+id);
+        const btn = document.getElementById('btn-'+id);
+
+        if(aud.paused) {
+            aud.play();
+            btn.className = "fas fa-pause";
+        } else {
+            aud.pause();
+            btn.className = "fas fa-play";
+        }
+
+        aud.ontimeupdate = () => { seek.value = (aud.currentTime / aud.duration) * 100; };
+        seek.oninput = () => { aud.currentTime = (seek.value / 100) * aud.duration; };
+        aud.onended = () => { btn.className = "fas fa-play"; seek.value = 0; };
     };
 
     function initFirebase() {
-        const rRef = ref(db, "final_v17/" + myRoom);
+        const rRef = ref(db, "final_v18/" + myRoom);
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
-            let content = d.t === 'text' ? d.v : 
-                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
-                          `<audio controls><source src="${d.v}" type="audio/webm"></audio>`;
+            let content = "";
+
+            if(d.t === 'text') content = `<div>${d.v}</div>`;
+            else if(d.t === 'img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
+            else if(d.t === 'loc') content = `<a href="${d.v}" target="_blank" style="color:blue; text-decoration:none;"><i class="fas fa-map-marker-alt"></i> میری لوکیشن دیکھیں</a>`;
+            else if(d.t === 'voice') content = `
+                <div class="audio-player">
+                    <i class="fas fa-play" id="btn-${k}" onclick="playVoice('${k}')" style="cursor:pointer; font-size:18px; color:var(--wa-dark)"></i>
+                    <input type="range" id="seek-${k}" value="0">
+                    <audio id="aud-${k}" src="${d.v}" style="display:none"></audio>
+                </div>`;
             
             const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
@@ -190,8 +240,7 @@
         onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
     }
 
-    // ہسٹری لسٹ
-    const saved = JSON.parse(localStorage.getItem('n_history_v17') || "[]");
+    const saved = JSON.parse(localStorage.getItem('n_history_v18') || "[]");
     const list = document.getElementById('chat-list');
     if(saved.length) {
         list.innerHTML = "";
@@ -204,5 +253,5 @@
     }
 </script>
 </body>
-            </html>
+                                                                        </html>
     
