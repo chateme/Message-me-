@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir - Fixed</title>
+    <title>WhatsApp Nasir - Full Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #128c7e; --bg: #efe7dd; --msg-sent: #dcf8c6; --msg-rec: #fff; --text: #000; }
@@ -22,11 +22,12 @@
         .sent { background: var(--msg-sent); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: var(--msg-rec); align-self: flex-start; border-top-left-radius: 0; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; }
-        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; width: 100%; background: transparent; }
-        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
+        /* Footer Layout Fix */
+        .footer { padding: 8px; display: flex; align-items: flex-end; gap: 5px; width: 100%; }
+        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; position: relative; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 10px 0; }
-        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        #rec-info { display: none; color: #e91e63; font-weight: bold; flex: 1; align-items: center; gap: 8px; }
+        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        #rec-info { display: none; color: #e91e63; font-weight: bold; flex: 1; align-items: center; gap: 8px; font-family: monospace; }
         #emoji-panel { display: none; background: var(--msg-rec); grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 150px; overflow-y: auto; border-top: 1px solid #ddd; }
         .emo { font-size: 24px; text-align: center; cursor: pointer; padding: 8px; }
     </style>
@@ -44,7 +45,11 @@
     </div>
 
     <div id="contacts-screen" class="screen">
-        <div class="header"><span style="flex:1; font-weight:bold;">چیٹس</span><i class="fas fa-sign-out-alt" onclick="logout()"></i></div>
+        <div class="header">
+            <span style="flex:1; font-weight:bold;">WhatsApp Nasir</span>
+            <button onclick="showContacts()" style="background:none; border:none; color:white; padding-right:10px;"><i class="fas fa-sync-alt"></i></button>
+            <i class="fas fa-sign-out-alt" onclick="logout()"></i>
+        </div>
         <div id="contact-list"></div>
     </div>
 
@@ -54,7 +59,7 @@
         <div id="emoji-panel"></div>
         <div class="footer">
             <div class="input-bar">
-                <i class="far fa-smile" onclick="toggleEmoji()" style="color:#8696a0; cursor:pointer; font-size: 20px;"></i>
+                <i class="far fa-smile" onclick="toggleEmoji()" style="color:#8696a0; cursor:pointer; font-size: 22px; padding-right:5px;"></i>
                 <div id="rec-info">🔴 <span id="timer">00:00</span></div>
                 <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
             </div>
@@ -68,7 +73,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -84,25 +89,31 @@
         if(n && p) {
             localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p);
             set(ref(db, 'users/' + p), { name: n, phone: p });
-            location.reload();
+            setTimeout(() => { location.reload(); }, 500);
         }
     };
 
     window.logout = () => { localStorage.clear(); location.reload(); };
 
-    function showContacts() {
+    window.showContacts = () => {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('contacts-screen').classList.add('active');
         const list = document.getElementById('contact-list');
-        onValue(ref(db, 'users'), snap => {
-            list.innerHTML = "";
-            snap.forEach(child => {
-                const u = child.val();
-                list.innerHTML += `<div class="contact-item" onclick="openChat('${u.phone}', '${u.name}')">
-                    <div class="avatar">${u.name[0]}</div>
-                    <div><b>${u.name} ${u.phone==myPhone?'(آپ)':''}</b><br><small>${u.phone}</small></div>
-                </div>`;
-            });
+        list.innerHTML = "<p style='padding:20px; text-align:center;'>لوڈ ہو رہا ہے...</p>";
+
+        get(child(ref(db), 'users')).then((snap) => {
+            if (snap.exists()) {
+                list.innerHTML = "";
+                snap.forEach(c => {
+                    const u = c.val();
+                    list.innerHTML += `<div class="contact-item" onclick="openChat('${u.phone}', '${u.name}')">
+                        <div class="avatar">${u.name[0].toUpperCase()}</div>
+                        <div><b>${u.name} ${u.phone==myPhone?'(آپ)':''}</b><br><small>${u.phone}</small></div>
+                    </div>`;
+                });
+            } else {
+                list.innerHTML = "<p style='padding:20px; text-align:center;'>کوئی یوزر نہیں ملا۔</p>";
+            }
         });
     }
 
@@ -113,8 +124,6 @@
         document.getElementById('chat-screen').classList.add('active');
         loadMessages();
     };
-
-    window.showContacts = showContacts;
 
     function loadMessages() {
         const chatFlow = document.getElementById('chat-flow');
@@ -157,9 +166,10 @@
                     r.onloadend = () => sendData(r.result, 'voice');
                     s.getTracks().forEach(t => t.stop());
                 };
-            } catch(e) { alert("Mic Permission Error"); }
+            } catch(e) { alert("Mic Permission Error: مائیک کی اجازت دیں"); }
         } else {
-            mediaRecorder.stop(); isRecording = false;
+            if(mediaRecorder) mediaRecorder.stop(); 
+            isRecording = false;
             clearInterval(timerInt);
             document.getElementById('rec-info').style.display = 'none';
             inp.style.display = 'block';
@@ -181,5 +191,4 @@
     })();
 </script>
 </body>
-    </html>
-    
+</html>
