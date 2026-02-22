@@ -3,39 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro</title>
+    <title>Nasir Messenger Pro 🇵🇰</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --wa-green: #075e54; --wa-light: #dcf8c6; --bg: #e5ddd5; }
+        :root { --wa-green: #075e54; --wa-light: #dcf8c6; --bg: #e5ddd5; --wa-blue: #34b7f1; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 60px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .p-img { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid white; }
+        /* ہیڈر */
+        .header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 60px; z-index: 100; }
+        .p-img { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid white; object-fit: cover; }
 
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 80%; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        /* چیٹ باکس */
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; }
+        .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 80%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 1.4; }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         
-        /* آڈیو پلیئر ڈیزائن */
-        .audio-box { display: flex; align-items: center; gap: 12px; min-width: 210px; padding: 5px 0; }
-        .play-btn { font-size: 32px; color: var(--wa-green); cursor: pointer; }
-        .audio-track { flex: 1; height: 4px; background: #bbb; border-radius: 2px; position: relative; }
-        .audio-fill { height: 100%; background: var(--wa-green); width: 0%; border-radius: 2px; transition: width 0.1s linear; }
-        .timer { font-size: 11px; color: #666; margin-top: 4px; font-variant-numeric: tabular-nums; }
+        /* آڈیو ڈیزائن */
+        .audio-wrapper { display: flex; align-items: center; gap: 12px; min-width: 200px; padding: 5px 0; }
+        .play-icon { font-size: 35px; color: var(--wa-green); cursor: pointer; }
+        .track-container { flex: 1; height: 4px; background: #c0c0c0; border-radius: 2px; position: relative; }
+        .track-fill { height: 100%; background: var(--wa-green); width: 0%; border-radius: 2px; }
+        .audio-time { font-size: 11px; color: #666; margin-top: 5px; font-family: monospace; }
 
+        /* میٹا ڈیٹا (ٹائم اور ٹک) */
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
-        .tick { color: #34b7f1; }
-        .del-link { color: #e74c3c; cursor: pointer; margin-right: 5px; text-decoration: none; font-weight: bold; }
+        .tick { color: var(--wa-blue); font-size: 11px; }
+        .del-btn { color: #e74c3c; cursor: pointer; margin-right: 8px; font-weight: bold; }
 
-        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; }
-        .input-area { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; height: 45px; border: 1px solid #ddd; }
-        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; }
+        /* فوٹر */
+        .footer { background: #f0f0f0; padding: 8px 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; }
+        .input-box { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; min-height: 45px; }
+        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; padding: 10px 0; }
         
-        #rec-mode { display: none; flex: 1; align-items: center; justify-content: space-between; background: white; border-radius: 25px; padding: 0 15px; height: 45px; color: red; font-weight: bold; }
-        .btn-act { background: none; border: none; color: #555; font-size: 22px; cursor: pointer; }
-        .send-circle { background: var(--wa-green); color: white; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; font-size: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        #rec-box { display: none; flex: 1; align-items: center; justify-content: space-between; background: white; border-radius: 25px; padding: 0 15px; height: 45px; color: #d32f2f; }
+        .mic-btn { color: #757575; font-size: 22px; cursor: pointer; border: none; background: none; transition: color 0.3s; }
+        .mic-btn.active { color: #d32f2f; }
+        .send-btn { background: var(--wa-green); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; font-size: 20px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
     </style>
@@ -53,149 +59,159 @@
 <div id="chat-flow"></div>
 
 <div class="footer">
-    <label for="img-up" class="btn-act"><i class="fas fa-camera"></i></label>
-    <input type="file" id="img-up" accept="image/*" style="display:none" onchange="upImg(this)">
+    <label for="img-input" class="mic-btn"><i class="fas fa-camera"></i></label>
+    <input type="file" id="img-input" accept="image/*" style="display:none" onchange="uploadImage(this)">
     
-    <div class="input-area" id="ui-norm">
+    <div class="input-box" id="norm-ui">
         <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
-        <button class="btn-act" id="rec-start"><i class="fas fa-microphone"></i></button>
+        <button class="mic-btn" id="btn-start-rec"><i class="fas fa-microphone"></i></button>
     </div>
 
-    <div id="rec-mode">
-        <span><i class="fas fa-circle blink"></i> <span id="r-time">00:00</span></span>
-        <span style="color:#666; font-size:13px;">ریکارڈنگ جاری...</span>
-        <i class="fas fa-stop-circle" id="rec-stop" style="font-size:30px; cursor:pointer;"></i>
+    <div id="rec-box">
+        <span class="blink"><i class="fas fa-circle"></i> <span id="r-timer">00:00</span></span>
+        <span style="color:#777; font-size:14px;">ریکارڈنگ ہو رہی ہے...</span>
+        <i class="fas fa-stop-circle" id="btn-stop-rec" style="font-size:32px; cursor:pointer;"></i>
     </div>
 
-    <button class="send-circle" onclick="sendT()"><i class="fas fa-paper-plane"></i></button>
+    <button class="send-btn" onclick="sendTextMessage()"><i class="fas fa-paper-plane"></i></button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const config = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
-    const app = initializeApp(config);
+    const firebaseConfig = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
+    const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const mRef = ref(db, "nasir_final_stable_v1");
+    const messagesRef = ref(db, "nasir_messenger_stable_v5");
 
-    // مستقل یوزر آئی ڈی کا حل (ریفریش پر میسج بائیں نہیں جائیں گے)
-    if(!localStorage.getItem('nasir_uid')) {
-        localStorage.setItem('nasir_uid', "NASIR-" + Date.now());
+    // پکی یوزر آئی ڈی (ریفریش کا مسئلہ ختم)
+    if(!localStorage.getItem('nasir_user_id')) {
+        localStorage.setItem('nasir_user_id', "USER-" + Math.random().toString(36).substr(2, 9));
     }
-    const myId = localStorage.getItem('nasir_uid');
+    const currentUserId = localStorage.getItem('nasir_user_id');
 
-    let recorder, chunks = [], sec = 0, timer;
+    let mediaRecorder, audioChunks = [], timerInterval, seconds = 0;
+    let globalStream = null;
 
-    const pushMsg = (v, t) => push(mRef, { 
-        u: myId, 
-        v: v, 
-        t: t, 
-        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) 
-    });
-
-    window.sendT = () => {
-        const i = document.getElementById('msg-input');
-        if(i.value.trim()) { pushMsg(i.value, 'text'); i.value = ""; }
+    const sendMessage = (val, type) => {
+        push(messagesRef, {
+            sender: currentUserId,
+            content: val,
+            type: type,
+            timestamp: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
     };
 
-    window.upImg = (el) => {
+    window.sendTextMessage = () => {
+        const inp = document.getElementById('msg-input');
+        if(inp.value.trim()){ sendMessage(inp.value, 'text'); inp.value = ""; }
+    };
+
+    window.uploadImage = (el) => {
         const reader = new FileReader();
-        reader.onload = (e) => pushMsg(e.target.result, 'img');
+        reader.onload = (e) => sendMessage(e.target.result, 'image');
         reader.readAsDataURL(el.files[0]);
     };
 
-    window.delMsg = (k) => { 
-        if(confirm("کیا آپ یہ پیغام مٹانا چاہتے ہیں؟")) {
-            remove(ref(db, `nasir_final_stable_v1/${k}`));
-            document.getElementById(k).remove();
+    window.deleteMessage = (key) => {
+        if(confirm("کیا یہ پیغام مٹانا ہے؟")) remove(ref(db, `nasir_messenger_stable_v5/${key}`));
+    };
+
+    // ریکارڈنگ سسٹم (بغیر بار بار پرمیشن کے)
+    document.getElementById('btn-start-rec').onclick = async () => {
+        try {
+            if (!globalStream) {
+                globalStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
+            mediaRecorder = new MediaRecorder(globalStream);
+            mediaRecorder.start();
+            
+            document.getElementById('norm-ui').style.display = 'none';
+            document.getElementById('rec-box').style.display = 'flex';
+            
+            seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                document.getElementById('r-timer').innerText = Math.floor(seconds/60).toString().padStart(2,'0') + ":" + (seconds%60).toString().padStart(2,'0');
+            }, 1000);
+
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                clearInterval(timerInterval);
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => sendMessage(reader.result, 'audio');
+                
+                document.getElementById('norm-ui').style.display = 'flex';
+                document.getElementById('rec-box').style.display = 'none';
+            };
+        } catch (err) {
+            alert("مائیکروفون کی اجازت نہیں ملی۔ براہ کرم سیٹنگز سے اجازت دیں۔");
         }
     };
 
-    // ریکارڈنگ سسٹم
-    document.getElementById('rec-start').onclick = async () => {
-        try {
-            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(s);
-            recorder.start();
-            document.getElementById('ui-norm').style.display = 'none';
-            document.getElementById('rec-mode').style.display = 'flex';
-            sec = 0;
-            timer = setInterval(() => {
-                sec++;
-                document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
-            }, 1000);
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                clearInterval(timer);
-                const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks));
-                r.onloadend = () => pushMsg(r.result, 'voice');
-                document.getElementById('ui-norm').style.display = 'flex';
-                document.getElementById('rec-mode').style.display = 'none';
-                s.getTracks().forEach(track => track.stop());
-            };
-        } catch (e) { alert("مائیکروفون کی اجازت دیں!"); }
+    document.getElementById('btn-stop-rec').onclick = () => {
+        if(mediaRecorder) mediaRecorder.stop();
     };
-    document.getElementById('rec-stop').onclick = () => recorder.stop();
 
-    // آڈیو پلیئر کنٹرولر
-    window.handleAudio = (btn, audId) => {
-        const aud = document.getElementById(audId);
-        const fill = btn.parentElement.querySelector('.audio-fill');
-        const timeTxt = btn.parentElement.querySelector('.timer');
+    // آڈیو پلے بیک کنٹرول
+    window.playVoice = (btn, id) => {
+        const audio = document.getElementById(id);
+        const fill = btn.parentElement.querySelector('.track-fill');
+        const timeDisplay = btn.parentElement.querySelector('.audio-time');
 
-        if(aud.paused) {
-            aud.play();
-            btn.className = "fas fa-pause-circle play-btn";
-            aud.ontimeupdate = () => {
-                const p = (aud.currentTime / aud.duration) * 100;
-                fill.style.width = p + "%";
-                let cur = Math.floor(aud.currentTime);
-                let dur = isNaN(aud.duration) ? 0 : Math.floor(aud.duration);
-                timeTxt.innerText = `00:${cur.toString().padStart(2,'0')} / 00:${dur.toString().padStart(2,'0')}`;
+        if(audio.paused) {
+            audio.play();
+            btn.className = "fas fa-pause-circle play-icon";
+            audio.ontimeupdate = () => {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                fill.style.width = progress + "%";
+                timeDisplay.innerText = "00:" + Math.floor(audio.currentTime).toString().padStart(2, '0');
             };
-            aud.onended = () => {
-                btn.className = "fas fa-play-circle play-btn";
+            audio.onended = () => {
+                btn.className = "fas fa-play-circle play-icon";
                 fill.style.width = "0%";
-                timeTxt.innerText = "00:00";
+                timeDisplay.innerText = "00:00";
             };
         } else {
-            aud.pause();
-            btn.className = "fas fa-play-circle play-btn";
+            audio.pause();
+            btn.className = "fas fa-play-circle play-icon";
         }
     };
 
-    onChildAdded(mRef, (snap) => {
-        const d = snap.val();
-        const isMe = d.u === myId;
-        const key = snap.key;
-        let content = "";
+    onChildAdded(messagesRef, (data) => {
+        const msg = data.val();
+        const key = data.key;
+        const isMyMsg = msg.sender === currentUserId;
+        let body = "";
 
-        if(d.t === 'text') content = `<div>${d.v}</div>`;
-        else if(d.t === 'img') content = `<img src="${d.v}" style="width:100%; border-radius:8px; display:block;">`;
-        else content = `
-            <div class="audio-box">
-                <i class="fas fa-play-circle play-btn" onclick="handleAudio(this, 'aud-${key}')"></i>
-                <audio id="aud-${key}" src="${d.v}" preload="metadata"></audio>
+        if(msg.type === 'text') body = `<div>${msg.content}</div>`;
+        else if(msg.type === 'image') body = `<img src="${msg.content}" style="width:100%; border-radius:8px;">`;
+        else body = `
+            <div class="audio-wrapper">
+                <i class="fas fa-play-circle play-icon" onclick="playVoice(this, 'play-${key}')"></i>
+                <audio id="play-${key}" src="${msg.content}"></audio>
                 <div style="flex:1">
-                    <div class="audio-track"><div class="audio-fill"></div></div>
-                    <div class="timer">00:00</div>
+                    <div class="track-container"><div class="track-fill"></div></div>
+                    <div class="audio-time">00:00</div>
                 </div>
             </div>`;
 
         const html = `
-            <div class="msg ${isMe ? 'sent' : 'received'}" id="${key}">
-                ${content}
+            <div class="msg ${isMyMsg ? 'sent' : 'received'}" id="msg-${key}">
+                ${body}
                 <div class="meta">
-                    ${isMe ? `<span class="del-link" onclick="delMsg('${key}')">مٹائیں</span>` : ''}
-                    ${d.time} ${isMe ? '<i class="fas fa-check-double tick"></i>' : ''}
+                    ${isMyMsg ? `<span class="del-btn" onclick="deleteMessage('${key}')">مٹائیں</span>` : ''}
+                    ${msg.timestamp} ${isMyMsg ? '<i class="fas fa-check-double tick"></i>' : ''}
                 </div>
             </div>`;
         
         document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
-        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        const flow = document.getElementById('chat-flow');
+        flow.scrollTop = flow.scrollHeight;
     });
 </script>
 </body>
