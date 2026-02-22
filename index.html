@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Smart Messenger Pro</title>
+    <title>Nasir Messenger Pro Fixed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
@@ -12,10 +12,9 @@
 
         /* لسٹ اسکرین */
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; }
-        .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; }
         .chat-list-container { flex: 1; padding: 15px; overflow-y: auto; }
-        .chat-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; border-left: 5px solid var(--wa-green); transition: 0.2s; }
-        .chat-item:active { transform: scale(0.98); background: #f9f9f9; }
+        .chat-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; border-left: 5px solid var(--wa-green); }
         .add-new-btn { position: fixed; bottom: 30px; right: 30px; background: var(--wa-dark); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; cursor: pointer; z-index: 2100; }
 
         /* فارم */
@@ -33,13 +32,13 @@
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; margin-bottom: 3px; display: block; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 5px; }
-        .del-btn { color: #d32f2f; cursor: pointer; }
+        .del-btn { color: #d32f2f; cursor: pointer; font-size: 12px; }
 
-        /* آڈیو پلیئر ڈیزائن */
+        /* آڈیو پلیئر */
         .audio-box { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 5px 0; }
         .play-btn { font-size: 30px; color: var(--wa-green); cursor: pointer; }
-        .track { flex: 1; height: 4px; background: #ccc; border-radius: 2px; position: relative; }
-        .fill { height: 100%; background: var(--wa-green); width: 0%; transition: width 0.1s linear; }
+        .track { flex: 1; height: 4px; background: #ccc; border-radius: 2px; overflow: hidden; }
+        .fill { height: 100%; background: var(--wa-green); width: 0%; }
 
         /* فوٹر */
         .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
@@ -55,16 +54,16 @@
 <body>
 
 <div id="setup-screen">
-    <div class="setup-header">ناصر اسمارٹ میسنجر پرو</div>
+    <div class="setup-header">ناصر میسنجر پرو</div>
     <div class="chat-list-container" id="chat-list">
-        <p style="text-align: center; color: #666; margin-top: 50px;">کوئی پرانی چیٹ موجود نہیں ہے۔</p>
+        <p style="text-align: center; color: #666; margin-top: 50px;">کوئی پرانی چیٹ نہیں ملی۔</p>
     </div>
     <button class="add-new-btn" onclick="showForm()"><i class="fas fa-plus"></i></button>
 </div>
 
 <div id="room-form">
     <div class="form-card">
-        <h3 style="color:var(--wa-green)">نئی چیٹ</h3><br>
+        <h3 style="color:var(--wa-green)">نئی چیٹ شروع کریں</h3><br>
         <input type="text" id="u-name" placeholder="آپ کا نام">
         <input type="text" id="r-pass" placeholder="روم آئی ڈی (پاس ورڈ)">
         <button class="send-btn" style="width:100%; border-radius:10px;" onclick="createNewChat()">شروع کریں</button>
@@ -105,13 +104,12 @@
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myName = "", myRoom = "", recorder, chunks = [], sec = 0, timer, micStream;
+    let myName = "", myRoom = "", mediaRecorder, chunks = [], sec = 0, timer;
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
-    // لسٹ رینڈر کرنا
     function renderList() {
-        const chats = JSON.parse(localStorage.getItem('n_chat_history') || "[]");
+        const chats = JSON.parse(localStorage.getItem('n_history_v2') || "[]");
         const container = document.getElementById('chat-list');
         if(chats.length === 0) return;
         container.innerHTML = "";
@@ -130,12 +128,12 @@
     window.createNewChat = () => {
         const n = document.getElementById('u-name').value.trim();
         const p = document.getElementById('r-pass').value.trim();
-        if(!n || !p) return alert("معلومات مکمل کریں");
+        if(!n || !p) return alert("نام اور پاس ورڈ لکھیں");
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_chat_history') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v2') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_chat_history', JSON.stringify(history));
+            localStorage.setItem('n_history_v2', JSON.stringify(history));
         }
         openChat(n, rid, p);
         hideForm();
@@ -149,7 +147,7 @@
         initFirebase();
     }
 
-    const post = (v, t) => push(ref(db, "final_rooms/" + myRoom), {
+    const post = (v, t) => push(ref(db, "pro_rooms/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
@@ -163,34 +161,47 @@
         r.readAsDataURL(el.files[0]);
     };
 
-    window.delMsg = (k) => { if(confirm("مٹائیں؟")) remove(ref(db, `final_rooms/${myRoom}/${k}`)); };
+    window.delMsg = (k) => { if(confirm("پیغام مٹائیں؟")) remove(ref(db, `pro_rooms/${myRoom}/${k}`)); };
 
-    // مائیکروفون فکسڈ
+    // مائیکروفون فکس (یونیورسل)
     document.getElementById('mic-start').onclick = async () => {
         try {
-            if(!micStream) micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(micStream);
-            recorder.start();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/aac'];
+            const type = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
+            
+            mediaRecorder = new MediaRecorder(stream, { mimeType: type });
+            chunks = [];
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: type });
+                const r = new FileReader();
+                r.readAsDataURL(blob);
+                r.onloadend = () => post(r.result, 'voice');
+                stream.getTracks().forEach(t => t.stop());
+            };
+
+            mediaRecorder.start();
             document.getElementById('norm-ui').style.display = 'none';
             document.getElementById('rec-ui').style.display = 'flex';
             sec = 0;
+            clearInterval(timer);
             timer = setInterval(() => {
                 sec++;
                 document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
             }, 1000);
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                clearInterval(timer);
-                const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks));
-                r.onloadend = () => post(r.result, 'voice');
-                document.getElementById('norm-ui').style.display = 'flex';
-                document.getElementById('rec-ui').style.display = 'none';
-            };
-        } catch(e) { alert("مائیک کی اجازت دیں"); }
+        } catch(e) { alert("مائیکروفون کی اجازت نہیں ملی۔"); }
     };
-    document.getElementById('mic-stop').onclick = () => recorder.stop();
+
+    document.getElementById('mic-stop').onclick = () => {
+        if(mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+            document.getElementById('norm-ui').style.display = 'flex';
+            document.getElementById('rec-ui').style.display = 'none';
+            clearInterval(timer);
+        }
+    };
 
     window.playV = (btn, aid) => {
         const a = document.getElementById(aid);
@@ -203,7 +214,7 @@
     };
 
     function initFirebase() {
-        const rRef = ref(db, "final_rooms/" + myRoom);
+        const rRef = ref(db, "pro_rooms/" + myRoom);
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
             let content = d.t === 'text' ? `<div>${d.v}</div>` : 
@@ -212,7 +223,10 @@
             
             const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
                 <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>`:''}${d.time}</div>
+                <div class="meta">
+                    ${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}
+                    ${d.time} ${isMe ? '<i class="fas fa-check-double" style="color:#34b7f1"></i>' : ''}
+                </div>
             </div>`;
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
@@ -224,4 +238,4 @@
 </script>
 </body>
             </html>
-    
+                
