@@ -3,63 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro v20</title>
+    <title>Nasir Messenger Pro v21</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Header & Flow */
-        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 65px; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        
-        /* Message Bubbles */
-        .msg { position: relative; padding: 8px 12px 28px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+        /* Screens */
+        #setup-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; }
+        #main-chat { display: none; flex-direction: column; height: 100vh; background: var(--bg); }
+
+        /* Chat Flow */
+        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+
+        /* Messages */
+        .msg { position: relative; padding: 8px 12px 25px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
-        .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; display: block; }
-        .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 4px; }
-        .tick { color: #34b7f1; font-size: 12px; }
-
-        /* Audio Controls */
-        .audio-row { display: flex; align-items: center; gap: 8px; width: 210px; margin-top: 5px; }
-        .audio-row input[type="range"] { flex: 1; accent-color: var(--wa-dark); height: 4px; }
-        .atime { font-size: 10px; min-width: 30px; }
+        .meta { position: absolute; bottom: 3px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 3px; }
+        .tick { color: #34b7f1; font-size: 11px; }
 
         /* Footer */
-        .footer { background: #f0f0f0; padding: 7px 10px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ccc; }
+        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ccc; }
         .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; gap: 10px; }
-        #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; }
-        #rec-timer-ui { display: none; flex: 1; align-items: center; gap: 10px; color: red; font-weight: bold; }
+        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; }
         .send-btn { background: var(--wa-green); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+
+        /* Recording UI */
+        #rec-timer-ui { display: none; align-items: center; gap: 8px; color: red; font-weight: bold; flex: 1; }
         .blink { animation: blk 1s infinite; } @keyframes blk { 50% { opacity: 0; } }
+
+        /* Audio Player */
+        .audio-row { display: flex; align-items: center; gap: 5px; min-width: 180px; margin-top: 5px; }
+        .audio-row input[type="range"] { flex: 1; accent-color: var(--wa-dark); }
     </style>
 </head>
 <body>
 
-<div id="setup-screen" style="position:fixed; inset:0; background:white; z-index:2000; display:flex; flex-direction:column;">
-    <div style="background:var(--wa-green); color:white; padding:20px; text-align:center; font-weight:bold;">ناصر میسنجر v20</div>
+<div id="setup-screen">
+    <div style="background:var(--wa-green); color:white; padding:20px; text-align:center; font-weight:bold; font-size:20px;">ناصر میسنجر v21</div>
     <div id="chat-list" style="flex:1; padding:15px; overflow-y:auto;"></div>
-    <button onclick="document.getElementById('room-form').style.display='flex'" style="position:fixed; bottom:30px; right:30px; background:var(--wa-dark); color:white; width:60px; height:60px; border-radius:50%; border:none; font-size:24px;">+</button>
-</div>
-
-<div id="room-form" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:3000; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:white; padding:25px; border-radius:20px; width:100%; max-width:350px; text-align:center;">
-        <input type="text" id="u-name" placeholder="نام" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
-        <input type="text" id="r-pass" placeholder="کوڈ" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;">
-        <button id="btn-start" style="width:100%; padding:12px; background:var(--wa-green); color:white; border:none; border-radius:10px;">داخل ہوں</button>
+    <div style="padding:20px;">
+        <button onclick="showForm()" style="width:100%; padding:15px; background:var(--wa-dark); color:white; border:none; border-radius:10px; font-size:16px;">+ نیا روم بنائیں</button>
     </div>
 </div>
 
-<div id="main-chat" style="display:none; flex-direction:column; height:100vh;">
+<div id="room-form" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:3000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; padding:25px; border-radius:20px; width:100%; max-width:350px;">
+        <h3 style="text-align:center; margin-bottom:15px;">روم کی تفصیلات</h3>
+        <input type="text" id="u-name" placeholder="آپ کا نام" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+        <input type="text" id="r-pass" placeholder="روم کوڈ (مثلاً 1234)" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
+        <button id="btn-login" style="width:100%; padding:12px; background:var(--wa-green); color:white; border:none; border-radius:8px; font-weight:bold;">داخل ہوں</button>
+        <button onclick="document.getElementById('room-form').style.display='none'" style="width:100%; padding:10px; margin-top:10px; background:none; border:none; color:red;">کینسل</button>
+    </div>
+</div>
+
+<div id="main-chat">
     <div class="chat-header">
-        <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <div id="active-room-name" style="font-weight:bold;"></div>
+        <i class="fas fa-arrow-left" onclick="location.reload()" style="cursor:pointer;"></i>
+        <div id="room-title" style="font-weight:bold; font-size:18px;">روم</div>
     </div>
     <div id="chat-flow"></div>
     <div class="footer">
-        <label for="cam-in" style="cursor:pointer;"><i class="fas fa-camera" style="color:#555; font-size:20px;"></i></label>
+        <label for="cam-in"><i class="fas fa-camera" style="color:#555; font-size:22px; cursor:pointer;"></i></label>
         <input type="file" id="cam-in" accept="image/*" style="display:none">
         
         <div class="input-bar">
@@ -73,7 +81,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -83,18 +91,26 @@
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
-    document.getElementById('btn-start').onclick = () => {
+    window.showForm = () => document.getElementById('room-form').style.display = 'flex';
+
+    document.getElementById('btn-login').onclick = () => {
         const n = document.getElementById('u-name').value.trim();
         const p = document.getElementById('r-pass').value.trim();
-        if(!n || !p) return;
-        myName = n; myRoom = btoa(p);
+        if(!n || !p) return alert("براہ کرم نام اور کوڈ لکھیں");
+        
+        myName = n;
+        myRoom = btoa(p);
+        
+        // داخلے کو یقینی بنانا
         document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('room-form').style.display = 'none';
         document.getElementById('main-chat').style.display = 'flex';
-        document.getElementById('active-room-name').innerText = p;
+        document.getElementById('room-title').innerText = p;
+        
         initFirebase();
     };
 
-    const sendMsg = (v, t) => push(ref(db, "final_v20/" + myRoom), {
+    const sendMsg = (v, t) => push(ref(db, "final_v21/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, 
         time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
@@ -104,7 +120,7 @@
         if(i.value.trim()){ sendMsg(i.value, 'text'); i.value = ""; }
     };
 
-    // مائیکروفون اور ٹائمر فکس
+    // ریکارڈنگ ٹائمر فکس
     document.getElementById('mic-btn').onclick = async function() {
         const ui = document.getElementById('rec-timer-ui');
         const inp = document.getElementById('msg-input');
@@ -129,7 +145,7 @@
                     seconds++;
                     clock.innerText = Math.floor(seconds/60).toString().padStart(2,'0')+":"+(seconds%60).toString().padStart(2,'0');
                 }, 1000);
-            } catch(e) { alert("Mic Permission Required!"); }
+            } catch(e) { alert("مائیک تک رسائی نہیں مل رہی!"); }
         } else {
             mediaRecorder.stop(); isRec = false; this.style.color = "#555";
             ui.style.display = "none"; inp.style.display = "block";
@@ -137,44 +153,32 @@
         }
     };
 
-    // آڈیو پلے بیک اور ٹائمر
     window.playAud = (id) => {
-        const a = document.getElementById('aud-'+id), s = document.getElementById('seek-'+id), 
-              b = document.getElementById('btn-'+id), t = document.getElementById('cur-'+id);
+        const a = document.getElementById('aud-'+id), s = document.getElementById('seek-'+id), b = document.getElementById('btn-'+id);
         if(a.paused) { a.play(); b.className = "fas fa-pause"; } else { a.pause(); b.className = "fas fa-play"; }
-        a.ontimeupdate = () => {
-            s.value = (a.currentTime / a.duration) * 100 || 0;
-            let m = Math.floor(a.currentTime/60), sec = Math.floor(a.currentTime%60);
-            t.innerText = m.toString().padStart(2,'0')+":"+sec.toString().padStart(2,'0');
-        };
+        a.ontimeupdate = () => s.value = (a.currentTime / a.duration) * 100 || 0;
         s.oninput = () => a.currentTime = (s.value/100) * a.duration;
-        a.onended = () => { b.className = "fas fa-play"; s.value = 0; t.innerText = "00:00"; };
+        a.onended = () => { b.className = "fas fa-play"; s.value = 0; };
     };
 
     function initFirebase() {
-        onChildAdded(ref(db, "final_v20/" + myRoom), snap => {
+        const roomRef = ref(db, "final_v21/" + myRoom);
+        onChildAdded(roomRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
             let content = d.t === 'text' ? d.v : 
                           d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
-                          `<div class="audio-row">
-                             <i class="fas fa-play" id="btn-${k}" onclick="playAud('${k}')"></i>
-                             <input type="range" id="seek-${k}" value="0">
-                             <span class="atime" id="cur-${k}">00:00</span>
-                             <audio id="aud-${k}" src="${d.v}"></audio>
-                          </div>`;
+                          `<div class="audio-row"><i class="fas fa-play" id="btn-${k}" onclick="playAud('${k}')"></i><input type="range" id="seek-${k}" value="0"><audio id="aud-${k}" src="${d.v}"></audio></div>`;
             
             const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
-                <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">
-                    ${isMe ? `<i class="fas fa-trash" onclick="delMsg('${k}')" style="cursor:pointer; color:red;"></i>` : ''}
-                    ${d.time} <i class="fas fa-check tick"></i>
-                </div>
+                <span style="font-size:11px; font-weight:bold; color:#e67e22; display:block;">${isMe?'آپ':d.user}</span>
+                ${content}
+                <div class="meta">${isMe ? `<i class="fas fa-trash" onclick="delMsg('${k}')" style="color:red; margin-right:5px;"></i>` : ''}${d.time} <i class="fas fa-check tick"></i></div>
             </div>`;
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
-        window.delMsg = (key) => remove(ref(db, `final_v20/${myRoom}/${key}`));
-        onChildRemoved(ref(db, "final_v20/" + myRoom), snap => document.getElementById("m-"+snap.key)?.remove());
+        window.delMsg = (key) => { if(confirm("مٹائیں؟")) remove(ref(db, `final_v21/${myRoom}/${key}`)); };
+        onChildRemoved(roomRef, snap => document.getElementById("m-"+snap.key)?.remove());
     }
 </script>
 </body>
