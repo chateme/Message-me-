@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir - Full Fix</title>
+    <title>WhatsApp Nasir - 4 Digit Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #128c7e; --bg: #efe7dd; --msg-sent: #dcf8c6; --msg-rec: #fff; --text: #000; }
@@ -14,43 +14,60 @@
         .screen { display: none; height: 100%; flex-direction: column; }
         .active { display: flex; }
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; z-index: 10; }
+        
         #contact-list { flex: 1; overflow-y: auto; background: var(--msg-rec); }
         .contact-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; cursor: pointer; color: var(--text); }
         .avatar { width: 45px; height: 45px; border-radius: 50%; background: #075e54; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        
+        .fab { position: absolute; bottom: 20px; right: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 20; }
+
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-color: var(--bg); background-blend-mode: overlay; }
         .msg { position: relative; padding: 8px 12px 22px 12px; border-radius: 8px; max-width: 85%; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; }
         .sent { background: var(--msg-sent); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: var(--msg-rec); align-self: flex-start; border-top-left-radius: 0; }
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; }
-        /* Footer Layout Fix */
-        .footer { padding: 8px; display: flex; align-items: flex-end; gap: 5px; width: 100%; }
-        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; position: relative; }
+
+        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; width: 100%; }
+        .input-bar { flex: 1; background: var(--msg-rec); border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; color: var(--text); font-size: 16px; padding: 10px 0; }
-        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-        #rec-info { display: none; color: #e91e63; font-weight: bold; flex: 1; align-items: center; gap: 8px; font-family: monospace; }
+        .main-btn { background: var(--wa-teal); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        
+        #rec-info { display: none; color: #e91e63; font-weight: bold; flex: 1; align-items: center; gap: 8px; font-size: 18px; }
+        .dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
         #emoji-panel { display: none; background: var(--msg-rec); grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 150px; overflow-y: auto; border-top: 1px solid #ddd; }
         .emo { font-size: 24px; text-align: center; cursor: pointer; padding: 8px; }
+
+        #new-chat-box { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 100; width: 85%; color: black; }
+        .error-msg { color: red; font-size: 12px; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body class="dark-mode">
 
 <div id="app-container">
     <div id="login-screen" class="screen active">
-        <div class="header">لاگ ان کریں</div>
+        <div class="header">لاگ ان</div>
         <div style="padding:30px; display:flex; flex-direction:column; gap:15px;">
-            <input type="text" id="reg-name" placeholder="اپنا نام" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
-            <input type="number" id="reg-phone" placeholder="فون نمبر" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
-            <button onclick="register()" style="padding:15px; background:var(--wa-teal); color:white; border:none; border-radius:10px; font-weight:bold;">لاگ ان</button>
+            <input type="text" id="reg-name" placeholder="نام" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
+            <input type="number" id="reg-phone" placeholder="اپنا نمبر (کم از کم 4 ہندسے)" style="padding:15px; border-radius:10px; border:1px solid #ccc;">
+            <button onclick="register()" style="padding:15px; background:var(--wa-teal); color:white; border:none; border-radius:10px; font-weight:bold;">شروع کریں</button>
         </div>
     </div>
 
     <div id="contacts-screen" class="screen">
-        <div class="header">
-            <span style="flex:1; font-weight:bold;">WhatsApp Nasir</span>
-            <button onclick="showContacts()" style="background:none; border:none; color:white; padding-right:10px;"><i class="fas fa-sync-alt"></i></button>
-            <i class="fas fa-sign-out-alt" onclick="logout()"></i>
-        </div>
+        <div class="header"><span style="flex:1; font-weight:bold;">چیٹس</span><i class="fas fa-sign-out-alt" onclick="logout()"></i></div>
         <div id="contact-list"></div>
+        <div class="fab" onclick="toggleNewChat()"><i class="fas fa-plus"></i></div>
+        
+        <div id="new-chat-box">
+            <h3 style="margin-bottom:10px;">نیا نمبر</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">چیٹ کے لیے کم از کم 4 ہندسوں کا نمبر لکھیں۔</p>
+            <input type="number" id="new-phone" placeholder="مثلاً 1234" style="width:100%; padding:12px; margin-bottom:5px; border:1px solid #ccc; border-radius:5px; font-size: 16px;">
+            <div id="err-text" class="error-msg">نمبر کم از کم 4 ہندسوں کا ہونا ضروری ہے!</div>
+            <button onclick="startDirectChat()" style="width:100%; padding:12px; background:var(--wa-teal); color:white; border:none; border-radius:5px; font-weight:bold;">چیٹ شروع کریں</button>
+            <button onclick="toggleNewChat()" style="width:100%; padding:10px; background:#eee; border:none; border-radius:5px; margin-top:8px; color: black;">بند کریں</button>
+        </div>
     </div>
 
     <div id="chat-screen" class="screen">
@@ -59,13 +76,13 @@
         <div id="emoji-panel"></div>
         <div class="footer">
             <div class="input-bar">
-                <i class="far fa-smile" onclick="toggleEmoji()" style="color:#8696a0; cursor:pointer; font-size: 22px; padding-right:5px;"></i>
-                <div id="rec-info">🔴 <span id="timer">00:00</span></div>
+                <i class="far fa-smile" onclick="toggleEmoji()" style="color:#8696a0; cursor:pointer; font-size: 20px;"></i>
+                <div id="rec-info"><div class="dot"></div> <span id="timer">00:00</span></div>
                 <input type="text" id="msg-input" placeholder="میسج لکھیں..." autocomplete="off">
             </div>
             <button class="main-btn" id="action-btn">
-                <i class="fas fa-microphone" id="mic-icon" style="font-size: 20px;"></i>
-                <i class="fas fa-paper-plane" id="send-icon" style="display:none; font-size: 18px;"></i>
+                <i class="fas fa-microphone" id="mic-icon"></i>
+                <i class="fas fa-paper-plane" id="send-icon" style="display:none;"></i>
             </button>
         </div>
     </div>
@@ -73,7 +90,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -86,34 +103,45 @@
 
     window.register = () => {
         const n = document.getElementById('reg-name').value, p = document.getElementById('reg-phone').value;
-        if(n && p) {
+        if(n && p.length >= 4) {
             localStorage.setItem('u_name', n); localStorage.setItem('u_phone', p);
-            set(ref(db, 'users/' + p), { name: n, phone: p });
-            setTimeout(() => { location.reload(); }, 500);
-        }
+            location.reload();
+        } else { alert("نام اور کم از کم 4 ہندسوں کا نمبر لازمی ہے۔"); }
     };
 
     window.logout = () => { localStorage.clear(); location.reload(); };
 
-    window.showContacts = () => {
+    window.toggleNewChat = () => {
+        const box = document.getElementById('new-chat-box');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('err-text').style.display = 'none';
+    };
+
+    window.startDirectChat = () => {
+        const p = document.getElementById('new-phone').value;
+        if(p && p.length >= 4) {
+            toggleNewChat();
+            openChat(p, "نمبر: " + p);
+        } else {
+            document.getElementById('err-text').style.display = 'block';
+        }
+    };
+
+    function showContacts() {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('contacts-screen').classList.add('active');
         const list = document.getElementById('contact-list');
-        list.innerHTML = "<p style='padding:20px; text-align:center;'>لوڈ ہو رہا ہے...</p>";
-
-        get(child(ref(db), 'users')).then((snap) => {
-            if (snap.exists()) {
-                list.innerHTML = "";
+        onValue(ref(db, 'users_chats/' + myPhone), snap => {
+            list.innerHTML = "";
+            if(snap.exists()){
                 snap.forEach(c => {
                     const u = c.val();
                     list.innerHTML += `<div class="contact-item" onclick="openChat('${u.phone}', '${u.name}')">
                         <div class="avatar">${u.name[0].toUpperCase()}</div>
-                        <div><b>${u.name} ${u.phone==myPhone?'(آپ)':''}</b><br><small>${u.phone}</small></div>
+                        <div><b>${u.name}</b><br><small>${u.phone}</small></div>
                     </div>`;
                 });
-            } else {
-                list.innerHTML = "<p style='padding:20px; text-align:center;'>کوئی یوزر نہیں ملا۔</p>";
-            }
+            } else { list.innerHTML = "<p style='padding:30px; text-align:center; color:#888;'>نیا چیٹ شروع کرنے کے لیے + کا بٹن دبائیں۔</p>"; }
         });
     }
 
@@ -122,6 +150,7 @@
         document.getElementById('chat-title').innerText = name;
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('chat-screen').classList.add('active');
+        set(ref(db, 'users_chats/' + myPhone + '/' + phone), { name: name, phone: phone });
         loadMessages();
     };
 
@@ -159,17 +188,21 @@
                 document.getElementById('rec-info').style.display = 'flex';
                 inp.style.display = 'none';
                 let sec = 0;
-                timerInt = setInterval(() => { sec++; document.getElementById('timer').innerText = `00:${sec.toString().padStart(2,'0')}`; }, 1000);
+                timerInt = setInterval(() => {
+                    sec++;
+                    let m = Math.floor(sec / 60).toString().padStart(2, '0');
+                    let s = (sec % 60).toString().padStart(2, '0');
+                    document.getElementById('timer').innerText = `${m}:${s}`;
+                }, 1000);
                 mediaRecorder.ondataavailable = e => chunks.push(e.data);
                 mediaRecorder.onstop = () => {
                     const r = new FileReader(); r.readAsDataURL(new Blob(chunks));
                     r.onloadend = () => sendData(r.result, 'voice');
                     s.getTracks().forEach(t => t.stop());
                 };
-            } catch(e) { alert("Mic Permission Error: مائیک کی اجازت دیں"); }
+            } catch(e) { alert("Mic Error"); }
         } else {
-            if(mediaRecorder) mediaRecorder.stop(); 
-            isRecording = false;
+            mediaRecorder.stop(); isRecording = false;
             clearInterval(timerInt);
             document.getElementById('rec-info').style.display = 'none';
             inp.style.display = 'block';
@@ -182,6 +215,7 @@
         push(ref(db, "chats/" + roomID), { sender: myPhone, val: val, type: type, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
     }
 
+    window.showContacts = showContacts;
     window.toggleEmoji = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; };
     window.addEmoji = (e) => { inp.value += e; inp.dispatchEvent(new Event('input')); };
     
@@ -191,4 +225,5 @@
     })();
 </script>
 </body>
-</html>
+                    </html>
+                                                                                                                                                         
