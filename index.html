@@ -124,5 +124,100 @@
         });
     }
 
-    document.getElementById('start-chat-btn').onclick =
+    document.getElementById('start-chat-btn').onclick = () => {
+        const n = document.getElementById('u-name').value.trim();
+        const p = document.getElementById('r-pass').value.trim();
+        if(!n || p.length < 4) {
+            document.getElementById('err-msg').style.display = 'block';
+            return;
+        }
+        const rid = btoa(p);
+        let history = JSON.parse(localStorage.getItem('n_history_v5') || "[]");
+        if(!history.find(x => x.roomId === rid)) {
+            history.push({ userName: n, roomName: p, roomId: rid });
+            localStorage.setItem('n_history_v5', JSON.stringify(history));
+        }
+        openChat(n, rid, p);
+        document.getElementById('room-form').style.display = 'none';
+    };
+
+    function openChat(name, rid, rName) {
+        myName = name; myRoom = rid;
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('main-chat').style.display = 'flex';
+        document.getElementById('active-room-name').innerText = rName;
+        initFirebase();
+    }
+
+    const post = (v, t) => push(ref(db, "final_v5/" + myRoom), {
+        uid: myUid, user: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    });
+
+    document.getElementById('final-send').onclick = () => {
+        const i = document.getElementById('msg-input');
+        if(i.value.trim()){ post(i.value, 'text'); i.value = ""; }
+    };
+
+    document.getElementById('img-in').onchange = (e) => {
+        const r = new FileReader(); r.onload = (ev) => post(ev.target.result, 'img');
+        r.readAsDataURL(e.target.files[0]);
+    };
+
+    // مائیکروفون
+    document.getElementById('mic-start').onclick = async () => {
+        try {
+            if (!activeStream) activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const type = ['audio/webm', 'audio/mp4', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+            mediaRecorder = new MediaRecorder(activeStream, { mimeType: type });
+            chunks = [];
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const r = new FileReader();
+                r.readAsDataURL(new Blob(chunks, { type: type }));
+                r.onloadend = () => post(r.result, 'voice');
+            };
+            mediaRecorder.start();
+            document.getElementById('norm-ui').style.display = 'none';
+            document.getElementById('rec-ui').style.display = 'flex';
+            sec = 0; clearInterval(timer);
+            timer = setInterval(() => {
+                sec++;
+                document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
+            }, 1000);
+        } catch(e) { alert("مائیکروفون کی اجازت دیں"); }
+    };
+
+    document.getElementById('mic-stop').onclick = () => {
+        mediaRecorder.stop();
+        document.getElementById('norm-ui').style.display = 'flex';
+        document.getElementById('rec-ui').style.display = 'none';
+        clearInterval(timer);
+    };
+
+    window.playV = (btn, aid) => {
+        const a = document.getElementById(aid);
+        const f = btn.parentElement.querySelector('.fill');
+        if(a.paused) {
+            a.play(); btn.className = "fas fa-pause-circle play-btn";
+            a.ontimeupdate = () => f.style.width = (a.currentTime/a.duration)*100 + "%";
+            a.onended = () => { btn.className = "fas fa-play-circle play-btn"; f.style.width = "0%"; };
+        } else a.pause(), btn.className = "fas fa-play-circle play-btn";
+    };
+
+    function initFirebase() {
+        const rRef = ref(db, "final_v5/" + myRoom);
+        onChildAdded(rRef, snap => {
+            const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
+            let content = d.t === 'text' ? `<div>${d.v}</div>` : 
+                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
+                          `<div class="audio-box"><i class="fas fa-play-circle play-btn" onclick="playV(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><div class="track"><div class="fill"></div></div></div>`;
+            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `<div class="msg ${isMe?'sent':'received'}" id="m-${k}"><span class="u-tag">${isMe?'آپ':d.user}</span>${content}<div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v5/${myRoom}/${k}'))"></i>`:''}${d.time}</div></div>`);
+            document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        });
+        onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
+    }
+    renderList();
+</script>
+</body>
+            </html>
     
