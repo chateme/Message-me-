@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro v16</title>
+    <title>Nasir Messenger v17</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* ہیڈر اور سیٹ اپ */
         #setup-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; }
         .setup-header { background: var(--wa-green); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 20px; }
         .chat-list-container { flex: 1; padding: 15px; overflow-y: auto; }
@@ -23,42 +22,30 @@
         
         #main-chat { display: none; flex-direction: column; height: 100vh; }
         .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 65px; }
-        #status-text { font-size: 11px; color: #dcf8c6; }
         
-        /* چیٹ ایریا */
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .msg { position: relative; padding: 8px 12px 28px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); cursor: pointer; }
+        .msg { position: relative; padding: 8px 12px 28px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; margin-bottom: 3px; display: block; }
-        
-        /* ریپلائی باکس ڈیزائن */
-        .reply-preview { background: rgba(0,0,0,0.05); border-left: 4px solid var(--wa-dark); padding: 5px 8px; border-radius: 4px; margin-bottom: 5px; font-size: 12px; color: #555; }
-        #active-reply-box { background: #eee; padding: 8px 15px; display: none; justify-content: space-between; align-items: center; border-left: 5px solid var(--wa-dark); }
-
-        /* ری ایکشن ڈیزائن */
-        .reaction-badge { position: absolute; bottom: -12px; left: 10px; background: white; border-radius: 10px; padding: 1px 5px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .react-tools { position: absolute; top: -35px; background: white; border-radius: 20px; padding: 5px 10px; display: none; gap: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 10; }
-        .react-tools span { cursor: pointer; transition: transform 0.2s; }
-        .react-tools span:hover { transform: scale(1.4); }
 
         .meta { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 5px; }
         .del-btn { color: #d32f2f; cursor: pointer; font-size: 13px; margin-right: 8px; }
-        .audio-msg { width: 220px; height: 40px; margin-top: 5px; }
+        audio { height: 35px; width: 200px; margin-top: 5px; }
 
-        /* فوٹر */
-        .footer-cont { background: #f0f0f0; border-top: 1px solid #ddd; }
-        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; }
+        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ddd; }
         .cam-btn { color: #555; font-size: 24px; cursor: pointer; padding: 5px; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 15px; height: 45px; display: flex; align-items: center; gap: 10px; }
         #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; }
         .send-btn { background: var(--wa-green); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .rec-active { color: red !important; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
 <div id="setup-screen">
-    <div class="setup-header">ناصر میسنجر v16 🔐</div>
+    <div class="setup-header">ناصر میسنجر v17 🔐</div>
     <div class="chat-list-container" id="chat-list"></div>
     <button class="add-new-btn" id="btn-add"><i class="fas fa-plus"></i></button>
 </div>
@@ -66,9 +53,9 @@
 <div id="room-form">
     <div class="form-card">
         <h3>روم میں داخل ہوں</h3><br>
-        <input type="text" id="u-name" placeholder="نام">
+        <input type="text" id="u-name" placeholder="آپ کا نام">
         <input type="text" id="r-pass" placeholder="کوڈ (4 ہندسے)">
-        <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">داخل ہوں</button>
+        <button class="send-btn" style="width:100%; border-radius:10px;" id="btn-start">شروع کریں</button>
         <button id="btn-cancel" style="border:none; background:none; margin-top:10px; color:red;">کینسل</button>
     </div>
 </div>
@@ -76,41 +63,32 @@
 <div id="main-chat">
     <div class="chat-header">
         <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <div style="flex:1;">
-            <div style="font-weight:bold;" id="active-room-name">چیٹ</div>
-            <div id="status-text"></div>
-        </div>
+        <div style="flex:1; font-weight:bold;" id="active-room-name">چیٹ</div>
     </div>
 
     <div id="chat-flow"></div>
 
-    <div class="footer-cont">
-        <div id="active-reply-box">
-            <div id="reply-text" style="font-size:12px;"></div>
-            <i class="fas fa-times" onclick="closeReply()" style="cursor:pointer; color:red;"></i>
+    <div class="footer">
+        <label for="cam-in" class="cam-btn"><i class="fas fa-camera"></i></label>
+        <input type="file" id="cam-in" accept="image/*" capture="camera" style="display:none">
+        
+        <div class="input-bar">
+            <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
+            <i class="fas fa-microphone" id="mic-btn" style="cursor:pointer; color:#555; font-size:20px;"></i>
         </div>
-        <div class="footer">
-            <label for="cam-in" class="cam-btn"><i class="fas fa-camera"></i></label>
-            <input type="file" id="cam-in" accept="image/*" capture="environment" style="display:none">
-            
-            <div class="input-bar">
-                <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
-                <i class="fas fa-microphone" id="mic-start" style="cursor:pointer; color:#555; font-size:20px;"></i>
-            </div>
-            <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
-        </div>
+        <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, update, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myName = "", myRoom = "", currentReply = null;
+    let myName = "", myRoom = "", isRecording = false, mediaRecorder, chunks = [];
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
@@ -122,10 +100,10 @@
         const p = document.getElementById('r-pass').value.trim();
         if(!n || p.length < 4) return;
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v16') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v17') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v16', JSON.stringify(history));
+            localStorage.setItem('n_history_v17', JSON.stringify(history));
         }
         openChat(n, rid, p);
         document.getElementById('room-form').style.display = 'none';
@@ -136,22 +114,14 @@
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-chat').style.display = 'flex';
         document.getElementById('active-room-name').innerText = rName;
-        
-        const myPresenceRef = ref(db, `presence_v16/${myRoom}/${myUid}`);
-        set(myPresenceRef, { name: myName, status: "online" });
-        onDisconnect(myPresenceRef).remove();
         initFirebase();
     }
 
-    // پیغام بھیجنا (بشمول ریپلائی)
     const sendMsg = (v, t) => {
-        const payload = {
+        push(ref(db, "final_v17/" + myRoom), {
             uid: myUid, user: myName, v: v, t: t, 
-            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-            reply: currentReply
-        };
-        push(ref(db, "final_v16/" + myRoom), payload);
-        closeReply();
+            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
     };
 
     document.getElementById('btn-send').onclick = () => {
@@ -159,103 +129,69 @@
         if(i.value.trim()){ sendMsg(i.value, 'text'); i.value = ""; }
     };
 
-    // ریپلائی فنکشنز
-    window.setReply = (user, text) => {
-        currentReply = { user, text: text.substring(0, 50) };
-        document.getElementById('active-reply-box').style.display = 'flex';
-        document.getElementById('reply-text').innerText = "Replying to " + user + ": " + currentReply.text;
-    };
-    window.closeReply = () => {
-        currentReply = null;
-        document.getElementById('active-reply-box').style.display = 'none';
+    // مائیکروفون فکس (بغیر پاپ اپ)
+    document.getElementById('mic-btn').onclick = async function() {
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const r = new FileReader();
+                    r.readAsDataURL(blob);
+                    r.onloadend = () => sendMsg(r.result, 'voice');
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                this.classList.add('rec-active');
+            } catch(e) { alert("Mic Error!"); }
+        } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            this.classList.remove('rec-active');
+        }
     };
 
-    // ری ایکشن فنکشن
-    window.sendReact = (key, emoji) => {
-        update(ref(db, `final_v16/${myRoom}/${key}`), { react: emoji });
+    // کیمرہ فکس
+    document.getElementById('cam-in').onchange = (e) => {
+        const file = e.target.files[0];
+        if(file) {
+            const r = new FileReader();
+            r.onload = (ev) => sendMsg(ev.target.result, 'img');
+            r.readAsDataURL(file);
+        }
     };
 
-    window.delMsg = (key) => { if(confirm('پیغام مٹائیں؟')) remove(ref(db, `final_v16/${myRoom}/${key}`)); };
+    // ڈیلیٹ فکس
+    window.delMsg = (key) => {
+        if(confirm('مٹائیں؟')) remove(ref(db, `final_v17/${myRoom}/${key}`));
+    };
 
     function initFirebase() {
-        const rRef = ref(db, "final_v16/" + myRoom);
-        
+        const rRef = ref(db, "final_v17/" + myRoom);
         onChildAdded(rRef, snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
+            let content = d.t === 'text' ? d.v : 
+                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
+                          `<audio controls><source src="${d.v}" type="audio/webm"></audio>`;
             
-            // ریپلائی کوڈ
-            let replyHtml = d.reply ? `<div class="reply-preview"><strong>${d.reply.user}</strong><br>${d.reply.text}</div>` : "";
-            
-            let content = "";
-            if(d.t === 'text') content = `<div>${d.v}</div>`;
-            else if(d.t === 'img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
-            else if(d.t === 'voice') content = `<audio controls class="audio-msg"><source src="${d.v}" type="audio/webm"></audio>`;
-            
-            let reactHtml = d.react ? `<span class="reaction-badge">${d.react}</span>` : "";
-
-            const html = `
-                <div class="msg ${isMe?'sent':'received'}" id="m-${k}" onclick="setReply('${d.user}', '${d.t=='text'?d.v:d.t}')" oncontextmenu="event.preventDefault(); document.getElementById('tools-${k}').style.display='flex'">
-                    <div class="react-tools" id="tools-${k}">
-                        <span onclick="sendReact('${k}', '❤️')">❤️</span>
-                        <span onclick="sendReact('${k}', '😂')">😂</span>
-                        <span onclick="sendReact('${k}', '👍')">👍</span>
-                        <span onclick="sendReact('${k}', '😮')">😮</span>
-                    </div>
-                    <span class="u-tag">${isMe?'آپ':d.user}</span>
-                    ${replyHtml} ${content} ${reactHtml}
-                    <div class="meta">
-                        ${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}
-                        ${d.time}
-                    </div>
-                </div>`;
-            
+            const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
+                <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
+                <div class="meta">
+                    ${isMe ? `<i class="fas fa-trash del-btn" onclick="delMsg('${k}')"></i>` : ''}
+                    ${d.time}
+                </div>
+            </div>`;
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
-
-        onValue(rRef, () => {}); // Syncing
         onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
-        // ری ایکشن اپڈیٹ لسنر
-        onValue(rRef, snap => {
-            snap.forEach(child => {
-                const d = child.val();
-                const el = document.getElementById("m-"+child.key);
-                if(el && d.react) {
-                    if(!el.querySelector('.reaction-badge')) {
-                        el.insertAdjacentHTML('beforeend', `<span class="reaction-badge">${d.react}</span>`);
-                    } else {
-                        el.querySelector('.reaction-badge').innerText = d.react;
-                    }
-                }
-            });
-        });
     }
 
-    // کیمرہ اور فائلز
-    document.getElementById('cam-in').onchange = (e) => {
-        const r = new FileReader();
-        r.onload = (ev) => sendMsg(ev.target.result, 'img');
-        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
-    };
-
-    // مائیکروفون (آڈیو)
-    let mediaRecorder;
-    document.getElementById('mic-start').onclick = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        let chunks = [];
-        mediaRecorder.ondataavailable = e => chunks.push(e.data);
-        mediaRecorder.onstop = () => {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-            reader.onloadend = () => sendMsg(reader.result, 'voice');
-        };
-        mediaRecorder.start();
-        alert("ریکارڈنگ شروع... روکنے کے لیے دوبارہ دبائیں (Demo)");
-        setTimeout(() => mediaRecorder.stop(), 5000); // 5 سیکنڈ بعد خود رک جائے گا
-    };
-
-    const saved = JSON.parse(localStorage.getItem('n_history_v16') || "[]");
+    // ہسٹری لسٹ
+    const saved = JSON.parse(localStorage.getItem('n_history_v17') || "[]");
     const list = document.getElementById('chat-list');
     if(saved.length) {
         list.innerHTML = "";
@@ -268,4 +204,5 @@
     }
 </script>
 </body>
-</html>
+            </html>
+    
