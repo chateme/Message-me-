@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro Fixed</title>
+    <title>Nasir Messenger Pro Final Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
@@ -15,7 +15,6 @@
         .chat-list-container { flex: 1; padding: 15px; overflow-y: auto; }
         .chat-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; border-left: 5px solid var(--wa-green); }
         
-        /* پلس بٹن کا اسٹائل */
         .add-new-btn { position: fixed; bottom: 30px; right: 30px; background: var(--wa-dark); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; cursor: pointer; z-index: 2100; }
 
         #room-form { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
@@ -55,7 +54,7 @@
     <div class="chat-list-container" id="chat-list">
         <p style="text-align: center; color: #666; margin-top: 50px;">کوئی محفوظ چیٹ نہیں ملی۔</p>
     </div>
-    <button class="add-new-btn" onclick="openRoomForm()"><i class="fas fa-plus"></i></button>
+    <button class="add-new-btn" id="master-plus-btn"><i class="fas fa-plus"></i></button>
 </div>
 
 <div id="room-form">
@@ -64,8 +63,8 @@
         <input type="text" id="u-name" placeholder="آپ کا نام">
         <input type="text" id="r-pass" placeholder="کوڈ (کم از کم 4 ہندسے)">
         <p id="err-msg" style="color:red; font-size:12px; display:none; margin-bottom:10px;">کوڈ کم از کم 4 ہندسوں کا ہونا ضروری ہے!</p>
-        <button class="send-btn" style="width:100%; border-radius:10px;" onclick="startNewChat()">شروع کریں</button>
-        <button onclick="closeRoomForm()" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
+        <button class="send-btn" style="width:100%; border-radius:10px;" id="master-start-btn">شروع کریں</button>
+        <button id="master-cancel-btn" style="width:100%; border:none; background:none; margin-top:10px; color:red;">کینسل</button>
     </div>
 </div>
 
@@ -102,17 +101,17 @@
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
-    // فارم کھولنے اور بند کرنے کے فنکشنز
-    window.openRoomForm = () => {
+    // پلس بٹن کا پکا فکس
+    document.getElementById('master-plus-btn').addEventListener('click', () => {
         document.getElementById('err-msg').style.display = 'none';
         document.getElementById('room-form').style.display = 'flex';
-    };
+    });
 
-    window.closeRoomForm = () => {
+    document.getElementById('master-cancel-btn').addEventListener('click', () => {
         document.getElementById('room-form').style.display = 'none';
-    };
+    });
 
-    window.startNewChat = () => {
+    document.getElementById('master-start-btn').addEventListener('click', () => {
         const n = document.getElementById('u-name').value.trim();
         const p = document.getElementById('r-pass').value.trim();
         if(!n || p.length < 4) {
@@ -120,17 +119,17 @@
             return;
         }
         const rid = btoa(p);
-        let history = JSON.parse(localStorage.getItem('n_history_v6') || "[]");
+        let history = JSON.parse(localStorage.getItem('n_history_v7') || "[]");
         if(!history.find(x => x.roomId === rid)) {
             history.push({ userName: n, roomName: p, roomId: rid });
-            localStorage.setItem('n_history_v6', JSON.stringify(history));
+            localStorage.setItem('n_history_v7', JSON.stringify(history));
         }
         enterChat(n, rid, p);
-        closeRoomForm();
-    };
+        document.getElementById('room-form').style.display = 'none';
+    });
 
     function renderChatList() {
-        const chats = JSON.parse(localStorage.getItem('n_history_v6') || "[]");
+        const chats = JSON.parse(localStorage.getItem('n_history_v7') || "[]");
         const container = document.getElementById('chat-list');
         if(chats.length === 0) return;
         container.innerHTML = "";
@@ -151,7 +150,7 @@
         initFirebase();
     }
 
-    const sendMessage = (v, t) => push(ref(db, "final_v6/" + myRoom), {
+    const sendMessage = (v, t) => push(ref(db, "final_v7/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
@@ -167,5 +166,58 @@
 
     document.getElementById('mic-start').onclick = async () => {
         try {
-            if
-    
+            if (!activeStream) activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const type = ['audio/webm', 'audio/mp4', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+            mediaRecorder = new MediaRecorder(activeStream, { mimeType: type });
+            chunks = [];
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const r = new FileReader();
+                r.readAsDataURL(new Blob(chunks, { type: type }));
+                r.onloadend = () => sendMessage(r.result, 'voice');
+            };
+            mediaRecorder.start();
+            document.getElementById('norm-ui').style.display = 'none';
+            document.getElementById('rec-ui').style.display = 'flex';
+            sec = 0; clearInterval(timer);
+            timer = setInterval(() => {
+                sec++;
+                document.getElementById('r-time').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
+            }, 1000);
+        } catch(e) { alert("مائیکروفون کی اجازت دیں"); }
+    };
+
+    document.getElementById('mic-stop').onclick = () => {
+        mediaRecorder.stop();
+        document.getElementById('norm-ui').style.display = 'flex';
+        document.getElementById('rec-ui').style.display = 'none';
+        clearInterval(timer);
+    };
+
+    window.playVoice = (btn, aid) => {
+        const a = document.getElementById(aid);
+        const f = btn.parentElement.querySelector('.fill');
+        if(a.paused) {
+            a.play(); btn.className = "fas fa-pause-circle play-btn";
+            a.ontimeupdate = () => f.style.width = (a.currentTime/a.duration)*100 + "%";
+            a.onended = () => { btn.className = "fas fa-play-circle play-btn"; f.style.width = "0%"; };
+        } else a.pause(), btn.className = "fas fa-play-circle play-btn";
+    };
+
+    function initFirebase() {
+        const rRef = ref(db, "final_v7/" + myRoom);
+        onChildAdded(rRef, snap => {
+            const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
+            let content = d.t === 'text' ? `<div>${d.v}</div>` : 
+                          d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
+                          `<div class="audio-box"><i class="fas fa-play-circle play-btn" onclick="playVoice(this, 'a-${k}')"></i><audio id="a-${k}" src="${d.v}"></audio><div class="track"><div class="fill"></div></div></div>`;
+            document.getElementById('chat-flow').insertAdjacentHTML('beforeend', `<div class="msg ${isMe?'sent':'received'}" id="m-${k}"><span class="u-tag">${isMe?'آپ':d.user}</span>${content}<div class="meta">${isMe?`<i class="fas fa-trash del-btn" onclick="if(confirm('مٹائیں؟')) remove(ref(db, 'final_v7/${myRoom}/${k}'))"></i>`:''}${d.time}</div></div>`);
+            document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        });
+        onChildRemoved(rRef, snap => document.getElementById("m-"+snap.key)?.remove());
+    }
+    renderChatList();
+</script>
+</body>
+    </html>
+                                                                              
