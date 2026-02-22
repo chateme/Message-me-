@@ -3,78 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Messenger Pro v22</title>
+    <title>Nasir Messenger v23</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #075e54; --wa-dark: #128c7e; --wa-light: #dcf8c6; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Screens */
-        #setup-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; }
-        #main-chat { display: none; flex-direction: column; height: 100vh; background: var(--bg); }
+        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
 
-        /* Header */
-        .chat-header { background: var(--wa-green); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-
-        /* Messages */
         .msg { position: relative; padding: 8px 12px 25px 12px; border-radius: 10px; max-width: 85%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: var(--wa-light); align-self: flex-end; border-top-right-radius: 0; }
         .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
-        .u-tag { font-size: 11px; font-weight: bold; color: #e67e22; display: block; margin-bottom: 2px; }
         .meta { position: absolute; bottom: 3px; right: 8px; font-size: 10px; color: #666; display: flex; align-items: center; gap: 3px; }
         .tick { color: #34b7f1; font-size: 11px; }
 
-        /* Footer Fixed Design */
-        .footer { background: #f0f0f0; padding: 6px 10px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #ccc; width: 100%; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 12px; height: 42px; display: flex; align-items: center; gap: 8px; border: 1px solid #ddd; }
-        #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; }
-        #rec-timer-ui { display: none; align-items: center; gap: 8px; color: red; font-weight: bold; flex: 1; font-size: 14px; }
-        .send-btn { background: var(--wa-green); color: white; width: 42px; height: 42px; border-radius: 50%; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
-        
-        /* Audio Seekbar & Timers */
-        .audio-row { display: flex; align-items: center; gap: 8px; min-width: 200px; margin-top: 5px; }
-        .audio-row input[type="range"] { flex: 1; accent-color: var(--wa-dark); cursor: pointer; height: 4px; }
-        .atime { font-size: 10px; min-width: 30px; color: #555; }
-        .blink { animation: blk 1s infinite; } @keyframes blk { 50% { opacity: 0; } }
+        /* FOOTER FIX - سینڈ بٹن اب باہر نہیں جائے گا */
+        .footer { background: #f0f0f0; padding: 5px 8px; display: flex; align-items: center; gap: 6px; border-top: 1px solid #ccc; width: 100%; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; padding: 0 12px; height: 40px; display: flex; align-items: center; gap: 8px; border: 1px solid #ddd; min-width: 0; }
+        #msg-input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; min-width: 0; }
+        .send-btn { background: var(--wa-green); color: white; width: 40px; height: 40px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+
+        /* Audio Design */
+        .audio-row { display: flex; align-items: center; gap: 8px; width: 190px; margin-top: 5px; }
+        .audio-row input[type="range"] { flex: 1; accent-color: var(--wa-dark); cursor: pointer; }
+        .atime { font-size: 10px; min-width: 32px; color: #555; font-family: monospace; }
+        #rec-timer-ui { display: none; align-items: center; gap: 5px; color: red; font-weight: bold; flex: 1; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div id="setup-screen">
-    <div style="background:var(--wa-green); color:white; padding:20px; text-align:center; font-weight:bold; font-size:20px;">ناصر میسنجر v22</div>
+<div id="setup-screen" style="position:fixed; inset:0; background:white; z-index:2000; display:flex; flex-direction:column;">
+    <div style="background:var(--wa-green); color:white; padding:20px; text-align:center; font-weight:bold;">ناصر میسنجر v23</div>
     <div id="chat-list" style="flex:1; padding:15px; overflow-y:auto;"></div>
-    <div style="padding:20px;">
-        <button onclick="document.getElementById('room-form').style.display='flex'" style="width:100%; padding:15px; background:var(--wa-dark); color:white; border:none; border-radius:10px;">+ نیا روم بنائیں</button>
-    </div>
+    <button onclick="document.getElementById('room-form').style.display='flex'" style="margin:20px; padding:15px; background:var(--wa-dark); color:white; border:none; border-radius:10px;">+ نیا روم</button>
 </div>
 
-<div id="room-form" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:3000; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:white; padding:25px; border-radius:20px; width:100%; max-width:350px; text-align:center;">
-        <input type="text" id="u-name" placeholder="آپ کا نام" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-        <input type="text" id="r-pass" placeholder="روم کوڈ" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd;">
+<div id="room-form" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:3000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; padding:25px; border-radius:20px; width:100%; max-width:320px; text-align:center;">
+        <input type="text" id="u-name" placeholder="نام" style="width:100%; padding:10px; margin-bottom:10px;">
+        <input type="text" id="r-pass" placeholder="کوڈ" style="width:100%; padding:10px; margin-bottom:15px;">
         <button id="btn-login" style="width:100%; padding:12px; background:var(--wa-green); color:white; border:none; border-radius:8px;">داخل ہوں</button>
     </div>
 </div>
 
-<div id="main-chat">
+<div id="main-chat" style="display:none; flex-direction:column; height:100vh;">
     <div class="chat-header">
         <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <div id="room-title" style="font-weight:bold;">روم</div>
+        <div id="room-title" style="font-weight:bold;">چیٹ</div>
     </div>
-    
     <div id="chat-flow"></div>
-
     <div class="footer">
-        <i class="fas fa-location-dot" onclick="sendLoc()" style="color:#34b7f1; font-size:22px; cursor:pointer;"></i>
-        <label for="cam-in"><i class="fas fa-camera" style="color:#555; font-size:22px; cursor:pointer;"></i></label>
+        <i class="fas fa-location-dot" onclick="sendLoc()" style="color:#34b7f1; font-size:20px;"></i>
+        <label for="cam-in"><i class="fas fa-camera" style="color:#555; font-size:20px;"></i></label>
         <input type="file" id="cam-in" accept="image/*" style="display:none">
-        
         <div class="input-bar">
-            <div id="rec-timer-ui"><i class="fas fa-circle blink"></i> <span id="r-clock">00:00</span></div>
-            <input type="text" id="msg-input" placeholder="پیغام لکھیں...">
-            <i class="fas fa-microphone" id="mic-btn" style="cursor:pointer; color:#555; font-size:20px;"></i>
+            <div id="rec-timer-ui"><i class="fas fa-circle" style="animation:blk 1s infinite;"></i> <span id="r-clock">00:00</span></div>
+            <input type="text" id="msg-input" placeholder="میسج...">
+            <i class="fas fa-microphone" id="mic-btn" style="color:#555; font-size:18px;"></i>
         </div>
         <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
     </div>
@@ -88,23 +75,21 @@
     const app = initializeApp(cfg);
     const db = getDatabase(app);
 
-    let myName = "", myRoom = "", isRec = false, mediaRecorder, chunks = [], recInt, seconds = 0;
+    let myName = "", myRoom = "", isRec = false, mediaRecorder, chunks = [], recInt;
     let myUid = localStorage.getItem('n_uid') || "U-" + Date.now();
     localStorage.setItem('n_uid', myUid);
 
     document.getElementById('btn-login').onclick = () => {
-        const n = document.getElementById('u-name').value.trim();
-        const p = document.getElementById('r-pass').value.trim();
+        const n = document.getElementById('u-name').value.trim(), p = document.getElementById('r-pass').value.trim();
         if(!n || !p) return;
         myName = n; myRoom = btoa(p);
         document.getElementById('setup-screen').style.display='none';
-        document.getElementById('room-form').style.display='none';
         document.getElementById('main-chat').style.display='flex';
         document.getElementById('room-title').innerText = p;
         initFirebase();
     };
 
-    const sendMsg = (v, t) => push(ref(db, "final_v22/" + myRoom), {
+    const sendMsg = (v, t) => push(ref(db, "final_v23/" + myRoom), {
         uid: myUid, user: myName, v: v, t: t, 
         time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
@@ -114,61 +99,54 @@
         if(i.value.trim()){ sendMsg(i.value, 'text'); i.value = ""; }
     };
 
-    // لوکیشن فکس
     window.sendLoc = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                const url = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                sendMsg(url, 'loc');
-            }, () => alert("لوکیشن آن کریں!"));
-        }
+        navigator.geolocation.getCurrentPosition(pos => {
+            sendMsg(`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`, 'loc');
+        });
     };
 
-    // مائیک اور ریکارڈنگ ٹائمر
     document.getElementById('mic-btn').onclick = async function() {
-        const ui = document.getElementById('rec-timer-ui'), inp = document.getElementById('msg-input'), clock = document.getElementById('r-clock');
         if (!isRec) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                chunks = [];
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const r = new FileReader();
-                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-                    r.onloadend = () => sendMsg(r.result, 'voice');
-                };
-                mediaRecorder.start();
-                isRec = true; this.style.color = "red";
-                ui.style.display = "flex"; inp.style.display = "none";
-                seconds = 0;
-                recInt = setInterval(() => {
-                    seconds++;
-                    clock.innerText = Math.floor(seconds/60).toString().padStart(2,'0')+":"+(seconds%60).toString().padStart(2,'0');
-                }, 1000);
-            } catch(e) { alert("Mic Error!"); }
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            chunks = [];
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const r = new FileReader();
+                r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
+                r.onloadend = () => sendMsg(r.result, 'voice');
+            };
+            mediaRecorder.start();
+            isRec = true; this.style.color = "red";
+            document.getElementById('rec-timer-ui').style.display = "flex";
+            document.getElementById('msg-input').style.display = "none";
+            let s = 0;
+            recInt = setInterval(() => { s++; document.getElementById('r-clock').innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); }, 1000);
         } else {
             mediaRecorder.stop(); isRec = false; this.style.color = "#555";
-            ui.style.display = "none"; inp.style.display = "block";
-            clearInterval(recInt); clock.innerText = "00:00";
+            document.getElementById('rec-timer-ui').style.display = "none";
+            document.getElementById('msg-input').style.display = "block";
+            clearInterval(recInt);
         }
     };
 
-    // آڈیو سیک بار اور پلے بیک ٹائمر
+    // سیک بار ٹائمر فکس
     window.playAud = (id) => {
         const a = document.getElementById('aud-'+id), s = document.getElementById('seek-'+id), 
               b = document.getElementById('btn-'+id), t = document.getElementById('cur-'+id);
         if(a.paused) { a.play(); b.className = "fas fa-pause"; } else { a.pause(); b.className = "fas fa-play"; }
-        a.ontimeupdate = () => {
-            s.value = (a.currentTime / a.duration) * 100 || 0;
-            let m = Math.floor(a.currentTime/60), sec = Math.floor(a.currentTime%60);
-            t.innerText = m.toString().padStart(2,'0')+":"+sec.toString().padStart(2,'0');
-        };
-        s.oninput = () => a.currentTime = (s.value/100) * a.duration;
+        
+        a.addEventListener('timeupdate', () => {
+            if(!isNaN(a.duration)){
+                s.value = (a.currentTime / a.duration) * 100;
+                let curM = Math.floor(a.currentTime / 60), curS = Math.floor(a.currentTime % 60);
+                t.innerText = curM.toString().padStart(2,'0') + ":" + curS.toString().padStart(2,'0');
+            }
+        });
+        s.oninput = () => a.currentTime = (s.value / 100) * a.duration;
         a.onended = () => { b.className = "fas fa-play"; s.value = 0; t.innerText = "00:00"; };
     };
 
-    // کیمرہ
     document.getElementById('cam-in').onchange = (e) => {
         const r = new FileReader();
         r.onload = (ev) => sendMsg(ev.target.result, 'img');
@@ -176,34 +154,23 @@
     };
 
     function initFirebase() {
-        const roomRef = ref(db, "final_v22/" + myRoom);
-        onChildAdded(roomRef, snap => {
+        onChildAdded(ref(db, "final_v23/" + myRoom), snap => {
             const d = snap.val(), k = snap.key, isMe = d.uid === myUid;
-            let content = "";
-            if(d.t === 'text') content = `<div>${d.v}</div>`;
-            else if(d.t === 'img') content = `<img src="${d.v}" style="width:100%; border-radius:8px;">`;
-            else if(d.t === 'loc') content = `<a href="${d.v}" target="_blank" style="color:blue; text-decoration:none; font-size:13px;"><i class="fas fa-map-marker-alt"></i> میری لوکیشن دیکھیں</a>`;
-            else if(d.t === 'voice') content = `
-                <div class="audio-row">
-                    <i class="fas fa-play" id="btn-${k}" onclick="playAud('${k}')" style="color:var(--wa-dark); cursor:pointer;"></i>
-                    <input type="range" id="seek-${k}" value="0">
-                    <span class="atime" id="cur-${k}">00:00</span>
-                    <audio id="aud-${k}" src="${d.v}"></audio>
-                </div>`;
+            let content = d.t === 'text' ? d.v : d.t === 'img' ? `<img src="${d.v}" style="width:100%; border-radius:8px;">` :
+                          d.t === 'loc' ? `<a href="${d.v}" target="_blank" style="color:blue; font-size:13px;"><i class="fas fa-map-marker-alt"></i> لوکیشن</a>` :
+                          `<div class="audio-row"><i class="fas fa-play" id="btn-${k}" onclick="playAud('${k}')"></i><input type="range" id="seek-${k}" value="0"><span class="atime" id="cur-${k}">00:00</span><audio id="aud-${k}" src="${d.v}"></audio></div>`;
             
             const html = `<div class="msg ${isMe?'sent':'received'}" id="m-${k}">
-                <span class="u-tag">${isMe?'آپ':d.user}</span>${content}
-                <div class="meta">
-                    ${isMe ? `<i class="fas fa-trash" onclick="delMsg('${k}')" style="color:red; cursor:pointer;"></i>` : ''}
-                    ${d.time} <i class="fas fa-check tick"></i>
-                </div>
+                <span style="font-size:11px; font-weight:bold; color:#e67e22; display:block;">${isMe?'آپ':d.user}</span>
+                ${content}<div class="meta">${isMe?`<i class="fas fa-trash" onclick="delMsg('${k}')" style="color:red; cursor:pointer;"></i>`:''}${d.time} <i class="fas fa-check tick"></i></div>
             </div>`;
             document.getElementById('chat-flow').insertAdjacentHTML('beforeend', html);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
-        window.delMsg = (key) => { if(confirm("مٹائیں؟")) remove(ref(db, `final_v22/${myRoom}/${key}`)); };
-        onChildRemoved(roomRef, snap => document.getElementById("m-"+snap.key)?.remove());
+        window.delMsg = (key) => remove(ref(db, `final_v23/${myRoom}/${key}`));
+        onChildRemoved(ref(db, "final_v23/" + myRoom), snap => document.getElementById("m-"+snap.key)?.remove());
     }
 </script>
 </body>
-</html>
+    </html>
+    
