@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v77</title>
+    <title>WhatsApp Nasir v78</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
@@ -11,61 +11,63 @@
         body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        /* Login & Overlays */
-        #login-screen, #status-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        /* Screens */
+        #login-screen, #status-view { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
         #login-screen { background: #111b21; color: white; }
-        #status-overlay { background: black; display: none; color: white; }
-        .login-input { width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none; text-align: center; }
-        .btn-green { width:100%; padding:15px; background:var(--wa-green); border-radius:30px; border:none; font-weight:bold; cursor:pointer; }
+        #status-view { background: black; display: none; color: white; }
 
-        /* Sidebar & Header */
-        #sidebar { position: absolute; left: -100%; top: 0; width: 80%; height: 100%; background: white; z-index: 2000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
+        /* Sidebar */
+        #sidebar { position: absolute; left: -100%; top: 0; width: 85%; height: 100%; background: white; z-index: 5000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
         #sidebar.open { left: 0; }
+        .side-head { background: var(--wa-teal); color: white; padding: 20px; font-weight: bold; }
+        .side-btn { width: 90%; margin: 10px auto; padding: 12px; background: #eee; border-radius: 5px; text-align: center; cursor: pointer; border: 1px solid #ddd; }
+
+        /* Header & Chat */
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; height: 60px; flex-shrink: 0; }
-        
-        /* Chat Area with Custom Wallpaper */
         #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: cover; }
 
         /* Message Bubbles */
-        .msg { position: relative; padding: 8px 10px 25px 10px; border-radius: 8px; margin-bottom: 12px; max-width: 85%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); background: white; min-width: 120px; }
+        .msg { position: relative; padding: 8px 10px 25px 10px; border-radius: 8px; margin-bottom: 12px; max-width: 80%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); background: white; min-width: 130px; }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .received { align-self: flex-start; }
-        .del-btn { color: #e74c3c; font-size: 12px; cursor: pointer; position: absolute; bottom: 5px; left: 8px; opacity: 0.5; }
+        .del-icon { color: #e74c3c; font-size: 14px; cursor: pointer; position: absolute; bottom: 5px; left: 8px; }
+        .msg-time { float: right; font-size: 9px; color: #888; margin-top: 5px; }
 
-        /* Footer & Emojis */
-        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 8px; }
+        /* Footer */
+        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
         #msg-input { flex: 1; border: none; outline: none; padding: 10px 5px; font-size: 15px; background: transparent; }
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 10px; border-top: 1px solid #ddd; max-height: 120px; overflow-y: auto; }
+        .bar-ico { color: #8696a0; font-size: 18px; padding: 5px; cursor: pointer; }
+
+        .btn-main { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        #rec-box { display: none; color: red; font-weight: bold; flex: 1; text-align: center; }
         
-        /* Status Bar UI */
-        #status-bar { background: white; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 1px solid #ddd; }
-        .status-circle { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--wa-green); padding: 2px; flex-shrink: 0; cursor: pointer; }
-        .status-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; }
     </style>
 </head>
 <body>
 
 <div id="app-wrap">
     <div id="login-screen">
-        <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green); margin-bottom: 20px;"></i>
-        <h2>WhatsApp Nasir v77</h2>
-        <input type="text" id="u-name" class="login-input" placeholder="نام">
-        <input type="password" id="u-pass" class="login-input" placeholder="6 ہندسوں کا کوڈ">
-        <button class="btn-green" onclick="startApp()">لاگ ان</button>
+        <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green); margin-bottom: 15px;"></i>
+        <h2>WhatsApp Nasir</h2>
+        <input type="text" id="u-name" style="width:100%; padding:12px; margin:10px 0;" placeholder="نام">
+        <input type="password" id="u-pass" style="width:100%; padding:12px; margin:10px 0;" placeholder="6 ہندسوں کا کوڈ">
+        <button onclick="startApp()" style="width:100%; padding:12px; background:var(--wa-green); border:none; border-radius:25px; font-weight:bold;">داخل ہوں</button>
     </div>
 
-    <div id="status-overlay" onclick="this.style.display='none'">
-        <img id="full-status-img" src="" style="max-width: 100%; max-height: 80vh;">
-        <p id="status-caption" style="margin-top: 20px; font-size: 18px;"></p>
-    </div>
-
+    <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
-        <div style="background:var(--wa-teal); color:white; padding:20px;">سیٹنگز</div>
-        <div style="padding:20px;">
-            <p>چیٹ وال پیپر بدلیں:</p>
-            <input type="text" id="wall-url" placeholder="تصویر کا لنک (URL) ڈالیں" style="width:100%; padding:10px; margin:10px 0;">
-            <button onclick="changeWall()" class="btn-green">اپ ڈیٹ کریں</button>
+        <div class="side-head">سیٹنگز اور ہسٹری</div>
+        <div id="history-box" style="height:200px; overflow-y:auto; padding:10px; border-bottom:1px solid #ddd;">
+            <small>چیٹ ہسٹری یہاں نظر آئے گی...</small>
+        </div>
+        <div style="padding:15px;">
+            <p>وال پیپر (URL):</p>
+            <input type="text" id="wall-input" placeholder="تصویر کا لنک..." style="width:100%; padding:8px; margin:5px 0;">
+            <div class="side-btn" onclick="setWallpaper()" style="background:var(--wa-green); color:black;">وال پیپر لگائیں</div>
+            <div class="side-btn" onclick="location.reload()">نئی چیٹ شروع کریں</div>
+            <div class="side-btn" onclick="toggleSidebar()">واپس چیٹ پر جائیں</div>
         </div>
     </div>
 
@@ -73,113 +75,138 @@
         <div class="header">
             <i class="fas fa-bars" onclick="toggleSidebar()"></i>
             <div style="flex:1;">
-                <h4 id="user-disp">Nasir</h4>
+                <h4 id="display-u">Nasir</h4>
                 <small>آن لائن</small>
             </div>
-            <i class="fas fa-circle-notch" title="Status" onclick="document.getElementById('st-in').click()"></i>
-            <i class="fas fa-camera" onclick="document.getElementById('c-in').click()"></i>
+            <i class="fas fa-camera" onclick="document.getElementById('st-in').click()" title="اسٹیٹس لگائیں"></i>
             <i class="fas fa-ellipsis-v" onclick="toggleSidebar()"></i>
         </div>
 
-        <div id="status-bar">
-            </div>
-        
         <div id="chat-flow"></div>
-        <div id="emoji-panel"></div>
 
         <div class="footer">
             <div class="input-bar">
-                <i class="far fa-smile" onclick="toggleEmoji()" style="color:#8696a0; cursor:pointer;"></i>
-                <input type="text" id="msg-input" placeholder="میسج...">
-                <i class="fas fa-paperclip" onclick="document.getElementById('f-in').click()" style="color:#8696a0; padding:5px;"></i>
+                <i class="far fa-smile bar-ico"></i>
+                <div id="rec-box">🔴 <span id="timer">00:00</span></div>
+                <input type="text" id="msg-input" placeholder="میسج لکھیں...">
+                <i class="fas fa-location-dot bar-ico" onclick="sendLoc()" title="لوکیشن"></i>
+                <i class="fas fa-camera bar-ico" onclick="document.getElementById('c-in').click()"></i>
             </div>
-            <button class="btn-round" style="background:var(--wa-teal); color:white; width:48px; height:48px; border-radius:50%; border:none;" onclick="handleAction()">
-                <i class="fas fa-paper-plane"></i>
+            <button class="btn-main" onclick="handleBtn()">
+                <i class="fas fa-microphone" id="mic-ico"></i>
+                <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
             </button>
         </div>
     </div>
-    
+
     <input type="file" id="st-in" accept="image/*" style="display:none">
     <input type="file" id="c-in" accept="image/*" capture="camera" style="display:none">
-    <input type="file" id="f-in" style="display:none">
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, remove, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    let myN = "", rK = "";
+    let myN = "", rK = "", isRec = false, mediaRec, chunks = [], tInt, sec = 0;
 
     window.startApp = () => {
         myN = document.getElementById('u-name').value;
         let p = document.getElementById('u-pass').value;
         if(myN && p.length >= 6) {
-            rK = "V77_" + btoa(p).substring(0,8);
+            rK = "V78_" + btoa(p).substring(0,8);
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-ui').style.display = 'flex';
-            document.getElementById('user-disp').innerText = myN;
-            initApp();
+            document.getElementById('display-u').innerText = myN;
+            initChat();
         }
     };
 
-    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
-    window.changeWall = () => {
-        let url = document.getElementById('wall-url').value;
+    window.toggleSidebar = () => {
+        const s = document.getElementById('sidebar');
+        const o = document.getElementById('overlay');
+        s.classList.toggle('open');
+        o.style.display = s.classList.contains('open') ? 'block' : 'none';
+    };
+
+    window.setWallpaper = () => {
+        const url = document.getElementById('wall-input').value;
         if(url) document.getElementById('chat-flow').style.backgroundImage = `url('${url}')`;
         toggleSidebar();
     };
 
-    window.handleAction = () => {
-        const inp = document.getElementById('msg-input');
+    const inp = document.getElementById('msg-input');
+    inp.oninput = () => {
+        const hasT = inp.value.trim().length > 0;
+        document.getElementById('send-ico').style.display = hasT ? 'block' : 'none';
+        document.getElementById('mic-ico').style.display = hasT ? 'none' : 'block';
+    };
+
+    window.handleBtn = () => {
         if(inp.value.trim()) {
-            push(ref(db, rK + "/msgs"), { s: myN, v: inp.value, t: 'text', time: new Date().toLocaleTimeString() });
-            inp.value = "";
+            send(inp.value, 'text');
+            inp.value = ""; inp.oninput();
+        } else { toggleVoice(); }
+    };
+
+    window.send = (v, t) => push(ref(db, rK), {
+        s: myN, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    });
+
+    window.sendLoc = () => {
+        navigator.geolocation.getCurrentPosition(p => {
+            let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+            send(`📍 لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
+        }, () => alert("GPS آن کریں"));
+    };
+
+    document.getElementById('c-in').onchange = (e) => {
+        const r = new FileReader(); r.onload = (ev) => send(ev.target.result, 'img'); r.readAsDataURL(e.target.files[0]);
+    };
+
+    async function toggleVoice() {
+        if(!isRec) {
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRec = new MediaRecorder(s); chunks = [];
+            mediaRec.ondataavailable = e => chunks.push(e.data);
+            mediaRec.onstop = () => {
+                const r = new FileReader(); r.onloadend = () => send(r.result, 'voice'); r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
+            };
+            mediaRec.start(); isRec = true; sec = 0;
+            document.getElementById('rec-box').style.display = 'block';
+            document.getElementById('msg-input').style.display = 'none';
+            tInt = setInterval(() => { sec++; document.getElementById('timer').innerText = Math.floor(sec/60).toString().padStart(2,'0')+":"+(sec%60).toString().padStart(2,'0'); }, 1000);
+        } else {
+            mediaRec.stop(); isRec = false; clearInterval(tInt);
+            document.getElementById('rec-box').style.display = 'none';
+            document.getElementById('msg-input').style.display = 'block';
         }
-    };
+    }
 
-    // Story/Status Upload
-    document.getElementById('st-in').onchange = (e) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => push(ref(db, rK + "/stories"), { s: myN, img: ev.target.result, time: new Date().getTime() });
-        reader.readAsDataURL(e.target.files[0]);
-    };
-
-    function initApp() {
-        // Load Messages
-        onChildAdded(ref(db, rK + "/msgs"), snap => {
-            const d = snap.val();
+    function initChat() {
+        onChildAdded(ref(db, rK), snap => {
+            const d = snap.val(), isMe = d.s === myN, k = snap.key;
             const div = document.createElement('div');
-            div.className = `msg ${d.s === myN ? 'sent' : 'received'}`;
-            div.innerHTML = `<b>${d.s}</b><br>${d.v}<br><small style="color:#888">${d.time}</small>`;
+            div.id = k; div.className = `msg ${isMe ? 'sent' : 'received'}`;
+            let c = d.v;
+            if(d.t==='voice') c = `<audio controls style="width:170px;"><source src="${d.v}"></audio>`;
+            if(d.t==='img') c = `<img src="${d.v}" style="width:100%; border-radius:5px;">`;
+            div.innerHTML = `<small style="font-weight:bold; color:var(--wa-teal);">${d.s}</small><div>${c}</div><div class="msg-time">${d.time}</div><span class="del-icon" onclick="delMsg('${k}')">🗑️</span>`;
             document.getElementById('chat-flow').appendChild(div);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
-        });
-
-        // Load Stories
-        onChildAdded(ref(db, rK + "/stories"), snap => {
-            const d = snap.val();
-            const div = document.createElement('div');
-            div.className = 'status-circle';
-            div.innerHTML = `<img src="${d.img}">`;
-            div.onclick = () => {
-                document.getElementById('full-status-img').src = d.img;
-                document.getElementById('status-caption').innerText = d.s + " کا اسٹیٹس";
-                document.getElementById('status-overlay').style.display = 'flex';
-            };
-            document.getElementById('status-bar').prepend(div);
+            
+            // Add to History
+            const h = document.createElement('div');
+            h.style.padding = '5px'; h.innerHTML = `• ${d.s}: ${d.t==='text'?d.v.substring(0,10):'Media'}`;
+            document.getElementById('history-box').prepend(h);
         });
     }
 
-    window.toggleEmoji = () => {
-        const p = document.getElementById('emoji-panel');
-        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
-    };
-    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","🌹"];
-    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:24px; cursor:pointer;" onclick="document.getElementById('msg-input').value+='${e}'; toggleEmoji();">${e}</div>`).join('');
+    window.delMsg = (id) => remove(ref(db, rK + "/" + id));
+    onChildRemoved(ref(db, rK), snap => document.getElementById(snap.key)?.remove());
 </script>
 </body>
-            </html>
+    </html>
     
