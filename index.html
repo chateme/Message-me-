@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v133</title>
+    <title>WhatsApp Nasir v134</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #25d366; --wa-teal: #075e54; --wa-bg: #e5ddd5; }
@@ -24,7 +24,7 @@
 
         .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--wa-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 200; }
 
-        /* Input Protected */
+        /* Input Bar Protected */
         .input-wrapper { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px; z-index: 2000; }
         .main-pill { background: white; border-radius: 25px; position: relative; min-height: 50px; display: flex; align-items: center; padding: 0 90px 0 45px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .smile-btn { position: absolute; left: 12px; font-size: 22px; color: #667781; cursor: pointer; }
@@ -70,8 +70,8 @@
     
     <div id="emoji-panel" class="pop-menu" onclick="event.stopPropagation()"></div>
     <div id="attach-panel" class="pop-menu" onclick="event.stopPropagation()">
-        <div onclick="document.getElementById('file-in').click()"><i class="fas fa-image" style="color:#5f66cd"></i> گیلری</div>
-        <div onclick="sendLoc()"><i class="fas fa-map-marker-alt" style="color:#15c3d2"></i> لوکیشن</div>
+        <div onclick="document.getElementById('file-in').click()" style="padding:5px; cursor:pointer;"><i class="fas fa-image" style="color:#5f66cd"></i> گیلری</div>
+        <div onclick="sendLoc()" style="padding:5px; cursor:pointer;"><i class="fas fa-map-marker-alt" style="color:#15c3d2"></i> لوکیشن</div>
         <input type="file" id="file-in" style="display:none" onchange="upFile(this)">
     </div>
 
@@ -98,6 +98,7 @@
     const db = getDatabase(app);
     let myID, toID, rec, chunks=[], tInt, secs=0, chatRef;
 
+    // Load Emojis
     const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","🌹","✅","📍"];
     const ep = document.getElementById('emoji-panel');
     ems.forEach(e => {
@@ -119,30 +120,43 @@
 
     function start() { document.getElementById('auth-screen').style.display='none'; document.getElementById('app-main').style.display='flex'; loadC(); }
     
-    // NEW CHAT FIXED
+    // NEW CHAT - INSTANT OPEN VERSION
     window.addNewChat = () => {
         const n = prompt("نیا موبائل نمبر درج کریں:");
         if(n && n.length > 4) {
-            set(ref(db, 'CONTACTS/' + myID + '/' + n), true).then(() => {
-                openC(n);
-            });
+            // Save to both mine and their contact list for syncing
+            set(ref(db, 'CONTACTS/' + myID + '/' + n), true);
+            set(ref(db, 'CONTACTS/' + n + '/' + myID), true);
+            // Instant open the chat window
+            openC(n);
         }
     };
 
     function loadC() {
         onValue(ref(db, 'CONTACTS/'+myID), s => {
             const ui = document.getElementById('contacts-ui'); ui.innerHTML = "";
-            s.forEach(c => ui.innerHTML += `<div class="chat-item" onclick="openC('${c.key}')"><div style="width:40px; height:40px; background:var(--wa-teal); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">${c.key[0]}</div><b>${c.key}</b></div>`);
+            s.forEach(c => {
+                ui.innerHTML += `<div class="chat-item" onclick="openC('${c.key}')">
+                    <div style="width:40px; height:40px; background:var(--wa-teal); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">${c.key[0]}</div>
+                    <div style="flex:1;"><b>${c.key}</b><br><small style="color:#888;">چیٹ کرنے کے لیے کلک کریں</small></div>
+                </div>`;
+            });
         });
     }
 
     window.openC = (n) => {
-        toID = n; document.getElementById('target-title').innerText = n;
+        toID = n; 
+        document.getElementById('target-title').innerText = n;
         document.getElementById('app-main').style.display='none';
         document.getElementById('chat-window').style.display='flex';
+        
         const cID = [myID, toID].sort().join('_');
-        const flow = document.getElementById('chat-flow'); flow.innerHTML = "";
-        if(chatRef) off(chatRef); chatRef = ref(db, 'SHARED_CHATS/'+cID);
+        const flow = document.getElementById('chat-flow'); 
+        flow.innerHTML = "";
+        
+        if(chatRef) off(chatRef); 
+        chatRef = ref(db, 'SHARED_CHATS/'+cID);
+        
         onChildAdded(chatRef, s => render(s.key, s.val()));
         onChildChanged(chatRef, s => render(s.key, s.val()));
     };
@@ -176,8 +190,9 @@
 
     window.sendLoc = () => {
         navigator.geolocation.getCurrentPosition(p => {
-            const link = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            send(`📍 لوکیشن: <a href="${link}" target="_blank" style="color:blue;">نقشہ دیکھیں</a>`, 'text');
+            const lat = p.coords.latitude; const lng = p.coords.longitude;
+            const link = `https://www.google.com/maps?q=${lat},${lng}`;
+            send(`📍 لوکیشن: <a href="${link}" target="_blank" style="color:blue; text-decoration:underline;">نقشہ دیکھیں</a>`, 'text');
             hidePopups();
         });
     };
@@ -226,5 +241,5 @@
     window.goBack = () => { document.getElementById('chat-window').style.display='none'; document.getElementById('app-main').style.display='flex'; };
 </script>
 </body>
-    </html>
-    
+                                                                                      </html>
+                                                                                      
