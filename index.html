@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v64</title>
+    <title>WhatsApp Nasir v65</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
@@ -11,81 +11,76 @@
         body { background: #d1d7db; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        /* Login */
+        /* Overlay to close menus */
+        #menu-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.05); }
+
         #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
         .login-input { width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none; text-align: center; font-size: 16px; }
         .login-btn { width:100%; padding:15px; background:var(--wa-green); border-radius:30px; font-weight:bold; border:none; cursor:pointer; color:black; }
 
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 110; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
 
         .msg-row { display: flex; width: 100%; margin-bottom: 15px; }
         .row-sent { justify-content: flex-end; }
-        .row-rec { justify-content: flex-start; }
-        .msg { position: relative; padding: 8px 10px 28px 10px; border-radius: 8px; max-width: 80%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 130px; background: white; }
+        .msg { position: relative; padding: 8px 10px 25px 10px; border-radius: 8px; max-width: 80%; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 120px; background: white; }
         .sent { background: #dcf8c6; }
-        .del-btn { color: #e74c3c; font-size: 11px; cursor: pointer; position: absolute; bottom: 5px; left: 10px; font-weight: bold; }
+        .del-btn { color: #e74c3c; font-size: 10px; cursor: pointer; position: absolute; bottom: 5px; left: 8px; }
 
-        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 50; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; }
-        #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 16px; background: transparent; }
-        .btn-round { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 60; }
+        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 120; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 45px; }
+        #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 15px; background: transparent; resize: none; }
+        
+        .btn-round { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 
-        /* Floating Menus */
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 5px; max-height: 130px; overflow-y: auto; border-top: 1px solid #ddd; }
-        #loc-menu { display: none; position: absolute; bottom: 75px; right: 10px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 200; overflow: hidden; min-width: 180px; }
-        .loc-item { padding: 15px; font-size: 14px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .loc-item:active { background: #f0f0f0; }
-
-        /* Overlay to close menus */
-        #menu-overlay { display: none; position: fixed; inset: 0; z-index: 150; }
+        /* Floating Menus (Fixed Position) */
+        #loc-menu { display: none; position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%); background: white; border-radius: 15px; box-shadow: 0 -2px 15px rgba(0,0,0,0.2); z-index: 200; width: 80%; }
+        .loc-item { padding: 15px; font-size: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; }
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 5px; max-height: 120px; overflow-y: auto; border-top: 1px solid #ddd; z-index: 200; }
     </style>
 </head>
 <body>
 
 <div id="app-wrap">
-    <div id="menu-overlay" onclick="closeAllMenus()"></div>
+    <div id="menu-overlay" onclick="closeAll()"></div>
 
     <div id="login-screen">
         <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green);"></i>
-        <h2 style="margin: 20px 0;">Nasir WhatsApp v64</h2>
-        <input type="text" id="u-name" class="login-input" placeholder="نام درج کریں">
+        <h2 style="margin: 20px 0;">Nasir WhatsApp v65</h2>
+        <input type="text" id="u-name" class="login-input" placeholder="نام">
         <input type="password" id="u-pass" class="login-input" placeholder="6 ہندسوں کا کوڈ">
-        <button class="login-btn" onclick="doLogin()">لاگ ان</button>
+        <button class="login-btn" onclick="login()">لاگ ان</button>
     </div>
 
     <div id="chat-app" style="display:none; flex-direction:column; height:100%;">
         <div class="header">
             <div><h4>WhatsApp Nasir</h4><small>آن لائن</small></div>
-            <i class="fas fa-power-off" onclick="location.reload()" style="cursor:pointer;"></i>
+            <i class="fas fa-power-off" onclick="location.reload()"></i>
         </div>
         
         <div id="chat-flow"></div>
         
         <div id="loc-menu">
-            <div class="loc-item" onclick="sendLoc('موجودہ')">📍 <b>موجودہ لوکیشن</b></div>
-            <div class="loc-item" onclick="sendLoc('لائیو')">🛰️ <b>لائیو لوکیشن</b></div>
+            <div class="loc-item" onclick="sendLoc('موجودہ')">📍 موجودہ لوکیشن بھیجیں</div>
+            <div class="loc-item" onclick="sendLoc('لائیو')">🛰️ لائیو لوکیشن شروع کریں</div>
         </div>
-
         <div id="emoji-panel"></div>
 
         <div class="footer">
             <div class="input-bar">
-                <i class="far fa-smile" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="toggleEmo()"></i>
-                <div id="rec-ui" style="display:none; color:red; font-weight:bold; flex:1;">🔴 <span id="timer">00:00</span></div>
+                <i class="far fa-smile" style="color:#8696a0; padding:8px;" onclick="toggleEmo()"></i>
+                <div id="rec-ui" style="display:none; color:red; flex:1;">🔴 <span id="timer">00:00</span></div>
                 <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
-                <i class="fas fa-paperclip" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="document.getElementById('file-in').click()"></i>
-                <i class="fas fa-location-dot" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="toggleLoc()"></i>
-                <i class="fas fa-camera" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="document.getElementById('cam-in').click()"></i>
+                <i class="fas fa-location-dot" style="color:#8696a0; padding:8px;" onclick="toggleLoc()"></i>
+                <i class="fas fa-camera" style="color:#8696a0; padding:8px;" onclick="document.getElementById('c-in').click()"></i>
             </div>
-            <button class="btn-round" id="action-btn" onclick="handleBtn()">
-                <i class="fas fa-microphone" id="mic-ico"></i>
-                <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
+            <button class="btn-round" onclick="handleBtn()">
+                <i class="fas fa-microphone" id="m-ico"></i>
+                <i class="fas fa-paper-plane" id="s-ico" style="display:none;"></i>
             </button>
         </div>
     </div>
-    <input type="file" id="cam-in" accept="image/*" style="display:none">
-    <input type="file" id="file-in" style="display:none">
+    <input type="file" id="c-in" accept="image/*" style="display:none">
 </div>
 
 <script type="module">
@@ -95,27 +90,27 @@
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    let myName = "", roomKey = "", isRec = false, mediaRec, chunks = [], timerInt, sec = 0;
+    let myN = "", rK = "", isR = false, mRec, chks = [], tInt, sc = 0;
 
-    window.doLogin = () => {
-        myName = document.getElementById('u-name').value;
+    window.login = () => {
+        myN = document.getElementById('u-name').value;
         let p = document.getElementById('u-pass').value;
-        if(myName && p.length >= 6) {
-            roomKey = "V64_SECURE_" + btoa(p).substring(0,8);
+        if(myN && p.length >= 6) {
+            rK = "V65_" + btoa(p).substring(0,8);
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-app').style.display = 'flex';
-            loadMsgs();
+            load();
         }
     };
 
     const inp = document.getElementById('msg-input');
     inp.oninput = () => {
-        const hasText = inp.value.trim().length > 0;
-        document.getElementById('send-ico').style.display = hasText ? 'block' : 'none';
-        document.getElementById('mic-ico').style.display = hasText ? 'none' : 'block';
+        const hasT = inp.value.trim().length > 0;
+        document.getElementById('s-ico').style.display = hasT ? 'block' : 'none';
+        document.getElementById('m-ico').style.display = hasT ? 'none' : 'block';
     };
 
-    window.closeAllMenus = () => {
+    window.closeAll = () => {
         document.getElementById('loc-menu').style.display = 'none';
         document.getElementById('emoji-panel').style.display = 'none';
         document.getElementById('menu-overlay').style.display = 'none';
@@ -123,101 +118,88 @@
 
     window.toggleLoc = () => {
         const m = document.getElementById('loc-menu');
-        const over = document.getElementById('menu-overlay');
+        const v = document.getElementById('menu-overlay');
         const isOpen = m.style.display === 'block';
-        closeAllMenus();
-        if(!isOpen) { m.style.display = 'block'; over.style.display = 'block'; }
+        closeAll();
+        if(!isOpen) { m.style.display = 'block'; v.style.display = 'block'; }
     };
 
     window.toggleEmo = () => {
         const p = document.getElementById('emoji-panel');
-        const over = document.getElementById('menu-overlay');
+        const v = document.getElementById('menu-overlay');
         const isOpen = p.style.display === 'grid';
-        closeAllMenus();
-        if(!isOpen) { p.style.display = 'grid'; over.style.display = 'block'; }
+        closeAll();
+        if(!isOpen) { p.style.display = 'grid'; v.style.display = 'block'; }
     };
 
     window.handleBtn = () => {
         if(inp.value.trim()) {
-            sendMsg(inp.value, 'text');
+            send(inp.value, 'text');
             inp.value = ""; inp.oninput();
-            closeAllMenus();
-        } else { toggleVoice(); }
+            closeAll();
+        } else { vRec(); }
     };
 
-    const sendMsg = (v, t, n = "") => push(ref(db, roomKey), {
-        s: myName, v: v, t: t, n: n, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    const send = (v, t) => push(ref(db, rK), {
+        s: myN, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
     window.sendLoc = (type) => {
         navigator.geolocation.getCurrentPosition(p => {
             let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            sendMsg(`📍 ${type} لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
-            closeAllMenus();
-        }, () => alert("GPS آن کریں"));
+            send(`📍 ${type} لوکیشن: <a href="${url}" target="_blank">نقشہ دیکھیں</a>`, 'text');
+            closeAll();
+        });
     };
 
-    // Emoji Setup
     const emos = ["😂","❤️","👍","😊","🙏","🔥","📍","🌹","✅","💯"];
-    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:25px; padding:10px; cursor:pointer;" onclick="addEmo('${e}')">${e}</div>`).join('');
-    window.addEmo = (e) => { sendMsg(e, 'text'); closeAllMenus(); };
+    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:22px; padding:10px; cursor:pointer;" onclick="addEmo('${e}')">${e}</div>`).join('');
+    window.addEmo = (e) => { send(e, 'text'); closeAll(); };
 
-    // File Handling
-    const setupFile = (id, type) => {
-        document.getElementById(id).onchange = (e) => {
-            const file = e.target.files[0];
-            const r = new FileReader(); r.onload = (ev) => sendMsg(ev.target.result, type, file.name); r.readAsDataURL(file);
-        };
+    document.getElementById('c-in').onchange = (e) => {
+        const file = e.target.files[0];
+        const r = new FileReader(); r.onload = (ev) => send(ev.target.result, 'img'); r.readAsDataURL(file);
     };
-    setupFile('cam-in', 'img'); setupFile('file-in', 'file');
 
-    // Voice Recording
-    async function toggleVoice() {
-        if(!isRec) {
+    async function vRec() {
+        if(!isR) {
             try {
                 const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRec = new MediaRecorder(s); chunks = [];
-                mediaRec.start(); isRec = true;
+                mRec = new MediaRecorder(s); chks = []; mRec.start(); isR = true;
                 document.getElementById('rec-ui').style.display = 'block';
                 document.getElementById('msg-input').style.display = 'none';
-                timerInt = setInterval(() => { sec++; document.getElementById('timer').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0'); }, 1000);
-                mediaRec.onstop = () => {
-                    const r = new FileReader(); r.onloadend = () => sendMsg(r.result, 'voice');
-                    r.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-                };
-                mediaRec.ondataavailable = e => chunks.push(e.data);
-            } catch(e) { alert("مائیک استعمال کرنے کی اجازت دیں"); }
+                tInt = setInterval(() => { sc++; document.getElementById('timer').innerText = Math.floor(sc/60).toString().padStart(2,'0') + ":" + (sc%60).toString().padStart(2,'0'); }, 1000);
+                mRec.onstop = () => { const r = new FileReader(); r.onloadend = () => send(r.result, 'voice'); r.readAsDataURL(new Blob(chks, { type: 'audio/webm' })); };
+                mRec.ondataavailable = e => chks.push(e.data);
+            } catch(e) { alert("مائیک پرمیشن دیں"); }
         } else {
-            mediaRec.stop(); isRec = false;
-            clearInterval(timerInt); sec = 0;
+            mRec.stop(); isR = false; clearInterval(tInt); sc = 0;
             document.getElementById('rec-ui').style.display = 'none';
             document.getElementById('msg-input').style.display = 'block';
         }
     }
 
-    function loadMsgs() {
-        const flow = document.getElementById('chat-flow');
-        onChildAdded(ref(db, roomKey), snap => {
-            const d = snap.val(), isMe = d.s === myName, k = snap.key;
+    function load() {
+        const f = document.getElementById('chat-flow');
+        onChildAdded(ref(db, rK), snap => {
+            const d = snap.val(), isMe = d.s === myN, k = snap.key;
             const div = document.createElement('div');
-            div.id = k; div.className = `msg-row ${isMe ? 'row-sent' : 'row-rec'}`;
-            let content = d.v;
-            if(d.t==='voice') content = `<audio controls style="width:180px;"><source src="${d.v}"></audio>`;
-            else if(d.t==='img') content = `<img src="${d.v}" style="width:100%; border-radius:5px;">`;
-            else if(d.t==='file') content = `📄 <a href="${d.v}" download="${d.n}">${d.n}</a>`;
-            
+            div.id = k; div.className = `msg-row ${isMe ? 'row-sent' : ''}`;
+            let c = d.v;
+            if(d.t==='voice') c = `<audio controls style="width:170px;"><source src="${d.v}"></audio>`;
+            if(d.t==='img') c = `<img src="${d.v}" style="width:100%; border-radius:5px;">`;
             div.innerHTML = `<div class="msg ${isMe ? 'sent' : ''}">
-                <div style="font-size:11px; font-weight:bold; color:var(--wa-teal);">${d.s}</div>
-                <div>${content}</div>
-                <div style="font-size:9px; color:#888; text-align:right; margin-top:5px;">${d.time}</div>
+                <div style="font-size:10px; font-weight:bold; color:var(--wa-teal);">${d.s}</div>
+                <div>${c}</div>
+                <div style="font-size:9px; color:#888; text-align:right;">${d.time}</div>
                 <span class="del-btn" onclick="del('${k}')">🗑️</span>
             </div>`;
-            flow.appendChild(div); flow.scrollTop = flow.scrollHeight;
+            f.appendChild(div); f.scrollTop = f.scrollHeight;
         });
-        window.del = (id) => { if(confirm("ڈیلیٹ کریں؟")) remove(ref(db, roomKey + "/" + id)); };
-        onChildRemoved(ref(db, roomKey), snap => { const el = document.getElementById(snap.key); if(el) el.remove(); });
+        window.del = (id) => { if(confirm("ڈیلیٹ؟")) remove(ref(db, rK + "/" + id)); };
+        onChildRemoved(ref(db, rK), snap => { const el = document.getElementById(snap.key); if(el) el.remove(); });
     }
 </script>
 </body>
-            </html>
-                    
+                    </html>
+                
