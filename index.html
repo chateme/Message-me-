@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v97</title>
+    <title>WhatsApp Nasir v99</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
@@ -11,74 +11,78 @@
         body, html { height: 100%; width: 100%; overflow: hidden; background: #d1d7db; display: flex; justify-content: center; }
         #app-wrap { width: 100%; max-width: 450px; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; }
 
-        /* Security/Login Screen */
-        #auth-screen { position: absolute; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; padding: 20px; color: white; overflow-y: auto; }
-        .room-card { background: #202c33; padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; border-left: 4px solid var(--wa-green); }
+        /* Auth Screen */
+        #auth-screen { position: absolute; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; padding: 20px; color: white; }
         .secure-input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; font-size: 16px; text-align: center; }
-        
+        .room-card { background: #202c33; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid var(--wa-green); }
+
         /* Header */
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; }
         
-        /* Chat Area */
+        /* Chat Flow */
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; }
-        .msg-container { display: flex; width: 100%; margin-bottom: 12px; }
-        .msg { position: relative; padding: 8px 12px 28px 12px; border-radius: 10px; max-width: 80%; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); min-width: 100px; }
+        .msg-container { display: flex; width: 100%; margin-bottom: 12px; position: relative; }
+        .msg { padding: 8px 12px 28px 12px; border-radius: 10px; max-width: 80%; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.15); min-width: 110px; position: relative; word-wrap: break-word; }
         .sent { background: #dcf8c6; margin-left: auto; }
-        .received { margin-right: auto; }
-
-        /* Delete & Time */
-        .del-btn { color: #ff4d4d; font-size: 14px; position: absolute; bottom: 5px; left: 8px; cursor: pointer; padding: 2px; }
-        .msg-time { font-size: 10px; color: #888; position: absolute; bottom: 5px; right: 8px; }
-
-        /* Footer - New Fixed Layout */
-        .footer { background: #f0f2f5; padding: 6px 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; width: 100%; height: 60px; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; height: 44px; border: 1px solid #ccc; overflow: hidden; }
-        #msg-input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; width: 50px; }
+        .received { background: white; margin-right: auto; }
         
-        .action-btn { background: var(--wa-teal); color: white; width: 44px; height: 44px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .msg-time { font-size: 10px; color: #888; position: absolute; bottom: 5px; right: 10px; }
+        .del-icon { color: #f44336; font-size: 13px; position: absolute; bottom: 5px; left: 10px; cursor: pointer; }
+
+        /* Footer Fixed Layout */
+        .footer { background: transparent; padding: 8px 10px; display: flex; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; padding: 10px 5px; max-height: 100px; overflow-y: auto; }
+        .icon-btn { color: #8696a0; font-size: 20px; padding: 8px; cursor: pointer; }
         
-        /* Popups */
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 180px; overflow-y: auto; border-top: 1px solid #ddd; }
-        #loc-menu { display: none; position: absolute; bottom: 65px; right: 15px; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); width: 200px; z-index: 500; }
-        .loc-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; margin-bottom: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+        /* Emoji & Loc Panels */
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 200px; overflow-y: auto; border-top: 1px solid #ddd; }
+        .emo { font-size: 26px; text-align: center; padding: 10px; cursor: pointer; }
+        #loc-menu { display: none; position: absolute; bottom: 70px; right: 60px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); width: 220px; z-index: 500; }
+        .loc-opt { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
 <body onclick="hidePopups()">
 
 <div id="app-wrap">
     <div id="auth-screen">
-        <h2 style="text-align:center; margin: 20px 0;">محفوظ روم ہسٹری</h2>
-        <div id="room-list" style="flex:1; overflow-y:auto;"></div>
+        <h2 style="text-align:center; margin-bottom:20px;">Nasir WhatsApp v99</h2>
+        <div id="room-list" style="flex:1; overflow-y:auto; margin-bottom:15px;"></div>
         <div style="background:#202c33; padding:15px; border-radius:12px;">
-            <input type="text" id="u-name" class="secure-input" placeholder="آپ کا نام">
-            <input type="password" id="u-pin" class="secure-input" placeholder="6 ہندسوں کا PIN (سکیورٹی)" maxlength="6">
-            <button onclick="createNewRoom()" style="width:100%; padding:12px; background:var(--wa-green); border:none; border-radius:8px; font-weight:bold; margin-top:10px;">+ نیا محفوظ روم بنائیں</button>
+            <input type="text" id="u-name" class="secure-input" placeholder="آپ کا نام لکھیں">
+            <input type="password" id="u-pin" class="secure-input" placeholder="6 ہندسوں کا PIN" maxlength="6">
+            <button onclick="createNewRoom()" style="width:100%; padding:14px; background:var(--wa-green); border:none; border-radius:30px; font-weight:bold; cursor:pointer; color:black;">محفوظ روم بنائیں</button>
         </div>
     </div>
 
     <div class="header">
         <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <div style="flex:1;"><h4 id="disp-name">Nasir Chat</h4><small>آن لائن</small></div>
-        <i class="fas fa-video"></i>
-        <i class="fas fa-ellipsis-v"></i>
+        <div style="flex:1;"><h4 id="room-name">Nasir Chat</h4><small>آن لائن</small></div>
+        <i class="fas fa-video" style="padding:10px;"></i>
+        <i class="fas fa-ellipsis-v" style="padding:10px;"></i>
     </div>
 
     <div id="chat-flow"></div>
-
-    <div id="loc-menu">
-        <div class="loc-item" onclick="sendLoc('current')">📍 موجودہ لوکیشن</div>
-        <div class="loc-item" onclick="sendLoc('live')">⌛ لائیو (15 منٹ)</div>
-    </div>
     <div id="emoji-panel" onclick="event.stopPropagation()"></div>
+
+    <div id="loc-menu" onclick="event.stopPropagation()">
+        <div class="loc-opt" onclick="sendLoc('current')">📍 موجودہ لوکیشن بھیجیں</div>
+        <div class="loc-opt" onclick="sendLoc('live')">⌛ لائیو لوکیشن (15 منٹ)</div>
+    </div>
 
     <div class="footer" onclick="event.stopPropagation()">
         <div class="input-bar">
-            <i class="far fa-smile" style="color:#8696a0; padding:8px;" onclick="toggleEmoji()"></i>
-            <input type="text" id="msg-input" placeholder="میسج لکھیں..." oninput="syncUI()">
-            <i class="fas fa-location-dot" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="toggleLoc()"></i>
-            <i class="fas fa-paperclip" style="color:#8696a0; padding:8px;"></i>
+            <i class="far fa-smile icon-btn" onclick="toggleEmoji()"></i>
+            <input type="text" id="msg-input" placeholder="میسج لکھیں..." oninput="syncBtn()">
+            <label for="file-up" class="fas fa-paperclip icon-btn"></label>
+            <input type="file" id="file-up" style="display:none;" onchange="sendFile(this)">
+            <i class="fas fa-location-dot icon-btn" onclick="toggleLoc()"></i>
+            <label for="cam-up" class="fas fa-camera icon-btn"></label>
+            <input type="file" id="cam-up" accept="image/*" capture="camera" style="display:none;" onchange="sendFile(this)">
         </div>
-        <button class="action-btn" id="act-btn" onclick="handleSend()">
+        <button class="action-btn" id="act-btn" onclick="handleAction()">
             <i class="fas fa-microphone" id="mic-ico"></i>
             <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
         </button>
@@ -92,20 +96,18 @@
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    let myN = "", myP = "", rid = "";
+    let myN = "", currentRid = "", rec, chunks = [];
 
-    // روم لوڈ کرنا (سکیورٹی کے ساتھ)
-    onValue(ref(db, 'NASIR_ROOMS'), (snap) => {
-        const list = document.getElementById('room-list');
-        list.innerHTML = "";
+    onValue(ref(db, 'V99_INDEX'), (snap) => {
+        const list = document.getElementById('room-list'); list.innerHTML = "";
         snap.forEach(c => {
             const d = c.val();
             const div = document.createElement('div');
             div.className = "room-card";
             div.innerHTML = `<b>🔒 ${d.n}</b><br><small>${d.t}</small>`;
             div.onclick = () => {
-                const check = prompt("اس روم کا 6 ہندسوں کا PIN درج کریں:");
-                if(check === d.p) join(c.key, d.n); else alert("غلط PIN!");
+                const p = prompt("6 ہندسوں کا PIN درج کریں:");
+                if(p === d.p) join(c.key, d.n); else alert("غلط PIN!");
             };
             list.appendChild(div);
         });
@@ -113,85 +115,98 @@
 
     window.createNewRoom = () => {
         myN = document.getElementById('u-name').value.trim();
-        myP = document.getElementById('u-pin').value.trim();
-        if(myN && myP.length === 6) {
-            const rRef = push(ref(db, 'NASIR_ROOMS'), { n: "روم: " + myN, p: myP, t: new Date().toLocaleString() });
+        const p = document.getElementById('u-pin').value.trim();
+        if(myN && p.length === 6) {
+            const rRef = push(ref(db, 'V99_INDEX'), { n: "روم: " + myN, p: p, t: new Date().toLocaleString() });
             join(rRef.key, "روم: " + myN);
-        } else { alert("نام اور 6 ہندسوں کا PIN لازمی ہے!"); }
+        } else alert("نام اور 6 ہندسوں کا پن کوڈ لکھیں");
     };
 
     function join(id, name) {
-        rid = id;
+        currentRid = id; if(!myN) myN = "User";
         document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('disp-name').innerText = name;
-        load();
+        document.getElementById('room-name').innerText = name;
+        startChat();
     }
 
     const inp = document.getElementById('msg-input');
-    window.syncUI = () => {
-        const has = inp.value.trim().length > 0;
-        document.getElementById('send-ico').style.display = has ? 'block' : 'none';
-        document.getElementById('mic-ico').style.display = has ? 'none' : 'block';
+    const emoP = document.getElementById('emoji-panel');
+    const locM = document.getElementById('loc-menu');
+
+    window.syncBtn = () => {
+        const hasText = inp.value.trim().length > 0;
+        document.getElementById('send-ico').style.display = hasText ? 'block' : 'none';
+        document.getElementById('mic-ico').style.display = hasText ? 'none' : 'block';
     };
 
-    window.toggleEmoji = () => {
-        const p = document.getElementById('emoji-panel');
-        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
-        document.getElementById('loc-menu').style.display = 'none';
-    };
+    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","😢","✅","🌹","🙌","🤔","😎","🎉"];
+    emoP.innerHTML = emos.map(e => `<div class="emo" onclick="addEmo('${e}')">${e}</div>`).join('');
+    window.addEmo = (e) => { inp.value += e; syncBtn(); };
 
-    window.toggleLoc = () => {
-        const m = document.getElementById('loc-menu');
-        m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        document.getElementById('emoji-panel').style.display = 'none';
-    };
+    window.toggleEmoji = () => { emoP.style.display = emoP.style.display === 'grid' ? 'none' : 'grid'; locM.style.display='none'; };
+    window.toggleLoc = () => { locM.style.display = locM.style.display === 'block' ? 'none' : 'block'; emoP.style.display='none'; };
+    window.hidePopups = () => { emoP.style.display = 'none'; locM.style.display = 'none'; };
 
-    window.hidePopups = () => {
-        document.getElementById('emoji-panel').style.display = 'none';
-        document.getElementById('loc-menu').style.display = 'none';
-    };
-
-    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","😢","✅","🌹","🙌","🤔","😎"];
-    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:24px; padding:8px; cursor:pointer; text-align:center" onclick="addEmo('${e}')">${e}</div>`).join('');
-    window.addEmo = (e) => { inp.value += e; syncUI(); };
-
-    window.handleSend = () => {
+    window.handleAction = () => {
         if(inp.value.trim()) {
             send(inp.value, 'text');
-            inp.value = ""; syncUI(); hidePopups();
-        } else { alert("ریکارڈنگ بٹن ایکٹیو ہے"); }
+            inp.value = ""; syncBtn(); hidePopups();
+        } else startVoice();
+    };
+
+    async function startVoice() {
+        if(!rec) {
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            rec = new MediaRecorder(s);
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = () => {
+                const b = new Blob(chunks, { type: 'audio/webm' });
+                const r = new FileReader(); r.readAsDataURL(b);
+                r.onloadend = () => send(r.result, 'audio');
+                chunks = [];
+            };
+        }
+        if(rec.state === "inactive") { rec.start(); document.getElementById('act-btn').style.background = "red"; }
+        else { rec.stop(); document.getElementById('act-btn').style.background = "#075e54"; }
+    }
+
+    window.sendFile = (el) => {
+        const f = el.files[0]; if(!f) return;
+        const r = new FileReader(); r.readAsDataURL(f);
+        r.onload = () => send(r.result, f.type.includes('image') ? 'img' : 'file');
     };
 
     window.sendLoc = (t) => {
         navigator.geolocation.getCurrentPosition(p => {
-            const link = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            const label = t === 'live' ? "⌛ لائیو لوکیشن:" : "📍 موجودہ لوکیشن:";
-            send(`${label} <a href="${link}" target="_blank">نقشہ</a>`, 'text');
+            const url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+            send(`${t==='live'?'⌛ لائیو':'📍 موجودہ'} لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
             hidePopups();
         });
     };
 
-    const send = (v, t) => push(ref(db, 'DATA/' + rid), {
-        s: myN || "User", v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+    const send = (v, t) => push(ref(db, 'V99_DATA/' + currentRid), {
+        s: myN, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    function load() {
-        onChildAdded(ref(db, 'DATA/' + rid), (snap) => {
+    function startChat() {
+        onChildAdded(ref(db, 'V99_DATA/' + currentRid), (snap) => {
             const d = snap.val(), isMe = d.s === myN, k = snap.key;
             const div = document.createElement('div');
             div.id = k; div.className = "msg-container";
+            let body = d.t === 'text' ? d.v : d.t === 'img' ? `<img src="${d.v}" style="max-width:100%; border-radius:8px">` : `<audio src="${d.v}" controls style="width:180px"></audio>`;
             div.innerHTML = `<div class="msg ${isMe ? 'sent' : 'received'}">
-                <b style="font-size:11px; color:var(--wa-teal)">${d.s}</b><br>${d.v}
+                <b style="font-size:11px; color:var(--wa-teal)">${d.s}</b><br>${body}
                 <div class="msg-time">${d.time}</div>
-                <i class="fas fa-trash-can del-btn" onclick="del('${k}')"></i>
+                <i class="fas fa-trash-can del-icon" onclick="delMsg('${k}')"></i>
             </div>`;
             document.getElementById('chat-flow').appendChild(div);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
     }
 
-    window.del = (id) => { if(confirm("ڈیلیٹ کریں؟")) remove(ref(db, 'DATA/' + rid + '/' + id)); };
-    onChildRemoved(ref(db, 'DATA/' + rid), (snap) => document.getElementById(snap.key)?.remove());
+    window.delMsg = (kid) => { if(confirm("ڈیلیٹ کریں؟")) remove(ref(db, 'V99_DATA/' + currentRid + '/' + kid)); };
+    onChildRemoved(ref(db, 'V99_DATA/' + currentRid), snap => document.getElementById(snap.key)?.remove());
 </script>
 </body>
-</html>
+    </html>
+    
