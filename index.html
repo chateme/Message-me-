@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v67</title>
+    <title>WhatsApp Nasir v68</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
@@ -12,11 +12,13 @@
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
         /* Sidebar/History */
-        #sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: white; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+        #sidebar { position: fixed; left: -300px; top: 0; width: 300px; height: 100%; background: white; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
         #sidebar.open { left: 0; }
-        .side-head { background: var(--wa-teal); color: white; padding: 20px; font-weight: bold; }
-        .side-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .side-head { background: var(--wa-teal); color: white; padding: 20px; font-weight: bold; font-size: 18px; }
+        #history-list { flex: 1; overflow-y: auto; }
+        .side-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
         .side-item:hover { background: #f5f5f5; }
+        .new-chat-btn { background: var(--wa-green); color: black; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; }
 
         #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
         .login-input { width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none; text-align: center; font-size: 16px; }
@@ -32,14 +34,14 @@
         .del-btn { color: #e74c3c; font-size: 10px; cursor: pointer; position: absolute; bottom: 5px; left: 8px; }
         .msg-time { font-size: 9px; color: #888; position: absolute; bottom: 5px; right: 8px; }
 
-        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 120; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 45px; }
+        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 5px; position: relative; z-index: 120; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 8px; min-height: 45px; }
         #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 15px; background: transparent; resize: none; }
         
         .btn-round { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 
         #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 5px; max-height: 120px; overflow-y: auto; border-top: 1px solid #ddd; }
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 900; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 900; }
     </style>
 </head>
 <body>
@@ -48,28 +50,28 @@
     <div id="overlay" onclick="closeSidebar()"></div>
 
     <div id="sidebar">
-        <div class="side-head">آپشنز</div>
-        <div class="side-item" onclick="startNewChat()"><i class="fas fa-plus"></i> نئی چیٹ شروع کریں</div>
-        <div class="side-item" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> لاگ آؤٹ</div>
-        <div style="padding: 15px; font-size: 12px; color: #888;">آپ کا چیٹ روم: <span id="current-room-id"></span></div>
+        <div class="side-head">چیٹ ہسٹری</div>
+        <div id="history-list">
+            </div>
+        <div class="new-chat-btn" onclick="location.reload()">+ نئی چیٹ شروع کریں</div>
     </div>
 
     <div id="login-screen">
         <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green);"></i>
-        <h2 style="margin: 20px 0;">Nasir WhatsApp v67</h2>
-        <input type="text" id="u-name" class="login-input" placeholder="نام لکھیں">
+        <h2 style="margin: 20px 0;">Nasir WhatsApp v68</h2>
+        <input type="text" id="u-name" class="login-input" placeholder="اپنا نام">
         <input type="password" id="u-pass" class="login-input" placeholder="6 ہندسوں کا کوڈ">
-        <button class="login-btn" onclick="login()">چیٹ شروع کریں</button>
+        <button class="login-btn" onclick="login()">لاگ ان</button>
     </div>
 
     <div id="chat-app" style="display:none; flex-direction:column; height:100%;">
         <div class="header">
-            <i class="fas fa-bars" onclick="toggleSidebar()" style="cursor:pointer; font-size: 20px;"></i>
+            <i class="fas fa-bars" onclick="toggleSidebar()" style="cursor:pointer;"></i>
             <div style="flex:1;">
-                <h4 id="display-name">WhatsApp Nasir</h4>
+                <h4 id="display-room">WhatsApp Nasir</h4>
                 <small>آن لائن</small>
             </div>
-            <i class="fas fa-arrow-left" title="واپس" onclick="toggleSidebar()" style="cursor:pointer;"></i>
+            <i class="fas fa-arrow-left" onclick="toggleSidebar()"></i>
         </div>
         
         <div id="chat-flow"></div>
@@ -80,8 +82,8 @@
                 <i class="far fa-smile" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="toggleEmo()"></i>
                 <div id="rec-ui" style="display:none; color:red; flex:1; font-weight:bold;">🔴 <span id="timer">00:00</span></div>
                 <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
+                <i class="fas fa-location-dot" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="sendLoc()"></i>
                 <i class="fas fa-paperclip" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="document.getElementById('f-in').click()"></i>
-                <i class="fas fa-camera" style="color:#8696a0; padding:8px; cursor:pointer;" onclick="document.getElementById('c-in').click()"></i>
             </div>
             <button class="btn-round" onclick="handleAction()">
                 <i class="fas fa-microphone" id="m-ico"></i>
@@ -90,7 +92,6 @@
         </div>
     </div>
 
-    <input type="file" id="c-in" accept="image/*" style="display:none">
     <input type="file" id="f-in" style="display:none">
 </div>
 
@@ -103,17 +104,42 @@
     const db = getDatabase(app);
     let myN = "", rK = "", isR = false, mRec, chks = [], tInt, sc = 0;
 
-    window.login = () => {
-        myN = document.getElementById('u-name').value.trim();
-        let p = document.getElementById('u-pass').value.trim();
-        if(myN && p.length >= 6) {
-            rK = "CH_" + btoa(p).substring(0,10);
+    // Login & History Logic
+    window.login = (savedPass = null) => {
+        myN = document.getElementById('u-name').value.trim() || "User";
+        let p = savedPass || document.getElementById('u-pass').value.trim();
+        
+        if(p.length >= 6) {
+            rK = "CH_V68_" + btoa(p).substring(0,12);
+            saveToHistory(p);
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-app').style.display = 'flex';
-            document.getElementById('current-room-id').innerText = p;
+            document.getElementById('display-room').innerText = "چیٹ: " + p;
+            closeSidebar();
             loadChat();
-        } else { alert("نام اور 6 ہندسوں کا کوڈ ضروری ہے"); }
+        } else { alert("6 ہندسوں کا کوڈ لکھیں"); }
     };
+
+    function saveToHistory(pass) {
+        let history = JSON.parse(localStorage.getItem('nasir_chats') || '[]');
+        if(!history.includes(pass)) {
+            history.push(pass);
+            localStorage.setItem('nasir_chats', JSON.stringify(history));
+        }
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('history-list');
+        let history = JSON.parse(localStorage.getItem('nasir_chats') || '[]');
+        list.innerHTML = history.map(pass => `
+            <div class="side-item" onclick="login('${pass}')">
+                <span><i class="fas fa-comments" style="color:var(--wa-teal)"></i> Code: ${pass}</span>
+                <i class="fas fa-chevron-right" style="color:#ccc"></i>
+            </div>
+        `).join('');
+    }
+    renderHistory();
 
     window.toggleSidebar = () => {
         document.getElementById('sidebar').classList.toggle('open');
@@ -122,12 +148,6 @@
     window.closeSidebar = () => {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('overlay').style.display = 'none';
-    };
-
-    window.startNewChat = () => {
-        if(confirm("موجودہ چیٹ چھوڑ کر نئی چیٹ شروع کریں؟")) {
-            location.reload();
-        }
     };
 
     const inp = document.getElementById('msg-input');
@@ -154,27 +174,25 @@
         s: myN, v: v, t: t, fn: fn, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    // Emoji Fix
+    window.sendLoc = () => {
+        navigator.geolocation.getCurrentPosition(p => {
+            let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+            sendMsg(`📍 لوکیشن: <a href="${url}" target="_blank">نقشہ دیکھیں</a>`, 'text');
+        }, () => alert("GPS آن کریں"));
+    };
+
     const emos = ["😂","❤️","👍","😊","🙏","🔥","📍","🌹","✅","💯","✨","😢","👋","🎉"];
     document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:25px; padding:10px; cursor:pointer; text-align:center;" onclick="addEmo('${e}')">${e}</div>`).join('');
-    window.addEmo = (e) => {
-        sendMsg(e, 'text');
-        document.getElementById('emoji-panel').style.display = 'none';
+    window.addEmo = (e) => { sendMsg(e, 'text'); document.getElementById('emoji-panel').style.display = 'none'; };
+
+    document.getElementById('f-in').onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const r = new FileReader(); 
+        r.onload = (ev) => sendMsg(ev.target.result, file.type.includes('image') ? 'img' : 'file', file.name); 
+        r.readAsDataURL(file);
     };
 
-    // File Handling
-    const handleFile = (id, type) => {
-        document.getElementById(id).onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const r = new FileReader(); 
-            r.onload = (ev) => sendMsg(ev.target.result, type, file.name); 
-            r.readAsDataURL(file);
-        };
-    };
-    handleFile('c-in', 'img'); handleFile('f-in', 'file');
-
-    // Voice
     async function vRec() {
         if(!isR) {
             try {
@@ -183,10 +201,7 @@
                 document.getElementById('rec-ui').style.display = 'block';
                 document.getElementById('msg-input').style.display = 'none';
                 tInt = setInterval(() => { sc++; document.getElementById('timer').innerText = Math.floor(sc/60).toString().padStart(2,'0') + ":" + (sc%60).toString().padStart(2,'0'); }, 1000);
-                mRec.onstop = () => { 
-                    const r = new FileReader(); r.onloadend = () => sendMsg(r.result, 'voice'); 
-                    r.readAsDataURL(new Blob(chks, { type: 'audio/webm' })); 
-                };
+                mRec.onstop = () => { const r = new FileReader(); r.onloadend = () => sendMsg(r.result, 'voice'); r.readAsDataURL(new Blob(chks, { type: 'audio/webm' })); };
                 mRec.ondataavailable = e => chks.push(e.data);
             } catch(e) { alert("مائیک آن کریں"); }
         } else {
@@ -199,12 +214,12 @@
     function loadChat() {
         const f = document.getElementById('chat-flow');
         f.innerHTML = ""; // Clear for new rooms
+        off(ref(db, rK)); // Unsubscribe from old room
         onChildAdded(ref(db, rK), snap => {
             const d = snap.val(), isMe = d.s === myN, k = snap.key;
             const div = document.createElement('div');
             div.id = k; div.className = `msg-row ${isMe ? 'row-sent' : ''}`;
             let content = d.v;
-            
             if(d.t==='voice') content = `<audio controls style="width:170px;"><source src="${d.v}"></audio>`;
             else if(d.t==='img') content = `<img src="${d.v}" style="width:100%; border-radius:5px; max-height:250px;">`;
             else if(d.t==='file') content = `<div style="background:#eee; padding:10px; border-radius:5px;"><i class="fas fa-file"></i> <a href="${d.v}" download="${d.fn}">${d.fn}</a></div>`;
@@ -222,5 +237,5 @@
     }
 </script>
 </body>
-    </html>
+                </html>
     
