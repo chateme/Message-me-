@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v130</title>
+    <title>WhatsApp Nasir v131</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #25d366; --wa-teal: #075e54; --wa-bg: #e5ddd5; }
@@ -11,7 +11,7 @@
         body, html { height: 100%; width: 100%; overflow: hidden; background: #fff; }
 
         /* Header */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; position: relative; z-index: 10; }
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; position: relative; z-index: 100; }
         
         #app-main { display: none; height: 100%; flex-direction: column; }
         .chat-list { flex: 1; overflow-y: auto; }
@@ -19,62 +19,64 @@
 
         /* Chat Window */
         #chat-window { display: none; position: fixed; inset: 0; background: var(--wa-bg); flex-direction: column; z-index: 1000; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 8px; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
         
         /* Messages */
         .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .msg-info { position: absolute; bottom: 4px; right: 8px; display: flex; align-items: center; gap: 4px; font-size: 10px; color: #777; }
-        .del-icon { color: #ff5252; cursor: pointer; margin-left: 5px; font-size: 12px; }
 
-        /* Unified Input Bar - FIXED DESIGN */
-        .input-outer { padding: 10px; background: transparent; width: 100%; }
-        .unified-pill { 
+        /* Bottom Fixed Input - NEW ABSOLUTE LOGIC */
+        .input-wrapper { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 10px; 
+            background: transparent; 
+            z-index: 2000;
+        }
+        .main-pill { 
             background: white; 
-            border-radius: 30px; 
+            border-radius: 25px; 
+            position: relative; 
+            min-height: 50px; 
             display: flex; 
             align-items: center; 
-            padding: 5px 15px; 
-            min-height: 50px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            width: 100%;
+            padding-left: 45px; /* Smile icon space */
+            padding-right: 85px; /* Attach and Mic space */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        
+        .smile-btn { position: absolute; left: 12px; font-size: 22px; color: #667781; cursor: pointer; }
+        .attach-btn { position: absolute; right: 50px; font-size: 22px; color: #667781; cursor: pointer; }
+        .mic-send-wrapper { 
+            position: absolute; 
+            right: 8px; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--wa-teal);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
         #msg-in { 
-            flex: 1; 
+            width: 100%; 
             border: none; 
             outline: none; 
             font-size: 16px; 
-            padding: 8px 5px; 
             background: transparent; 
+            padding: 10px 0;
         }
-        .icon-btn { 
-            font-size: 22px; 
-            color: #667781; 
-            cursor: pointer; 
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .mic-send-btn {
-            color: var(--wa-teal);
-            font-size: 24px;
-            margin-left: 10px;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        #timer { 
-            color: #e91e63; 
-            font-weight: bold; 
-            font-size: 14px; 
-            margin-right: 8px; 
-            display: none; 
-        }
+        #timer { color: #ff5252; font-weight: bold; font-size: 14px; margin-right: 5px; display: none; }
 
         /* Popups */
-        .pop-menu { display: none; position: absolute; bottom: 75px; background: white; border-radius: 15px; box-shadow: 0 -2px 15px rgba(0,0,0,0.2); z-index: 2000; padding: 15px; }
+        .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 -2px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 15px; }
         #emoji-panel { left: 10px; width: 280px; grid-template-columns: repeat(6, 1fr); gap: 10px; text-align: center; font-size: 24px; }
-        #attach-panel { right: 20px; width: 180px; flex-direction: column; gap: 12px; }
+        #attach-panel { right: 15px; width: 180px; flex-direction: column; gap: 12px; }
 
         /* Auth */
         #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
@@ -113,14 +115,16 @@
         <input type="file" id="file-in" style="display:none" onchange="upFile(this)">
     </div>
 
-    <div class="input-outer" onclick="event.stopPropagation()">
-        <div class="unified-pill">
-            <i class="far fa-smile icon-btn" onclick="toggleMenu('emoji-panel')"></i>
+    <div class="input-wrapper" onclick="event.stopPropagation()">
+        <div class="main-pill">
+            <i class="far fa-smile smile-btn" onclick="toggleMenu('emoji-panel')"></i>
+            
             <span id="timer">00:00</span>
             <input type="text" id="msg-in" placeholder="میسج لکھیں..." oninput="upUI()">
-            <i class="fas fa-paperclip icon-btn" onclick="toggleMenu('attach-panel')"></i>
             
-            <div class="mic-send-btn" id="main-btn" onclick="hAction()">
+            <i class="fas fa-paperclip attach-btn" onclick="toggleMenu('attach-panel')"></i>
+            
+            <div class="mic-send-wrapper" id="main-btn" onclick="hAction()">
                 <i class="fas fa-microphone" id="mic-icon"></i>
                 <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
             </div>
@@ -138,7 +142,7 @@
     let myID, toID, rec, chunks=[], tInt, secs=0, chatRef;
 
     // Emojis
-    const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","😢","😎","🌹","✅","📍","⚡","✨"];
+    const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","😢","😎","🌹","✅","📍"];
     const ep = document.getElementById('emoji-panel');
     ems.forEach(e => {
         const s = document.createElement('span'); s.innerText = e; s.style.cursor='pointer';
@@ -185,7 +189,7 @@
             let h = d.m;
             if(d.t==='audio') h = `<audio controls src="${d.m}" style="width:160px"></audio>`;
             if(d.t==='file') h = `📄 <a href="${d.m}" download="${d.name}" target="_blank" style="color:teal; font-weight:bold;">${d.name}</a>`;
-            div.innerHTML = h + `<div class="msg-info"><span>${d.time}</span>${d.sender===myID?'<span style="color:#53bdeb">✓✓</span> <i class="fas fa-trash del-icon" onclick="doDel(\''+id+'\')"></i>':''}</div>`;
+            div.innerHTML = h + `<div class="msg-info"><span>${d.time}</span>${d.sender===myID?'<span style="color:#53bdeb">✓✓</span> <i class="fas fa-trash" style="color:#ff5252; margin-left:5px;" onclick="doDel(\''+id+'\')"></i>':''}</div>`;
         }
         document.getElementById('chat-flow').appendChild(div);
         document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
@@ -247,5 +251,5 @@
     window.goBack = () => { document.getElementById('chat-window').style.display='none'; document.getElementById('app-main').style.display='flex'; };
 </script>
 </body>
-                                                </html>
-        
+    </html>
+    
