@@ -3,88 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v99</title>
+    <title>WhatsApp Nasir v100</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body, html { height: 100%; width: 100%; overflow: hidden; background: #d1d7db; display: flex; justify-content: center; }
-        #app-wrap { width: 100%; max-width: 450px; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; }
+        
+        #app-wrap { width: 100%; max-width: 500px; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; }
 
         /* Auth Screen */
-        #auth-screen { position: absolute; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; padding: 20px; color: white; }
-        .secure-input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; font-size: 16px; text-align: center; }
-        .room-card { background: #202c33; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid var(--wa-green); }
+        #auth-screen { position: absolute; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; padding: 25px; color: white; }
+        .secure-input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; font-size: 16px; text-align: center; background: #2a3942; color: white; }
+        .room-card { background: #202c33; padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; border-right: 5px solid var(--wa-green); }
 
         /* Header */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; }
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; z-index: 10; }
         
-        /* Chat Flow */
+        /* Chat Area */
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; }
-        .msg-container { display: flex; width: 100%; margin-bottom: 12px; position: relative; }
-        .msg { padding: 8px 12px 28px 12px; border-radius: 10px; max-width: 80%; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.15); min-width: 110px; position: relative; word-wrap: break-word; }
-        .sent { background: #dcf8c6; margin-left: auto; }
-        .received { background: white; margin-right: auto; }
+        .msg-box { display: flex; width: 100%; margin-bottom: 15px; position: relative; }
+        .msg { padding: 10px 12px 30px 12px; border-radius: 12px; max-width: 85%; background: white; box-shadow: 0 1px 1px rgba(0,0,0,0.2); min-width: 120px; position: relative; word-wrap: break-word; }
+        .sent { background: #dcf8c6; margin-left: auto; border-bottom-right-radius: 2px; }
+        .received { background: white; margin-right: auto; border-bottom-left-radius: 2px; }
         
-        .msg-time { font-size: 10px; color: #888; position: absolute; bottom: 5px; right: 10px; }
-        .del-icon { color: #f44336; font-size: 13px; position: absolute; bottom: 5px; left: 10px; cursor: pointer; }
+        .msg-time { font-size: 10px; color: #888; position: absolute; bottom: 6px; right: 12px; }
+        .del-icon { color: #f44336; font-size: 15px; position: absolute; bottom: 6px; left: 12px; cursor: pointer; }
 
-        /* Footer Fixed Layout */
-        .footer { background: transparent; padding: 8px 10px; display: flex; align-items: flex-end; gap: 5px; flex-shrink: 0; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 12px; min-height: 48px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; padding: 10px 5px; max-height: 100px; overflow-y: auto; }
-        .icon-btn { color: #8696a0; font-size: 20px; padding: 8px; cursor: pointer; }
+        /* Footer - Mobile Adaptive */
+        .footer { background: transparent; padding: 8px 12px; display: flex; align-items: flex-end; gap: 8px; flex-shrink: 0; padding-bottom: 15px; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 5px; min-height: 48px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; padding: 10px; max-height: 120px; overflow-y: auto; }
+        .bar-icon { color: #8696a0; font-size: 22px; padding: 10px; cursor: pointer; }
         
-        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; margin-bottom: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .action-btn { background: var(--wa-teal); color: white; width: 50px; height: 50px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-        /* Emoji & Loc Panels */
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 200px; overflow-y: auto; border-top: 1px solid #ddd; }
-        .emo { font-size: 26px; text-align: center; padding: 10px; cursor: pointer; }
-        #loc-menu { display: none; position: absolute; bottom: 70px; right: 60px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); width: 220px; z-index: 500; }
-        .loc-opt { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        /* Popups */
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 200px; overflow-y: auto; border-top: 1px solid #ddd; border-radius: 15px 15px 0 0; }
+        #loc-menu { display: none; position: absolute; bottom: 80px; left: 20px; right: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.3); z-index: 500; }
+        .loc-opt { padding: 18px; border-bottom: 1px solid #f0f0f0; font-size: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
     </style>
 </head>
-<body onclick="hidePopups()">
+<body onclick="hideAll()">
 
 <div id="app-wrap">
     <div id="auth-screen">
-        <h2 style="text-align:center; margin-bottom:20px;">Nasir WhatsApp v99</h2>
-        <div id="room-list" style="flex:1; overflow-y:auto; margin-bottom:15px;"></div>
-        <div style="background:#202c33; padding:15px; border-radius:12px;">
-            <input type="text" id="u-name" class="secure-input" placeholder="آپ کا نام لکھیں">
-            <input type="password" id="u-pin" class="secure-input" placeholder="6 ہندسوں کا PIN" maxlength="6">
-            <button onclick="createNewRoom()" style="width:100%; padding:14px; background:var(--wa-green); border:none; border-radius:30px; font-weight:bold; cursor:pointer; color:black;">محفوظ روم بنائیں</button>
+        <h2 style="text-align:center; margin: 30px 0;">Nasir Private Rooms</h2>
+        <div id="room-list" style="flex:1; overflow-y:auto; margin-bottom:20px;"></div>
+        <div style="background:#202c33; padding:20px; border-radius:15px;">
+            <input type="text" id="u-name" class="secure-input" placeholder="آپ کا نام">
+            <input type="password" id="u-pin" class="secure-input" placeholder="6 ہندسوں کا خفیہ PIN" maxlength="6">
+            <button onclick="createNewRoom()" style="width:100%; padding:16px; background:var(--wa-green); border:none; border-radius:30px; font-weight:bold; cursor:pointer; color:#000; font-size:16px;">+ نیا محفوظ روم بنائیں</button>
         </div>
     </div>
 
     <div class="header">
         <i class="fas fa-arrow-left" onclick="location.reload()"></i>
-        <div style="flex:1;"><h4 id="room-name">Nasir Chat</h4><small>آن لائن</small></div>
-        <i class="fas fa-video" style="padding:10px;"></i>
-        <i class="fas fa-ellipsis-v" style="padding:10px;"></i>
+        <div style="flex:1;"><h4 id="room-title">Chat Room</h4><small>آن لائن</small></div>
+        <i class="fas fa-video bar-icon" style="color:white"></i>
+        <i class="fas fa-phone bar-icon" style="color:white"></i>
+        <i class="fas fa-ellipsis-v bar-icon" style="color:white"></i>
     </div>
 
     <div id="chat-flow"></div>
     <div id="emoji-panel" onclick="event.stopPropagation()"></div>
 
     <div id="loc-menu" onclick="event.stopPropagation()">
-        <div class="loc-opt" onclick="sendLoc('current')">📍 موجودہ لوکیشن بھیجیں</div>
-        <div class="loc-opt" onclick="sendLoc('live')">⌛ لائیو لوکیشن (15 منٹ)</div>
+        <div class="loc-opt" onclick="sendLoc('current')"><i class="fas fa-map-marker-alt" style="color:red"></i> موجودہ لوکیشن بھیجیں</div>
+        <div class="loc-opt" onclick="sendLoc('live')"><i class="fas fa-hourglass-half" style="color:orange"></i> لائیو لوکیشن (15 منٹ)</div>
     </div>
 
     <div class="footer" onclick="event.stopPropagation()">
         <div class="input-bar">
-            <i class="far fa-smile icon-btn" onclick="toggleEmoji()"></i>
-            <input type="text" id="msg-input" placeholder="میسج لکھیں..." oninput="syncBtn()">
-            <label for="file-up" class="fas fa-paperclip icon-btn"></label>
-            <input type="file" id="file-up" style="display:none;" onchange="sendFile(this)">
-            <i class="fas fa-location-dot icon-btn" onclick="toggleLoc()"></i>
-            <label for="cam-up" class="fas fa-camera icon-btn"></label>
-            <input type="file" id="cam-up" accept="image/*" capture="camera" style="display:none;" onchange="sendFile(this)">
+            <i class="far fa-smile bar-icon" onclick="toggleEmo()"></i>
+            <textarea id="msg-input" placeholder="میسج لکھیں..." rows="1" oninput="uiSync()"></textarea>
+            <label for="f-up" class="fas fa-paperclip bar-icon"></label>
+            <input type="file" id="f-up" style="display:none;" onchange="upFile(this)">
+            <i class="fas fa-location-dot bar-icon" onclick="toggleLoc()"></i>
+            <label for="c-up" class="fas fa-camera bar-icon"></label>
+            <input type="file" id="c-up" accept="image/*" capture="camera" style="display:none;" onchange="upFile(this)">
         </div>
-        <button class="action-btn" id="act-btn" onclick="handleAction()">
-            <i class="fas fa-microphone" id="mic-ico"></i>
-            <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
+        <button class="action-btn" id="main-btn" onclick="handleBtn()">
+            <i class="fas fa-microphone" id="mic"></i>
+            <i class="fas fa-paper-plane" id="send" style="display:none;"></i>
         </button>
     </div>
 </div>
@@ -96,65 +97,64 @@
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    let myN = "", currentRid = "", rec, chunks = [];
+    let myN = "", myRid = "", rec, chunks = [];
 
-    onValue(ref(db, 'V99_INDEX'), (snap) => {
-        const list = document.getElementById('room-list'); list.innerHTML = "";
-        snap.forEach(c => {
+    // روم ہسٹری لوڈنگ
+    onValue(ref(db, 'V100_INDEX'), (s) => {
+        const l = document.getElementById('room-list'); l.innerHTML = "";
+        s.forEach(c => {
             const d = c.val();
             const div = document.createElement('div');
             div.className = "room-card";
             div.innerHTML = `<b>🔒 ${d.n}</b><br><small>${d.t}</small>`;
             div.onclick = () => {
-                const p = prompt("6 ہندسوں کا PIN درج کریں:");
+                const p = prompt("6 ہندسوں کا PIN لکھیں:");
                 if(p === d.p) join(c.key, d.n); else alert("غلط PIN!");
             };
-            list.appendChild(div);
+            l.appendChild(div);
         });
     });
 
     window.createNewRoom = () => {
         myN = document.getElementById('u-name').value.trim();
-        const p = document.getElementById('u-pin').value.trim();
-        if(myN && p.length === 6) {
-            const rRef = push(ref(db, 'V99_INDEX'), { n: "روم: " + myN, p: p, t: new Date().toLocaleString() });
-            join(rRef.key, "روم: " + myN);
-        } else alert("نام اور 6 ہندسوں کا پن کوڈ لکھیں");
+        const pin = document.getElementById('u-pin').value.trim();
+        if(myN && pin.length === 6) {
+            const rRef = push(ref(db, 'V100_INDEX'), { n: "روم بذریعہ " + myN, p: pin, t: new Date().toLocaleString() });
+            join(rRef.key, "روم بذریعہ " + myN);
+        } else alert("نام اور 6 ہندسوں کا PIN ضروری ہے");
     };
 
     function join(id, name) {
-        currentRid = id; if(!myN) myN = "User";
+        myRid = id; if(!myN) myN = "User";
         document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('room-name').innerText = name;
-        startChat();
+        document.getElementById('room-title').innerText = name;
+        initChat();
     }
 
     const inp = document.getElementById('msg-input');
-    const emoP = document.getElementById('emoji-panel');
-    const locM = document.getElementById('loc-menu');
-
-    window.syncBtn = () => {
-        const hasText = inp.value.trim().length > 0;
-        document.getElementById('send-ico').style.display = hasText ? 'block' : 'none';
-        document.getElementById('mic-ico').style.display = hasText ? 'none' : 'block';
+    window.uiSync = () => {
+        const has = inp.value.trim().length > 0;
+        document.getElementById('send').style.display = has ? 'block' : 'none';
+        document.getElementById('mic').style.display = has ? 'none' : 'block';
+        inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 'px';
     };
 
-    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","😢","✅","🌹","🙌","🤔","😎","🎉"];
-    emoP.innerHTML = emos.map(e => `<div class="emo" onclick="addEmo('${e}')">${e}</div>`).join('');
-    window.addEmo = (e) => { inp.value += e; syncBtn(); };
+    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","😢","✅","🌹","🙌","🤔","😎","🎉","💔","🔥"];
+    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div class="emo" onclick="addE('${e}')">${e}</div>`).join('');
+    window.addE = (e) => { inp.value += e; uiSync(); };
 
-    window.toggleEmoji = () => { emoP.style.display = emoP.style.display === 'grid' ? 'none' : 'grid'; locM.style.display='none'; };
-    window.toggleLoc = () => { locM.style.display = locM.style.display === 'block' ? 'none' : 'block'; emoP.style.display='none'; };
-    window.hidePopups = () => { emoP.style.display = 'none'; locM.style.display = 'none'; };
+    window.toggleEmo = () => { const p = document.getElementById('emoji-panel'); p.style.display = p.style.display==='grid'?'none':'grid'; };
+    window.toggleLoc = () => { const m = document.getElementById('loc-menu'); m.style.display = m.style.display==='block'?'none':'block'; };
+    window.hideAll = () => { document.getElementById('emoji-panel').style.display='none'; document.getElementById('loc-menu').style.display='none'; };
 
-    window.handleAction = () => {
+    window.handleBtn = () => {
         if(inp.value.trim()) {
             send(inp.value, 'text');
-            inp.value = ""; syncBtn(); hidePopups();
-        } else startVoice();
+            inp.value = ""; uiSync(); hideAll();
+        } else doVoice();
     };
 
-    async function startVoice() {
+    async function doVoice() {
         if(!rec) {
             const s = await navigator.mediaDevices.getUserMedia({ audio: true });
             rec = new MediaRecorder(s);
@@ -166,11 +166,11 @@
                 chunks = [];
             };
         }
-        if(rec.state === "inactive") { rec.start(); document.getElementById('act-btn').style.background = "red"; }
-        else { rec.stop(); document.getElementById('act-btn').style.background = "#075e54"; }
+        if(rec.state === "inactive") { rec.start(); document.getElementById('main-btn').style.background="red"; }
+        else { rec.stop(); document.getElementById('main-btn').style.background="#075e54"; }
     }
 
-    window.sendFile = (el) => {
+    window.upFile = (el) => {
         const f = el.files[0]; if(!f) return;
         const r = new FileReader(); r.readAsDataURL(f);
         r.onload = () => send(r.result, f.type.includes('image') ? 'img' : 'file');
@@ -180,32 +180,32 @@
         navigator.geolocation.getCurrentPosition(p => {
             const url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
             send(`${t==='live'?'⌛ لائیو':'📍 موجودہ'} لوکیشن: <a href="${url}" target="_blank">دیکھیں</a>`, 'text');
-            hidePopups();
+            hideAll();
         });
     };
 
-    const send = (v, t) => push(ref(db, 'V99_DATA/' + currentRid), {
+    const send = (v, t) => push(ref(db, 'V100_DATA/' + myRid), {
         s: myN, v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    function startChat() {
-        onChildAdded(ref(db, 'V99_DATA/' + currentRid), (snap) => {
+    function initChat() {
+        onChildAdded(ref(db, 'V100_DATA/' + myRid), (snap) => {
             const d = snap.val(), isMe = d.s === myN, k = snap.key;
             const div = document.createElement('div');
-            div.id = k; div.className = "msg-container";
-            let body = d.t === 'text' ? d.v : d.t === 'img' ? `<img src="${d.v}" style="max-width:100%; border-radius:8px">` : `<audio src="${d.v}" controls style="width:180px"></audio>`;
+            div.id = k; div.className = "msg-box";
+            let b = d.t === 'text' ? d.v : d.t === 'img' ? `<img src="${d.v}" style="max-width:100%; border-radius:10px">` : `<audio src="${d.v}" controls style="width:200px"></audio>`;
             div.innerHTML = `<div class="msg ${isMe ? 'sent' : 'received'}">
-                <b style="font-size:11px; color:var(--wa-teal)">${d.s}</b><br>${body}
+                <b style="font-size:11px; color:var(--wa-teal)">${d.s}</b><br>${b}
                 <div class="msg-time">${d.time}</div>
-                <i class="fas fa-trash-can del-icon" onclick="delMsg('${k}')"></i>
+                <i class="fas fa-trash-can del-icon" onclick="delM('${k}')"></i>
             </div>`;
             document.getElementById('chat-flow').appendChild(div);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
     }
 
-    window.delMsg = (kid) => { if(confirm("ڈیلیٹ کریں؟")) remove(ref(db, 'V99_DATA/' + currentRid + '/' + kid)); };
-    onChildRemoved(ref(db, 'V99_DATA/' + currentRid), snap => document.getElementById(snap.key)?.remove());
+    window.delM = (kid) => { if(confirm("ڈیلیٹ کریں؟")) remove(ref(db, 'V100_DATA/' + myRid + '/' + kid)); };
+    onChildRemoved(ref(db, 'V100_DATA/' + myRid), s => document.getElementById(s.key)?.remove());
 </script>
 </body>
     </html>
