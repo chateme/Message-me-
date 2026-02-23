@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v69</title>
+    <title>WhatsApp Nasir v70</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
@@ -12,10 +12,10 @@
         #app-wrap { width: 100%; max-width: 450px; background: var(--bg); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
         /* Sidebar */
-        #sidebar { position: fixed; left: -300px; top: 0; width: 300px; height: 100%; background: white; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+        #sidebar { position: fixed; left: -300px; top: 0; width: 300px; height: 100%; background: white; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
         #sidebar.open { left: 0; }
-        .side-head { background: var(--wa-teal); color: white; padding: 20px; font-weight: bold; }
-        .side-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .side-head { background: var(--wa-teal); color: white; padding: 20px; font-weight: bold; text-align: center; }
+        .side-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
 
         #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: white; }
         .login-input { width:100%; padding:15px; margin:10px 0; border-radius:8px; border:none; text-align: center; font-size: 16px; }
@@ -30,17 +30,14 @@
         .del-btn { color: #e74c3c; font-size: 10px; cursor: pointer; position: absolute; bottom: 5px; left: 8px; }
 
         .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 5px; position: relative; }
-        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 0 10px; min-height: 45px; }
         #msg-input { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 15px; background: transparent; }
 
-        /* Floating Location Menu */
-        #loc-popup { display: none; position: absolute; bottom: 70px; right: 50px; background: white; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); z-index: 500; width: 200px; overflow: hidden; }
-        .loc-option { padding: 12px; font-size: 14px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .loc-option:hover { background: #f9f9f9; }
-
-        .btn-round { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 5px; max-height: 150px; overflow-y: auto; }
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 400; }
+        .btn-round { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(8, 1fr); padding: 5px; max-height: 130px; overflow-y: auto; border-top: 1px solid #ddd; }
+        
+        #rec-timer { display: none; color: red; font-weight: bold; flex: 1; text-align: center; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 900; }
     </style>
 </head>
 <body>
@@ -50,13 +47,13 @@
 
     <div id="sidebar">
         <div class="side-head">چیٹ ہسٹری</div>
-        <div id="history-list" style="flex:1; overflow-y:auto;"></div>
-        <div style="padding:15px; background:var(--wa-green); text-align:center; cursor:pointer; font-weight:bold;" onclick="location.reload()">نئی چیٹ شروع کریں</div>
+        <div id="history-list" style="height: calc(100% - 120px); overflow-y: auto;"></div>
+        <button onclick="location.reload()" style="width:100%; padding:15px; background:var(--wa-green); border:none; font-weight:bold;">+ نئی چیٹ</button>
     </div>
 
     <div id="login-screen">
         <i class="fab fa-whatsapp" style="font-size: 50px; color: var(--wa-green);"></i>
-        <h2>Nasir WhatsApp v69</h2>
+        <h2 style="margin: 20px 0;">Nasir WhatsApp v70</h2>
         <input type="text" id="u-name" class="login-input" placeholder="نام">
         <input type="password" id="u-pass" class="login-input" placeholder="6 ہندسوں کا کوڈ">
         <button class="login-btn" onclick="login()">لاگ ان</button>
@@ -64,32 +61,27 @@
 
     <div id="chat-app" style="display:none; flex-direction:column; height:100%;">
         <div class="header">
-            <i class="fas fa-bars" onclick="toggleSidebar()" style="cursor:pointer;"></i>
+            <i class="fas fa-arrow-left" onclick="toggleSidebar()" style="cursor:pointer; font-size: 20px;"></i>
             <div style="flex:1;">
-                <h4 id="room-title">WhatsApp</h4>
+                <h4 id="room-name">WhatsApp</h4>
                 <small>آن لائن</small>
             </div>
+            <i class="fas fa-bars" onclick="toggleSidebar()" style="cursor:pointer;"></i>
         </div>
         
         <div id="chat-flow"></div>
         <div id="emoji-panel"></div>
 
-        <div id="loc-popup">
-            <div class="loc-option" onclick="sendGeo('موجودہ')">📍 موجودہ لوکیشن</div>
-            <div class="loc-option" onclick="sendGeo('لائیو')">🛰️ لائیو لوکیشن</div>
-            <div class="loc-option" style="color:red;" onclick="closePopups()">کینسل</div>
-        </div>
-
         <div class="footer">
             <div class="input-bar">
                 <i class="far fa-smile" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="toggleEmo()"></i>
+                <div id="rec-timer">🔴 <span id="timer-val">00:00</span></div>
                 <textarea id="msg-input" placeholder="میسج..." rows="1"></textarea>
-                <i class="fas fa-location-dot" id="loc-btn" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="toggleLoc()"></i>
                 <i class="fas fa-paperclip" style="color:#8696a0; padding:10px; cursor:pointer;" onclick="document.getElementById('f-in').click()"></i>
             </div>
-            <button class="btn-round" onclick="handleBtn()">
-                <i class="fas fa-microphone" id="m-ico"></i>
-                <i class="fas fa-paper-plane" id="s-ico" style="display:none;"></i>
+            <button class="btn-round" id="main-btn" onclick="handleMainAction()">
+                <i class="fas fa-microphone" id="mic-ico"></i>
+                <i class="fas fa-paper-plane" id="send-ico" style="display:none;"></i>
             </button>
         </div>
     </div>
@@ -103,82 +95,106 @@
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    let myN = "", rK = "", isR = false;
+    let myN = "", rK = "", isRec = false, mediaRec, chunks = [], timerInt, sec = 0;
 
     window.login = (saved = null) => {
         myN = document.getElementById('u-name').value || "Nasir";
         let p = saved || document.getElementById('u-pass').value;
         if(p.length >= 6) {
-            rK = "V69_" + btoa(p).substring(0,12);
-            localStorage.setItem('last_code', p);
+            rK = "V70_" + btoa(p).substring(0,12);
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('chat-app').style.display = 'flex';
-            document.getElementById('room-title').innerText = "چیٹ کوڈ: " + p;
-            saveHistory(p); load();
+            document.getElementById('room-name').innerText = "کوڈ: " + p;
+            addToHistory(p); load(); closePopups();
         }
     };
 
-    function saveHistory(p) {
-        let h = JSON.parse(localStorage.getItem('h_list') || '[]');
+    function addToHistory(p) {
+        let h = JSON.parse(localStorage.getItem('nasir_h') || '[]');
         if(!h.includes(p)) h.push(p);
-        localStorage.setItem('h_list', JSON.stringify(h));
+        localStorage.setItem('nasir_h', JSON.stringify(h));
         renderHistory();
     }
 
     function renderHistory() {
         const list = document.getElementById('history-list');
-        let h = JSON.parse(localStorage.getItem('h_list') || '[]');
-        list.innerHTML = h.map(code => `<div class="side-item" onclick="login('${code}')"><span>📟 Code: ${code}</span><i class="fas fa-chevron-right"></i></div>`).join('');
+        let h = JSON.parse(localStorage.getItem('nasir_h') || '[]');
+        list.innerHTML = h.map(code => `<div class="side-item" onclick="login('${code}')"><span><i class="fas fa-history"></i> چیٹ کوڈ: ${code}</span><i class="fas fa-chevron-right"></i></div>`).join('');
     }
     renderHistory();
 
-    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
+    window.toggleSidebar = () => {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').style.display = document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none';
+    };
+
     window.closePopups = () => {
-        document.getElementById('loc-popup').style.display = 'none';
+        document.getElementById('sidebar').classList.remove('open');
         document.getElementById('emoji-panel').style.display = 'none';
         document.getElementById('overlay').style.display = 'none';
-        document.getElementById('sidebar').classList.remove('open');
-    };
-
-    window.toggleLoc = () => {
-        document.getElementById('loc-popup').style.display = 'block';
-        document.getElementById('overlay').style.display = 'block';
-    };
-
-    window.toggleEmo = () => {
-        const p = document.getElementById('emoji-panel');
-        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
     };
 
     const inp = document.getElementById('msg-input');
     inp.oninput = () => {
-        const t = inp.value.trim();
-        document.getElementById('s-ico').style.display = t ? 'block' : 'none';
-        document.getElementById('m-ico').style.display = t ? 'none' : 'block';
+        const hasT = inp.value.trim().length > 0;
+        document.getElementById('send-ico').style.display = hasT ? 'block' : 'none';
+        document.getElementById('mic-ico').style.display = hasT ? 'none' : 'block';
     };
 
-    window.handleBtn = () => {
+    window.handleMainAction = () => {
         if(inp.value.trim()) {
             send(inp.value, 'text');
             inp.value = ""; inp.oninput();
-        }
+        } else { toggleVoice(); }
     };
 
     const send = (v, t, fn = "") => push(ref(db, rK), {
         s: myN, v: v, t: t, fn: fn, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
 
-    window.sendGeo = (type) => {
-        navigator.geolocation.getCurrentPosition(p => {
-            let url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            send(`📍 ${type} لوکیشن: <a href="${url}" target="_blank">نقشہ دیکھیں</a>`, 'text');
-            closePopups();
-        }, () => alert("GPS آن کریں"));
+    // Voice Recorder Logic
+    async function toggleVoice() {
+        if(!isRec) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRec = new MediaRecorder(stream);
+                chunks = [];
+                mediaRec.ondataavailable = e => chunks.push(e.data);
+                mediaRec.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => send(reader.result, 'voice');
+                    reader.readAsDataURL(blob);
+                };
+                mediaRec.start();
+                isRec = true;
+                sec = 0;
+                document.getElementById('rec-timer').style.display = 'block';
+                document.getElementById('msg-input').style.display = 'none';
+                document.getElementById('mic-ico').style.color = 'red';
+                timerInt = setInterval(() => {
+                    sec++;
+                    document.getElementById('timer-val').innerText = Math.floor(sec/60).toString().padStart(2,'0') + ":" + (sec%60).toString().padStart(2,'0');
+                }, 1000);
+            } catch(e) { alert("مائیک تک رسائی نہیں مل سکی۔"); }
+        } else {
+            mediaRec.stop();
+            isRec = false;
+            clearInterval(timerInt);
+            document.getElementById('rec-timer').style.display = 'none';
+            document.getElementById('msg-input').style.display = 'block';
+            document.getElementById('mic-ico').style.color = 'white';
+        }
+    }
+
+    window.toggleEmo = () => {
+        const p = document.getElementById('emoji-panel');
+        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
     };
 
     const emos = ["😂","❤️","👍","😊","🙏","🔥","📍","🌹","✅","💯","✨","😢"];
-    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:24px; padding:10px; cursor:pointer; text-align:center;" onclick="addE('${e}')">${e}</div>`).join('');
-    window.addE = (e) => { send(e, 'text'); closePopups(); };
+    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div style="font-size:25px; padding:10px; cursor:pointer; text-align:center;" onclick="addEmo('${e}')">${e}</div>`).join('');
+    window.addEmo = (e) => { send(e, 'text'); document.getElementById('emoji-panel').style.display = 'none'; };
 
     document.getElementById('f-in').onchange = (e) => {
         const f = e.target.files[0]; if(!f) return;
@@ -190,11 +206,13 @@
         off(ref(db, rK));
         onChildAdded(ref(db, rK), snap => {
             const d = snap.val(), isMe = d.s === myN, k = snap.key;
-            const div = document.createElement('div'); div.id = k; div.className = `msg ${isMe ? 'sent' : 'received'}`;
+            const div = document.createElement('div');
+            div.id = k; div.className = `msg ${isMe ? 'sent' : 'received'}`;
             let c = d.v;
-            if(d.t==='img') c = `<img src="${d.v}" style="width:100%; border-radius:5px;">`;
-            if(d.t==='file') c = `<div style="background:#eee; padding:8px; border-radius:5px;"><i class="fas fa-file"></i> <a href="${d.v}" download="${d.fn}">${d.fn}</a></div>`;
-            div.innerHTML = `<small style="color:var(--wa-teal); font-weight:bold;">${d.s}</small><div>${c}</div><small style="float:right; color:#888; font-size:9px;">${d.time}</small><span class="del-btn" onclick="del('${k}')">🗑️</span>`;
+            if(d.t==='voice') c = `<audio controls style="width:180px;"><source src="${d.v}"></audio>`;
+            else if(d.t==='img') c = `<img src="${d.v}" style="width:100%; border-radius:5px;">`;
+            else if(d.t==='file') c = `📄 <a href="${d.v}" download="${d.fn}">${d.fn}</a>`;
+            div.innerHTML = `<small style="font-weight:bold; color:var(--wa-teal);">${d.s}</small><div>${c}</div><small style="float:right; font-size:9px; color:#888;">${d.time}</small><span class="del-btn" onclick="del('${k}')">🗑️</span>`;
             f.appendChild(div); f.scrollTop = f.scrollHeight;
         });
         window.del = (id) => remove(ref(db, rK + "/" + id));
@@ -202,4 +220,5 @@
     }
 </script>
 </body>
-</html>
+    </html>
+            
