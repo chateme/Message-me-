@@ -3,161 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WhatsApp Nasir v101</title>
+    <title>WhatsApp Nasir v107 Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body, html { height: 100%; width: 100%; overflow: hidden; background: #111b21; position: fixed; }
         
-        /* پورے پیج کو موبائل اسکرین پر لاک کرنا */
-        body, html { 
-            height: 100%; width: 100%; overflow: hidden; 
-            background: #d1d7db; display: flex; justify-content: center;
-            position: fixed; /* اسکرین کو ہلنے سے روکنے کے لیے */
-        }
-        
-        #app-wrap { 
-            width: 100%; max-width: 500px; height: 100%; 
-            display: flex; flex-direction: column; background: var(--bg);
-            padding-bottom: env(safe-area-inset-bottom); /* آئی فون اور نئے اینڈرائیڈ کے لیے */
-        }
+        /* Security Screen */
+        #lock-screen { position: absolute; inset: 0; background: #111b21; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .pin-in { width: 200px; padding: 15px; margin: 20px; border-radius: 10px; border: none; font-size: 24px; text-align: center; background: #2a3942; color: white; letter-spacing: 5px; }
 
-        /* Header */
+        #app-wrap { width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; background: var(--bg); margin: 0 auto; display: none; position: relative; }
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 60px; flex-shrink: 0; }
         
-        /* Chat Area */
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; }
-        .msg-box { display: flex; width: 100%; margin-bottom: 12px; position: relative; }
-        .msg { padding: 8px 12px 28px 12px; border-radius: 12px; max-width: 80%; background: white; box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 100px; position: relative; }
-        .sent { background: #dcf8c6; margin-left: auto; }
-        .received { background: white; margin-right: auto; }
-        .del-btn { color: #f44336; font-size: 14px; position: absolute; bottom: 5px; left: 8px; cursor: pointer; }
-        .msg-time { font-size: 10px; color: #888; position: absolute; bottom: 5px; right: 10px; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; padding-bottom: 150px; }
+        .msg { padding: 10px 12px 30px 12px; border-radius: 12px; max-width: 85%; background: white; margin-bottom: 12px; position: relative; margin-left: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .sent { background: #dcf8c6; border-bottom-right-radius: 2px; }
+        .del-btn { color: #f44336; font-size: 16px; position: absolute; bottom: 6px; left: 10px; cursor: pointer; }
 
-        /* Footer - اس کو اسکرین کے بالکل نچلے حصے سے اوپر اٹھا دیا گیا ہے */
-        .footer-wrap {
-            background: #f0f2f5;
-            padding: 8px 10px 15px 10px; /* نیچے سے اضافی جگہ تاکہ بٹن باہر نہ جائیں */
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            width: 100%;
-        }
+        /* Floating Footer - Ultra Responsive */
+        .footer-fixed { position: absolute; bottom: 40px; left: 0; right: 0; padding: 0 10px; z-index: 1000; }
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(6, 1fr); padding: 10px; border-radius: 15px; margin-bottom: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; }
+        .emo { font-size: 26px; text-align: center; padding: 10px; cursor: pointer; }
 
-        .input-bar { 
-            flex: 1; background: white; border-radius: 25px; 
-            display: flex; align-items: center; padding: 0 10px; 
-            min-height: 48px; border: 1px solid #ccc;
-        }
-
-        #msg-input { 
-            flex: 1; border: none; outline: none; font-size: 16px; 
-            background: transparent; padding: 8px; max-height: 100px;
-        }
-
-        .bar-icon { color: #8696a0; font-size: 20px; padding: 8px; cursor: pointer; }
+        .bar-wrap { display: flex; align-items: flex-end; gap: 8px; width: 100%; }
+        .input-bar { flex: 1; background: white; border-radius: 25px; display: flex; align-items: center; padding: 5px 12px; min-height: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        #msg-input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; padding: 5px; max-height: 100px; }
         
-        .action-btn { 
-            background: var(--wa-teal); color: white; 
-            width: 48px; height: 48px; border-radius: 50%; 
-            border: none; display: flex; align-items: center; 
-            justify-content: center; font-size: 20px; flex-shrink: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-
-        /* Popups */
-        #emoji-panel { display: none; background: white; grid-template-columns: repeat(7, 1fr); padding: 10px; max-height: 180px; overflow-y: auto; border-top: 1px solid #ddd; }
-        .emo { font-size: 24px; text-align: center; padding: 8px; cursor: pointer; }
+        .main-action { background: var(--wa-teal); color: white; width: 54px; height: 54px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); flex-shrink: 0; }
     </style>
 </head>
 <body onclick="hidePopups()">
+
+<div id="lock-screen">
+    <i class="fas fa-user-shield" style="font-size: 50px; color: var(--wa-green);"></i>
+    <h3 style="margin-top:15px;">ناصر پرائیویٹ چیٹ</h3>
+    <input type="password" id="pass" class="pin-in" placeholder="PIN" maxlength="6">
+    <button onclick="unlock()" style="padding:12px 40px; border-radius:25px; background:var(--wa-green); border:none; font-weight:bold; cursor:pointer;">لاگ ان</button>
+</div>
 
 <div id="app-wrap">
     <div class="header">
         <i class="fas fa-arrow-left"></i>
         <div style="flex:1;"><h4>ناصر ممتاز</h4><small>آن لائن</small></div>
-        <i class="fas fa-video bar-icon" style="color:white"></i>
-        <i class="fas fa-ellipsis-v bar-icon" style="color:white"></i>
+        <i class="fas fa-video" style="padding:10px"></i>
     </div>
 
     <div id="chat-flow"></div>
-    <div id="emoji-panel" onclick="event.stopPropagation()"></div>
 
-    <div class="footer-wrap" onclick="event.stopPropagation()">
-        <div class="input-bar">
-            <i class="far fa-smile bar-icon" onclick="toggleEmoji()"></i>
-            <textarea id="msg-input" placeholder="میسج لکھیں..." rows="1" oninput="sync()"></textarea>
-            <i class="fas fa-paperclip bar-icon"></i>
-            <label for="cam" class="fas fa-camera bar-icon"></label>
-            <input type="file" id="cam" capture="camera" accept="image/*" style="display:none" onchange="sendImg(this)">
+    <div class="footer-fixed" onclick="event.stopPropagation()">
+        <div id="emoji-panel"></div>
+        <div class="bar-wrap">
+            <div class="input-bar">
+                <i class="far fa-smile" style="color:#8696a0; font-size:24px; cursor:pointer; padding:5px;" onclick="toggleEmo()"></i>
+                <textarea id="msg-input" placeholder="میسج لکھیں..." rows="1" oninput="ui()"></textarea>
+                <label for="cam" class="fas fa-camera" style="color:#8696a0; font-size:22px; padding:10px;"></label>
+                <input type="file" id="cam" capture="camera" accept="image/*" style="display:none" onchange="upImg(this)">
+            </div>
+            <button class="main-action" id="act-btn" onclick="go()">
+                <i class="fas fa-microphone" id="mic"></i>
+                <i class="fas fa-paper-plane" id="send" style="display:none;"></i>
+            </button>
         </div>
-        <button class="action-btn" id="act-btn" onclick="doAction()">
-            <i class="fas fa-microphone" id="mic"></i>
-            <i class="fas fa-paper-plane" id="send" style="display:none;"></i>
-        </button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, remove, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
     const db = getDatabase(app);
-    const rid = "NASIR_V101"; // فکسڈ روم آئی ڈی
+    let rec, chunks = [];
+
+    window.unlock = () => {
+        if(document.getElementById('pass').value === "123456") {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('app-wrap').style.display = 'flex';
+        } else { alert("غلط پن کوڈ!"); }
+    };
+
+    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","😢","✅","🌹","🙌","🤔","😎","🎉"];
+    const pnl = document.getElementById('emoji-panel');
+    pnl.innerHTML = emos.map(e => `<div class="emo" onclick="addE('${e}')">${e}</div>`).join('');
+    window.toggleEmo = () => pnl.style.display = pnl.style.display === 'grid' ? 'none' : 'grid';
+    window.addE = (e) => { document.getElementById('msg-input').value += e; ui(); };
+    window.hidePopups = () => pnl.style.display = 'none';
 
     const inp = document.getElementById('msg-input');
-    window.sync = () => {
+    window.ui = () => {
         const has = inp.value.trim().length > 0;
         document.getElementById('send').style.display = has ? 'block' : 'none';
         document.getElementById('mic').style.display = has ? 'none' : 'block';
         inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 'px';
     };
 
-    window.toggleEmoji = () => {
-        const p = document.getElementById('emoji-panel');
-        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
-    };
-    window.hidePopups = () => document.getElementById('emoji-panel').style.display = 'none';
-
-    const emos = ["😂","❤️","👍","😊","🙏","🔥","💯","📍","✨","😢","✅","🌹","🙌","🤔","😎"];
-    document.getElementById('emoji-panel').innerHTML = emos.map(e => `<div class="emo" onclick="addE('${e}')">${e}</div>`).join('');
-    window.addE = (e) => { inp.value += e; sync(); };
-
-    window.doAction = () => {
+    window.go = async () => {
         if(inp.value.trim()) {
-            send(inp.value, 'text');
-            inp.value = ""; sync(); hidePopups();
-        } else { alert("ریکارڈنگ شروع..."); }
+            push(ref(db, 'NASIR_V107'), { v: inp.value, t: 'text' });
+            inp.value = ""; ui(); pnl.style.display = 'none';
+        } else { startRec(); }
     };
 
-    window.sendImg = (el) => {
+    async function startRec() {
+        try {
+            if(!rec) {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                rec = new MediaRecorder(s);
+                rec.ondataavailable = e => chunks.push(e.data);
+                rec.onstop = () => {
+                    const b = new Blob(chunks, { type: 'audio/webm' });
+                    const r = new FileReader(); r.readAsDataURL(b);
+                    r.onloadend = () => push(ref(db, 'NASIR_V107'), { v: r.result, t: 'audio' });
+                    chunks = [];
+                };
+            }
+            if(rec.state === "inactive") {
+                rec.start(); document.getElementById('act-btn').style.background = "red";
+            } else {
+                rec.stop(); document.getElementById('act-btn').style.background = "#075e54";
+            }
+        } catch(e) { alert("براہ کرم سیٹنگز میں جا کر مائیک کی اجازت دیں"); }
+    }
+
+    window.upImg = (el) => {
         const f = el.files[0]; if(!f) return;
         const r = new FileReader(); r.readAsDataURL(f);
-        r.onload = () => send(r.result, 'img');
+        r.onload = () => push(ref(db, 'NASIR_V107'), { v: r.result, t: 'img' });
     };
 
-    const send = (v, t) => push(ref(db, 'CHATS/' + rid), {
-        s: "ناصر", v: v, t: t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-    });
-
-    onChildAdded(ref(db, 'CHATS/' + rid), (snap) => {
+    onChildAdded(ref(db, 'NASIR_V107'), (snap) => {
         const d = snap.val(), k = snap.key;
         const div = document.createElement('div');
-        div.id = k; div.className = "msg-box";
-        let body = d.t === 'text' ? d.v : `<img src="${d.v}" style="max-width:100%; border-radius:8px">`;
-        div.innerHTML = `<div class="msg sent">
-            ${body}<div class="msg-time">${d.time}</div>
-            <i class="fas fa-trash-can del-btn" onclick="del('${k}')"></i>
-        </div>`;
+        div.id = k; div.className = "msg sent";
+        let body = d.t === 'text' ? d.v : d.t === 'img' ? `<img src="${d.v}" style="max-width:100%; border-radius:8px">` : `<audio src="${d.v}" controls style="width:200px"></audio>`;
+        div.innerHTML = `${body} <i class="fas fa-trash-can del-btn" onclick="del('${k}')"></i>`;
         document.getElementById('chat-flow').appendChild(div);
         document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
     });
 
-    window.del = (id) => { if(confirm("ڈیلیٹ کریں؟")) remove(ref(db, 'CHATS/' + rid + '/' + id)); };
-    onChildRemoved(ref(db, 'CHATS/' + rid), s => document.getElementById(s.key)?.remove());
+    window.del = (id) => { if(confirm("ڈیلیٹ؟")) remove(ref(db, 'NASIR_V107/' + id)); document.getElementById(id).remove(); };
 </script>
 </body>
-    </html>
-    
+</html>
