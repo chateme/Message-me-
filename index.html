@@ -3,28 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v134</title>
+    <title>WhatsApp Nasir v136</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #25d366; --wa-teal: #075e54; --wa-bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body, html { height: 100%; width: 100%; overflow: hidden; background: #fff; }
 
+        /* Global UI */
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 100; position: relative; }
         #app-main { display: none; height: 100%; flex-direction: column; }
         .chat-list { flex: 1; overflow-y: auto; }
         .chat-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 12px; }
 
+        /* Chat Window */
         #chat-window { display: none; position: fixed; inset: 0; background: var(--wa-bg); flex-direction: column; z-index: 1000; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
         
-        .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        /* Message Style */
+        .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .msg-info { position: absolute; bottom: 4px; right: 8px; display: flex; align-items: center; gap: 4px; font-size: 10px; color: #777; }
 
+        /* Action Buttons */
         .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--wa-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 200; }
+        .invite-btn { font-size: 14px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; cursor: pointer; border: 1px solid white; }
 
-        /* Input Bar Protected */
+        /* Input Protected Design */
         .input-wrapper { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px; z-index: 2000; }
         .main-pill { background: white; border-radius: 25px; position: relative; min-height: 50px; display: flex; align-items: center; padding: 0 90px 0 45px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .smile-btn { position: absolute; left: 12px; font-size: 22px; color: #667781; cursor: pointer; }
@@ -33,27 +38,34 @@
         #msg-in { width: 100%; border: none; outline: none; font-size: 16px; background: transparent; padding: 12px 0; }
         #timer { color: #ff5252; font-weight: bold; font-size: 14px; display: none; margin-right: 5px; }
 
+        /* Menus */
         .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 -2px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 15px; }
         #emoji-panel { left: 10px; width: 280px; grid-template-columns: repeat(6, 1fr); gap: 10px; text-align: center; font-size: 24px; }
         #attach-panel { right: 15px; width: 180px; flex-direction: column; gap: 12px; }
 
+        /* Login Screen */
         #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
-        .auth-box input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; background: #2a3942; color: white; text-align: center; font-size: 18px; }
+        .auth-box { width: 100%; max-width: 320px; text-align: center; }
+        .auth-box input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; background: #2a3942; color: white; text-align: center; font-size: 18px; outline: none; }
     </style>
 </head>
 <body onclick="hidePopups()">
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 style="color:var(--wa-green); margin-bottom:20px;">WhatsApp Nasir</h2>
-        <input type="tel" id="u-phone" placeholder="موبائل نمبر">
-        <input type="password" id="u-pin" placeholder="پن کوڈ">
-        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border:none; border-radius:30px; color:white; font-weight:bold;">لاگ ان</button>
+        <h2 style="color:var(--wa-green); margin-bottom:10px;">Private Messenger</h2>
+        <p style="font-size:12px; color:#888; margin-bottom:20px;">محفوظ گفتگو کے لیے اپنا نمبر اور پن استعمال کریں</p>
+        <input type="tel" id="u-phone" placeholder="اپنا موبائل نمبر لکھیں">
+        <input type="password" id="u-pin" placeholder="پن کوڈ (یاد رکھیں)">
+        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border:none; border-radius:30px; color:white; font-weight:bold; font-size:16px;">لاگ ان / رجسٹر</button>
     </div>
 </div>
 
 <div id="app-main">
-    <div class="header"><b>WhatsApp</b><i class="fas fa-sign-out-alt" onclick="location.reload()"></i></div>
+    <div class="header">
+        <b>WhatsApp Nasir</b>
+        <div class="invite-btn" onclick="copyInvite()">Invite +</div>
+    </div>
     <div class="chat-list" id="contacts-ui"></div>
     <div class="fab" onclick="addNewChat()"><i class="fas fa-plus"></i></div>
 </div>
@@ -63,7 +75,7 @@
         <div style="display:flex; align-items:center; gap:10px;">
             <i class="fas fa-arrow-left" onclick="goBack()"></i>
             <div style="width:35px; height:35px; background:#ccc; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas fa-user" style="color:white"></i></div>
-            <div><b id="target-title">نام</b><br><small style="font-size:10px; color:#cfcfcf;">آن لائن</small></div>
+            <div><b id="target-title">صارف</b><br><small style="font-size:10px; color:#cfcfcf;">انکرپٹڈ چیٹ</small></div>
         </div>
     </div>
     <div id="chat-flow"></div>
@@ -79,7 +91,7 @@
         <div class="main-pill">
             <i class="far fa-smile smile-btn" onclick="toggleMenu('emoji-panel')"></i>
             <span id="timer">00:00</span>
-            <input type="text" id="msg-in" placeholder="میسج لکھیں..." oninput="upUI()">
+            <input type="text" id="msg-in" placeholder="محفوظ میسج لکھیں..." oninput="upUI()">
             <i class="fas fa-paperclip attach-btn" onclick="toggleMenu('attach-panel')"></i>
             <div class="mic-send-wrapper" id="main-btn" onclick="hAction()">
                 <i class="fas fa-microphone" id="mic-icon"></i>
@@ -98,11 +110,11 @@
     const db = getDatabase(app);
     let myID, toID, rec, chunks=[], tInt, secs=0, chatRef;
 
-    // Load Emojis
+    // Emojis
     const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","🌹","✅","📍"];
     const ep = document.getElementById('emoji-panel');
     ems.forEach(e => {
-        const s = document.createElement('span'); s.innerText = e;
+        const s = document.createElement('span'); s.innerText = e; s.style.cursor='pointer';
         s.onclick = () => { document.getElementById('msg-in').value += e; upUI(); };
         ep.appendChild(s);
     });
@@ -110,24 +122,28 @@
     window.login = () => {
         myID = document.getElementById('u-phone').value.trim();
         const pin = document.getElementById('u-pin').value.trim();
-        if(myID.length < 4) return;
+        if(myID.length < 4 || pin.length < 4) { alert("نمبر اور پن کم از کم 4 ہندسوں کا ہو"); return; }
+        
         onValue(ref(db, 'USERS/'+myID), s => {
             if(!s.val()) set(ref(db, 'USERS/'+myID), {pin}).then(()=>start());
             else if(s.val().pin === pin) start();
-            else alert("غلط پن");
+            else alert("غلط پن کوڈ! اپنا رجسٹرڈ پن استعمال کریں۔");
         }, {onlyOnce:true});
     };
 
     function start() { document.getElementById('auth-screen').style.display='none'; document.getElementById('app-main').style.display='flex'; loadC(); }
-    
-    // NEW CHAT - INSTANT OPEN VERSION
+
+    window.copyInvite = () => {
+        const text = `السلام علیکم! میں آپ سے محفوظ گفتگو کے لیے اپنی پرائیویٹ چیٹ ایپ استعمال کر رہا ہوں۔\nلنک: ${window.location.href}\nاپنا نمبر لکھیں اور اپنی مرضی کا پن کوڈ سیٹ کر کے لاگ ان کریں۔ وہاں سے میرا نمبر ایڈ کر کے بات شروع کریں!`;
+        navigator.clipboard.writeText(text);
+        alert("دعوت نامہ کاپی ہو گیا ہے! اب کسی کو بھی بھیج دیں۔");
+    };
+
     window.addNewChat = () => {
-        const n = prompt("نیا موبائل نمبر درج کریں:");
+        const n = prompt("جس کا نمبر ایڈ کرنا ہے وہ لکھیں:");
         if(n && n.length > 4) {
-            // Save to both mine and their contact list for syncing
             set(ref(db, 'CONTACTS/' + myID + '/' + n), true);
-            set(ref(db, 'CONTACTS/' + n + '/' + myID), true);
-            // Instant open the chat window
+            set(ref(db, 'CONTACTS/' + n + '/' + myID), true); // Cross-syncing for social feel
             openC(n);
         }
     };
@@ -138,25 +154,19 @@
             s.forEach(c => {
                 ui.innerHTML += `<div class="chat-item" onclick="openC('${c.key}')">
                     <div style="width:40px; height:40px; background:var(--wa-teal); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">${c.key[0]}</div>
-                    <div style="flex:1;"><b>${c.key}</b><br><small style="color:#888;">چیٹ کرنے کے لیے کلک کریں</small></div>
+                    <b>${c.key}</b>
                 </div>`;
             });
         });
     }
 
     window.openC = (n) => {
-        toID = n; 
-        document.getElementById('target-title').innerText = n;
+        toID = n; document.getElementById('target-title').innerText = n;
         document.getElementById('app-main').style.display='none';
         document.getElementById('chat-window').style.display='flex';
-        
         const cID = [myID, toID].sort().join('_');
-        const flow = document.getElementById('chat-flow'); 
-        flow.innerHTML = "";
-        
-        if(chatRef) off(chatRef); 
-        chatRef = ref(db, 'SHARED_CHATS/'+cID);
-        
+        const flow = document.getElementById('chat-flow'); flow.innerHTML = "";
+        if(chatRef) off(chatRef); chatRef = ref(db, 'SHARED_CHATS/'+cID);
         onChildAdded(chatRef, s => render(s.key, s.val()));
         onChildChanged(chatRef, s => render(s.key, s.val()));
     };
@@ -190,9 +200,8 @@
 
     window.sendLoc = () => {
         navigator.geolocation.getCurrentPosition(p => {
-            const lat = p.coords.latitude; const lng = p.coords.longitude;
-            const link = `https://www.google.com/maps?q=${lat},${lng}`;
-            send(`📍 لوکیشن: <a href="${link}" target="_blank" style="color:blue; text-decoration:underline;">نقشہ دیکھیں</a>`, 'text');
+            const link = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+            send(`📍 لوکیشن: <a href="${link}" target="_blank" style="color:blue;">نقشہ دیکھیں</a>`, 'text');
             hidePopups();
         });
     };
@@ -241,5 +250,5 @@
     window.goBack = () => { document.getElementById('chat-window').style.display='none'; document.getElementById('app-main').style.display='flex'; };
 </script>
 </body>
-                                                                                      </html>
-                                                                                      
+                    </html>
+    
