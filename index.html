@@ -3,83 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WhatsApp Nasir v154</title>
+    <title>WhatsApp Nasir v155</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --wa-bg: #e5ddd5; --wa-light: #dcf8c6; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body, html { height: 100%; width: 100%; overflow: hidden; background: #f0f2f5; }
 
-        /* Modern Auth Screen */
-        #auth-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #111b21 0%, #075e54 100%); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .auth-card { background: white; padding: 30px; border-radius: 25px; width: 100%; max-width: 380px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center; }
-        .auth-card h2 { color: var(--wa-teal); margin-bottom: 20px; font-size: 24px; }
-        .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; font-size: 16px; transition: 0.3s; }
-        .auth-card input:focus { border-color: var(--wa-teal); outline: none; }
-        .auth-btn { width: 100%; padding: 14px; background: var(--wa-teal); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 15px rgba(7,94,84,0.3); }
+        /* Beautiful Login Card */
+        #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .auth-card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; outline: none; }
+        .auth-btn { width: 100%; padding: 14px; background: var(--wa-teal); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* Header */
+        /* Main UI */
         .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 1000; }
         #app-main, #chat-window { display: none; height: 100vh; flex-direction: column; }
 
-        /* Chat List */
-        .chat-list { flex: 1; overflow-y: auto; background: white; }
-        .chat-item { padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; }
-        .chat-item:active { background: #f5f5f5; }
-        .avatar { width: 50px; height: 50px; background: #e1e9eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--wa-teal); font-weight: bold; font-size: 20px; }
-
         /* Chat Flow */
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background: var(--wa-bg); background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
-        .msg { padding: 8px 12px 22px; border-radius: 12px; max-width: 80%; position: relative; background: white; box-shadow: 0 1px 1px rgba(0,0,0,0.1); font-size: 15px; align-self: flex-start; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background: var(--wa-bg); background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 10px; padding-bottom: 70px; }
+        .msg { padding: 8px 12px 20px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: var(--wa-light); align-self: flex-end; }
-        .msg-time { position: absolute; bottom: 4px; left: 8px; font-size: 10px; color: #888; }
-        .del-msg { position: absolute; top: -5px; right: -25px; color: #ff4d4d; font-size: 14px; opacity: 0; cursor: pointer; }
-        .msg:hover .del-msg { opacity: 1; }
+        .msg-time { position: absolute; bottom: 3px; left: 8px; font-size: 10px; color: #888; }
 
-        /* Mobile Responsive Input Bar */
-        .footer { background: #f0f0f0; padding: 10px; position: fixed; bottom: 0; width: 100%; display: flex; align-items: center; gap: 8px; z-index: 2000; }
-        .pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 12px; border: 1px solid #ddd; min-height: 48px; }
-        #msg-in { flex: 1; border: none; outline: none; padding: 10px 5px; font-size: 16px; background: transparent; }
-        .pill-icon { color: #666; font-size: 20px; padding: 5px; cursor: pointer; flex-shrink: 0; }
-        .main-action { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; flex-shrink: 0; }
+        /* FIXED INPUT BAR (WhatsApp Style) */
+        .footer { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 5px; position: fixed; bottom: 0; width: 100%; z-index: 2000; }
+        .pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 10px; min-height: 45px; }
+        #msg-in { flex: 1; border: none; outline: none; padding: 10px; font-size: 16px; background: transparent; text-align: right; }
         
-        #emoji-panel { display: none; background: white; border-top: 1px solid #ddd; padding: 10px; grid-template-columns: repeat(8, 1fr); gap: 12px; position: fixed; bottom: 68px; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1999; box-shadow: 0 -5px 10px rgba(0,0,0,0.05); }
-        .emoji { font-size: 26px; text-align: center; cursor: pointer; }
-        #rec-timer { color: #ff4d4d; font-weight: bold; margin-left: 5px; display: none; font-size: 14px; }
+        .pill-icon { color: #666; font-size: 20px; padding: 8px; cursor: pointer; }
+        .action-btn { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        
+        #emoji-panel { display: none; background: white; grid-template-columns: repeat(7, 1fr); gap: 10px; padding: 10px; position: fixed; bottom: 60px; width: 100%; max-height: 180px; overflow-y: auto; border-top: 1px solid #ddd; z-index: 1999; }
+        .emoji { font-size: 25px; text-align: center; cursor: pointer; }
+        #rec-timer { color: red; font-weight: bold; font-size: 14px; margin-right: 5px; display: none; }
     </style>
 </head>
 <body onclick="closeEmoji()">
 
 <div id="auth-screen">
     <div class="auth-card">
-        <h2>ناصر میسنجر</h2>
-        <input type="text" id="u-name" placeholder="آپ کا نام (مثلاً ناصر)">
-        <input type="tel" id="u-phone" placeholder="موبائل نمبر (03001234567)">
-        <input type="password" id="u-pin" placeholder="4 ہندسوں کا پن کوڈ">
+        <h2 style="color:var(--wa-teal); margin-bottom:10px;">ناصر میسنجر</h2>
+        <input type="text" id="u-name" placeholder="آپ کا نام">
+        <input type="tel" id="u-phone" placeholder="موبائل نمبر">
+        <input type="password" id="u-pin" placeholder="پن کوڈ">
         <button class="auth-btn" onclick="login()">لاگ ان / رجسٹریشن</button>
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">محفوظ چیٹ، بہترین تجربہ</p>
     </div>
 </div>
 
 <div id="app-main">
     <div class="header">
-        <i class="fas fa-sign-out-alt" onclick="logout()" style="cursor:pointer; font-size: 20px;"></i>
-        <b>چیٹس</b>
-        <div onclick="addContact()" style="background:var(--wa-green); padding:6px 15px; border-radius:20px; cursor:pointer; font-size:13px; font-weight: bold;">+ نئی چیٹ</div>
+        <i class="fas fa-power-off" onclick="logout()"></i>
+        <b>ناصر چیٹس</b>
+        <div onclick="addContact()" style="background:var(--wa-green); padding:5px 12px; border-radius:15px; font-size:12px; cursor:pointer;">+ نیا نمبر</div>
     </div>
-    <div class="chat-list" id="list-ui"></div>
+    <div id="list-ui" style="flex:1; overflow-y:auto; background:white;"></div>
 </div>
 
 <div id="chat-window">
     <div class="header">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <i class="fas fa-arrow-right" onclick="goBack()" style="cursor:pointer; font-size: 18px;"></i>
-            <div id="target-info">
-                <b id="target-title" style="font-size: 16px;">نام معلوم</b><br>
-                <small id="target-phone" style="font-size: 11px; opacity: 0.8;"></small>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-arrow-right" onclick="goBack()"></i>
+            <div>
+                <b id="target-title">نام</b><br>
+                <small id="target-phone" style="font-size:10px;"></small>
             </div>
         </div>
-        <i class="fas fa-trash-alt" onclick="clearFullChat()" style="cursor:pointer; font-size: 18px;"></i>
+        <i class="fas fa-trash-alt" onclick="clearFull()"></i>
     </div>
     
     <div id="chat-flow"></div>
@@ -89,14 +79,14 @@
         <div class="pill">
             <i class="far fa-smile pill-icon" onclick="toggleEmoji()"></i>
             <span id="rec-timer">00:00</span>
-            <input type="text" id="msg-in" placeholder="میسج لکھیں..." oninput="upUI()" onfocus="scrollDown()">
-            <i class="fas fa-paperclip pill-icon" onclick="sendLoc()" title="لوکیشن"></i>
+            <input type="text" id="msg-in" placeholder="میسج لکھیں..." oninput="upUI()">
+            <i class="fas fa-map-marker-alt pill-icon" onclick="sendLoc()"></i>
             <i class="fas fa-camera pill-icon" onclick="document.getElementById('f-in').click()"></i>
             <input type="file" id="f-in" style="display:none" accept="image/*" onchange="upFile(this)">
         </div>
-        <div class="main-action" id="action-btn" onclick="handleBtnAction()">
-            <i class="fas fa-microphone" id="mic-icon"></i>
-            <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
+        <div class="action-btn" onclick="handleAction()">
+            <i class="fas fa-microphone" id="mic-i"></i>
+            <i class="fas fa-paper-plane" id="send-i" style="display:none"></i>
         </div>
     </div>
 </div>
@@ -113,57 +103,43 @@
     const clean = (n) => n.replace(/\D/g, '').slice(-10);
 
     window.onload = () => {
-        const id = localStorage.getItem('nasir_id');
-        const nm = localStorage.getItem('nasir_nm');
-        if(id && nm) { myID = id; myName = nm; startApp(); }
+        const id = localStorage.getItem('n_id'), nm = localStorage.getItem('n_nm');
+        if(id && nm) { myID = id; myName = nm; start(); }
     };
 
     window.login = () => {
-        const nm = document.getElementById('u-name').value.trim();
-        const ph = clean(document.getElementById('u-phone').value);
-        const pi = document.getElementById('u-pin').value;
-        if(!nm || ph.length < 10 || !pi) return alert("براہ کرم تمام معلومات درست درج کریں");
-        
-        get(ref(db, 'USERS/'+ph)).then(s => {
-            if(s.exists() && s.val().pin !== pi) return alert("غلط پن کوڈ!");
-            set(ref(db, 'USERS/'+ph), {name:nm, pin:pi, phone:ph}).then(() => {
-                myID = ph; myName = nm;
-                localStorage.setItem('nasir_id', ph);
-                localStorage.setItem('nasir_nm', nm);
-                startApp();
-            });
+        const nm = document.getElementById('u-name').value.trim(), ph = clean(document.getElementById('u-phone').value), pi = document.getElementById('u-pin').value;
+        if(!nm || ph.length < 10) return alert("معلومات مکمل کریں");
+        set(ref(db, 'USERS/'+ph), {name:nm, pin:pi, phone:ph}).then(() => {
+            myID = ph; myName = nm;
+            localStorage.setItem('n_id', ph); localStorage.setItem('n_nm', nm);
+            start();
         });
     };
 
-    window.logout = () => { if(confirm("لاگ آؤٹ کریں؟")) { localStorage.clear(); location.reload(); } };
-    function startApp() { document.getElementById('auth-screen').style.display='none'; document.getElementById('app-main').style.display='flex'; loadChats(); }
+    window.logout = () => { localStorage.clear(); location.reload(); };
+    function start() { document.getElementById('auth-screen').style.display='none'; document.getElementById('app-main').style.display='flex'; loadList(); }
 
     window.addContact = async () => {
-        const raw = prompt("جس سے چیٹ کرنی ہے اس کا نمبر لکھیں (10 ہندسے):");
+        const raw = prompt("نمبر لکھیں:");
         if(!raw) return;
         const n = clean(raw);
         const s = await get(child(ref(db), 'USERS/'+n));
-        
         if(s.exists()){
             await set(ref(db, `CONTACTS/${myID}/${n}`), s.val().name);
             await set(ref(db, `CONTACTS/${n}/${myID}`), myName);
-            openChat(n, s.val().name);
         } else {
-            const inviteLink = window.location.href;
-            const waLink = `https://wa.me/92${n}?text=Assalam-o-Alaikum! Nasir Messenger join karein: ${inviteLink}`;
-            if(confirm("یہ نمبر رجسٹر نہیں ہے۔ کیا آپ اسے واٹس ایپ پر انوائٹ کرنا چاہتے ہیں؟")) {
-                window.open(waLink, '_blank');
-            }
+            alert("یہ نمبر رجسٹر نہیں ہے۔ اسے انوائٹ کریں!");
         }
     };
 
-    function loadChats() {
+    function loadList() {
         onValue(ref(db, `CONTACTS/${myID}`), s => {
             const ui = document.getElementById('list-ui'); ui.innerHTML = "";
             s.forEach(c => {
-                ui.innerHTML += `<div class="chat-item" onclick="openChat('${c.key}', '${c.val()}')">
-                    <div class="avatar">${c.val()[0]}</div>
-                    <div style="flex:1"><b>${c.val()}</b><br><small style="color:gray">0${c.key}</small></div>
+                ui.innerHTML += `<div style="padding:15px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:12px;" onclick="openChat('${c.key}', '${c.val()}')">
+                    <div style="width:45px; height:45px; background:var(--wa-teal); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;">${c.val()[0]}</div>
+                    <div><b>${c.val()}</b><br><small>0${c.key}</small></div>
                 </div>`;
             });
         });
@@ -171,52 +147,48 @@
 
     window.openChat = (id, name) => {
         toID = id; document.getElementById('target-title').innerText = name;
-        document.getElementById('target-phone').innerText = '0' + id;
+        document.getElementById('target-phone').innerText = '0'+id;
         document.getElementById('app-main').style.display='none';
         document.getElementById('chat-window').style.display='flex';
         const cID = [myID, toID].sort().join('_');
         const flow = document.getElementById('chat-flow'); flow.innerHTML = "";
         if(chatRef) off(chatRef); chatRef = ref(db, 'SHARED_CHATS/'+cID);
-        onChildAdded(chatRef, s => renderMsg(s.key, s.val()));
+        onChildAdded(chatRef, s => render(s.key, s.val()));
     };
 
-    function renderMsg(kid, d) {
-        if(document.getElementById(kid)) return;
+    function render(kid, d) {
         const div = document.createElement('div');
         div.id = kid; div.className = "msg " + (d.sender===myID?"sent":"");
-        let html = d.m;
-        if(d.type==='img') html = `<img src="${d.m}" style="max-width:100%; border-radius:10px;" onclick="window.open('${d.m}')">`;
-        if(d.type==='audio') html = `<audio controls src="${d.m}" style="width:180px"></audio>`;
-        if(d.type==='loc') html = `<a href="${d.m}" target="_blank" style="color:var(--wa-teal); text-decoration:none;">📍 میری لوکیشن دیکھیں</a>`;
-        
-        div.innerHTML = html + `<div class="msg-time">${d.time}</div>`;
-        if(d.sender===myID) div.innerHTML += `<i class="fas fa-trash del-msg" onclick="delM('${kid}')"></i>`;
+        let c = d.m;
+        if(d.type==='img') c = `<img src="${d.m}" style="max-width:200px; border-radius:8px;">`;
+        if(d.type==='audio') c = `<audio controls src="${d.m}" style="width:180px"></audio>`;
+        if(d.type==='loc') c = `<a href="${d.m}" target="_blank">📍 میری لوکیشن دیکھیں</a>`;
+        div.innerHTML = c + `<div class="msg-time">${d.time}</div>`;
         document.getElementById('chat-flow').appendChild(div);
-        scrollDown();
+        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
     }
 
-    window.handleBtnAction = async () => {
+    window.handleAction = async () => {
         const inp = document.getElementById('msg-in');
-        if(inp.value.trim()){ sendMsg(inp.value, 'text'); inp.value=""; upUI(); return; }
-        
+        if(inp.value.trim()){ send(inp.value, 'text'); inp.value=""; upUI(); return; }
         if(!rec){
-            const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-            rec = new MediaRecorder(stream);
+            const st = await navigator.mediaDevices.getUserMedia({audio:true});
+            rec = new MediaRecorder(st);
             rec.ondataavailable = e => chunks.push(e.data);
             rec.onstop = () => {
                 const b = new Blob(chunks, {type:'audio/webm'});
                 const r = new FileReader(); r.readAsDataURL(b);
-                r.onloadend = () => sendMsg(r.result, 'audio');
-                chunks = []; document.getElementById('rec-timer').style.display='none';
+                r.onloadend = () => send(r.result, 'audio');
+                chunks=[]; document.getElementById('rec-timer').style.display='none';
             };
         }
         if(rec.state==='inactive'){
             rec.start(); document.getElementById('rec-timer').style.display='inline';
-            let s=0; timer = setInterval(() => { s++; let m=Math.floor(s/60), sec=s%60; document.getElementById('rec-timer').innerText=`${m}:${sec<10?'0':''}${sec}`; },1000);
+            let s=0; timer = setInterval(()=>{ s++; let m=Math.floor(s/60), sec=s%60; document.getElementById('rec-timer').innerText=`${m}:${sec<10?'0':''}${sec}`; },1000);
         } else { rec.stop(); clearInterval(timer); }
     };
 
-    function sendMsg(m, type) {
+    function send(m, type) {
         const cID = [myID, toID].sort().join('_');
         push(ref(db, 'SHARED_CHATS/'+cID), { m, type, sender:myID, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
     }
@@ -224,28 +196,22 @@
     window.upFile = (el) => {
         const f = el.files[0]; if(!f) return;
         const r = new FileReader(); r.readAsDataURL(f);
-        r.onloadend = () => sendMsg(r.result, 'img');
+        r.onloadend = () => send(r.result, 'img');
     };
 
     window.sendLoc = () => {
         navigator.geolocation.getCurrentPosition(p => {
-            sendMsg(`https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`, 'loc');
+            send(`https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`, 'loc');
         }, () => alert("لوکیشن آن کریں"));
     };
 
-    window.delM = (kid) => {
-        const cID = [myID, toID].sort().join('_');
-        if(confirm("میسج ڈیلیٹ کریں؟")) { remove(ref(db, `SHARED_CHATS/${cID}/${kid}`)); document.getElementById(kid).remove(); }
-    };
-
-    window.clearFullChat = () => { if(confirm("پوری چیٹ ڈیلیٹ؟")) remove(chatRef); location.reload(); };
-    window.upUI = () => { const v = document.getElementById('msg-in').value.trim(); document.getElementById('send-icon').style.display=v?'block':'none'; document.getElementById('mic-icon').style.display=v?'none':'block'; };
-    window.scrollDown = () => { const f = document.getElementById('chat-flow'); f.scrollTop = f.scrollHeight; };
+    window.upUI = () => { const v = document.getElementById('msg-in').value.trim(); document.getElementById('send-i').style.display=v?'block':'none'; document.getElementById('mic-i').style.display=v?'none':'block'; };
     window.toggleEmoji = () => { const p = document.getElementById('emoji-panel'); p.style.display = (p.style.display==='grid'?'none':'grid'); };
     window.closeEmoji = () => document.getElementById('emoji-panel').style.display = 'none';
     window.goBack = () => { document.getElementById('chat-window').style.display='none'; document.getElementById('app-main').style.display='flex'; };
+    window.clearFull = () => { if(confirm("چیٹ صاف کریں؟")) remove(chatRef); location.reload(); };
 
-    const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","🌹","✅","📍","😭","😘","🙌","✨","🎉","🤔","😮","👋"];
+    const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","🌹","✅","📍","😭","😘","🙌","✨","🎉","🤔"];
     ems.forEach(e => {
         const d = document.createElement('div'); d.className='emoji'; d.innerText=e;
         d.onclick = () => { document.getElementById('msg-in').value += e; upUI(); };
@@ -253,5 +219,5 @@
     });
 </script>
 </body>
-        </html>
+    </html>
     
