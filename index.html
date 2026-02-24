@@ -3,85 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v140</title>
+    <title>WhatsApp Nasir v141</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #25d366; --wa-teal: #075e54; --wa-bg: #e5ddd5; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body, html { height: 100%; width: 100%; overflow: hidden; background: #fff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body, html { height: 100%; width: 100%; overflow: hidden; background: #fff; position: fixed; }
         
-        /* UI Components */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 1000; position: relative; }
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 2000; }
         #app-main { display: none; height: 100%; flex-direction: column; }
-        .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .unread-badge { background: var(--wa-green); color: white; border-radius: 50%; padding: 2px 7px; font-size: 12px; }
+        .chat-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .chat-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 
-        #chat-window { display: none; position: fixed; inset: 0; background: var(--wa-bg); flex-direction: column; z-index: 2000; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
+        #chat-window { display: none; position: fixed; inset: 0; background: var(--wa-bg); flex-direction: column; z-index: 3000; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
         
-        /* Message Style */
-        .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 16px; }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .msg-info { position: absolute; bottom: 4px; right: 8px; display: flex; align-items: center; gap: 4px; font-size: 10px; color: #777; }
-        .del-btn { color: #ff5252; cursor: pointer; margin-left: 5px; font-size: 12px; }
 
-        /* Input Bar */
-        .input-wrapper { position: fixed; bottom: 0; width: 100%; padding: 10px; display: flex; align-items: center; gap: 8px; z-index: 3000; }
-        .main-pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        #msg-in { flex: 1; border: none; outline: none; padding: 12px 5px; font-size: 16px; }
-        .icon-btn { color: #667781; font-size: 20px; cursor: pointer; padding: 5px; }
-        .mic-btn { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        /* Fixed Input Bar for Mobile */
+        .input-wrapper { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 4000; }
+        .main-pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 12px; border: 1px solid #ddd; }
+        #msg-in { flex: 1; border: none; outline: none; padding: 10px 0; font-size: 16px; height: 40px; }
+        .icon-btn { color: #667781; font-size: 22px; cursor: pointer; padding: 5px; }
+        .mic-btn { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
 
-        /* Menus */
-        .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 -2px 15px rgba(0,0,0,0.2); padding: 15px; z-index: 4000; }
-        #emoji-panel { left: 10px; width: 280px; grid-template-columns: repeat(6, 1fr); gap: 10px; display: none; }
-        #attach-menu { right: 60px; width: 150px; flex-direction: column; gap: 15px; }
-
-        #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .pop-menu { display: none; position: absolute; bottom: 65px; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); padding: 15px; z-index: 5000; }
+        #emoji-panel { left: 10px; width: 260px; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
     </style>
 </head>
-<body onclick="hidePopups()">
+<body>
 
 <div id="auth-screen">
     <div style="width: 80%; max-width: 300px; text-align: center;">
-        <h2 style="color:var(--wa-green); margin-bottom:20px;">WhatsApp Nasir</h2>
+        <h2 style="color:var(--wa-green); margin-bottom:20px;">ناصر میسنجر</h2>
         <input type="tel" id="u-phone" placeholder="نمبر" style="width:100%; padding:15px; margin-bottom:10px; border-radius:10px; border:none; background:#2a3942; color:white; text-align:center;">
         <input type="password" id="u-pin" placeholder="پن" style="width:100%; padding:15px; margin-bottom:20px; border-radius:10px; border:none; background:#2a3942; color:white; text-align:center;">
-        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border:none; border-radius:30px; color:white; font-weight:bold;">داخل ہوں</button>
+        <button onclick="login()" style="width:100%; padding:15px; background:var(--wa-green); border:none; border-radius:30px; color:white; font-weight:bold;">لاگ ان</button>
     </div>
 </div>
 
 <div id="app-main">
-    <div class="header"><b>چیٹس</b><i class="fas fa-plus" onclick="addNewChat()"></i></div>
+    <div class="header">
+        <b>واٹس ایپ ناصر</b>
+        <div style="background:rgba(255,255,255,0.2); padding:8px 15px; border-radius:20px; font-size:14px;" onclick="addNewChat()">نئی چیٹ +</div>
+    </div>
     <div class="chat-list" id="contacts-ui"></div>
 </div>
 
 <div id="chat-window">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-arrow-left" onclick="goBack()"></i>
+            <i class="fas fa-arrow-left" style="padding:10px;" onclick="goBack()"></i>
             <b id="target-title">صارف</b>
         </div>
     </div>
     <div id="chat-flow"></div>
 
     <div id="emoji-panel" class="pop-menu" onclick="event.stopPropagation()"></div>
-    <div id="attach-menu" class="pop-menu" onclick="event.stopPropagation()">
-        <div onclick="document.getElementById('cam-in').click()"><i class="fas fa-camera" style="color:#ec407a"></i> کیمرہ</div>
-        <div onclick="document.getElementById('file-in').click()"><i class="fas fa-file" style="color:#5f66cd"></i> فائل</div>
-        <div onclick="sendLoc()"><i class="fas fa-map-marker-alt" style="color:#15c3d2"></i> لوکیشن</div>
-        <input type="file" id="cam-in" accept="image/*" capture="camera" style="display:none" onchange="upMedia(this)">
-        <input type="file" id="file-in" style="display:none" onchange="upMedia(this)">
-    </div>
 
-    <div class="input-wrapper" onclick="event.stopPropagation()">
+    <div class="input-wrapper">
         <div class="main-pill">
             <i class="far fa-smile icon-btn" onclick="toggleMenu('emoji-panel')"></i>
-            <input type="text" id="msg-in" placeholder="میسج..." oninput="upUI()">
-            <i class="fas fa-paperclip icon-btn" onclick="toggleMenu('attach-menu')"></i>
+            <input type="text" id="msg-in" placeholder="میسج لکھیں..." oninput="upUI()" onfocus="scrollDown()">
+            <i class="fas fa-paperclip icon-btn" onclick="alert('فائل فیچر فعال ہو رہا ہے...')"></i>
         </div>
-        <div class="mic-btn" id="main-act" onclick="handleAction()">
+        <div class="mic-btn" onclick="handleAction()">
             <i class="fas fa-microphone" id="mic-icon"></i>
             <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
         </div>
@@ -90,7 +79,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onValue, set, off, update, onChildChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, onValue, set, off, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com/" };
     const app = initializeApp(cfg);
@@ -102,7 +91,7 @@
     window.login = () => {
         myID = clean(document.getElementById('u-phone').value);
         const pin = document.getElementById('u-pin').value;
-        if(myID.length < 10) return alert("نمبر ٹھیک لکھیں");
+        if(myID.length < 10) return alert("نمبر درست لکھیں");
         onValue(ref(db, 'USERS/'+myID), s => {
             if(!s.val()) set(ref(db, 'USERS/'+myID), {pin}).then(start);
             else if(s.val().pin === pin) start();
@@ -112,14 +101,21 @@
 
     function start() { document.getElementById('auth-screen').style.display='none'; document.getElementById('app-main').style.display='flex'; loadC(); }
 
+    window.addNewChat = () => {
+        const raw = prompt("دوسرے بندے کا نمبر لکھیں:");
+        if(raw) {
+            const n = clean(raw);
+            set(ref(db, `CONTACTS/${myID}/${n}`), true);
+            set(ref(db, `CONTACTS/${n}/${myID}`), true);
+            openC(n);
+        }
+    };
+
     function loadC() {
         onValue(ref(db, `CONTACTS/${myID}`), s => {
             const ui = document.getElementById('contacts-ui'); ui.innerHTML = "";
             s.forEach(c => {
-                ui.innerHTML += `<div class="chat-item" onclick="openC('${c.key}')">
-                    <b>${c.key}</b>
-                    <span id="unread-${c.key}" class="unread-badge" style="display:none">0</span>
-                </div>`;
+                ui.innerHTML += `<div class="chat-item" onclick="openC('${c.key}')"><b>${c.key}</b><i class="fas fa-chevron-right" style="color:#ccc"></i></div>`;
             });
         });
     }
@@ -131,85 +127,62 @@
         const cID = [myID, toID].sort().join('_');
         const flow = document.getElementById('chat-flow'); flow.innerHTML = "";
         if(chatRef) off(chatRef); chatRef = ref(db, 'SHARED_CHATS/'+cID);
-        onChildAdded(chatRef, s => { render(s.key, s.val()); if(s.val().sender !== myID) update(ref(db, `SHARED_CHATS/${cID}/${s.key}`), {seen:true}); });
-        onChildChanged(chatRef, s => render(s.key, s.val()));
+        onChildAdded(chatRef, s => render(s.key, s.val()));
+        setTimeout(scrollDown, 200);
     };
 
     function render(id, d) {
         let div = document.getElementById(id) || document.createElement('div');
         div.id = id; div.className = "msg " + (d.sender===myID?"sent":"");
-        if(d.del) { div.innerHTML = "🚫 <i>میسج مٹایا گیا</i>"; }
-        else {
-            let content = d.m;
-            if(d.type==='img') content = `<img src="${d.m}" style="max-width:200px; border-radius:10px;">`;
-            if(d.type==='audio') content = `<audio controls src="${d.m}" style="width:150px;"></audio>`;
-            
-            let status = d.sender === myID ? (d.seen ? '<span style="color:#34b7f1">✓✓</span>' : '✓✓') : '';
-            div.innerHTML = content + `<div class="msg-info"><span>${d.time}</span> ${status} <i class="fas fa-trash del-btn" onclick="doDel('${id}')"></i></div>`;
-        }
+        let content = d.type === 'audio' ? `<audio controls src="${d.m}" style="width:160px"></audio>` : d.m;
+        div.innerHTML = content + `<div class="msg-info"><span>${d.time}</span></div>`;
         document.getElementById('chat-flow').appendChild(div);
-        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+        scrollDown();
     }
 
     window.handleAction = async () => {
         const inp = document.getElementById('msg-in');
         if(inp.value.trim()) { send(inp.value, 'text'); inp.value=""; upUI(); return; }
         
-        if(!rec) {
-            const st = await navigator.mediaDevices.getUserMedia({audio:true});
-            rec = new MediaRecorder(st);
-            rec.ondataavailable = e => chunks.push(e.data);
-            rec.onstop = () => {
-                const b = new Blob(chunks, {type:'audio/webm'});
-                const r = new FileReader(); r.readAsDataURL(b);
-                r.onloadend = () => send(r.result, 'audio');
-                chunks = [];
-            };
-        }
-        if(rec.state==='inactive') { rec.start(); document.getElementById('mic-icon').style.color='red'; }
-        else { rec.stop(); document.getElementById('mic-icon').style.color='white'; }
+        try {
+            if(!rec) {
+                const st = await navigator.mediaDevices.getUserMedia({audio:true});
+                rec = new MediaRecorder(st);
+                rec.ondataavailable = e => chunks.push(e.data);
+                rec.onstop = () => {
+                    const b = new Blob(chunks, {type:'audio/webm'});
+                    const r = new FileReader(); r.readAsDataURL(b);
+                    r.onloadend = () => send(r.result, 'audio');
+                    chunks = [];
+                };
+            }
+            if(rec.state==='inactive') { rec.start(); document.getElementById('mic-icon').style.color='red'; }
+            else { rec.stop(); document.getElementById('mic-icon').style.color='white'; }
+        } catch(e) { alert("مائیک تک رسائی نہیں مل رہی۔ براہ کرم براؤزر سیٹنگ میں مائیک آن کریں۔"); }
     };
 
     function send(m, type='text') {
         const cID = [myID, toID].sort().join('_');
-        const data = { m, type, sender:myID, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), seen:false };
-        push(ref(db, 'SHARED_CHATS/'+cID), data);
-        set(ref(db, `CONTACTS/${toID}/${myID}`), true);
+        push(ref(db, 'SHARED_CHATS/'+cID), { m, type, sender:myID, time:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
     }
 
-    window.upMedia = (el) => {
-        const f = el.files[0]; if(!f) return;
-        const r = new FileReader(); r.readAsDataURL(f);
-        r.onloadend = () => send(r.result, f.type.includes('image') ? 'img' : 'file');
-    };
-
-    window.sendLoc = () => {
-        navigator.geolocation.getCurrentPosition(p => {
-            const link = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-            send(`📍 لوکیشن: <a href="${link}" target="_blank">دیکھیں</a>`, 'text');
-        });
-    };
-
-    window.doDel = (id) => { if(confirm("مٹائیں؟")) update(ref(db, `SHARED_CHATS/${[myID,toID].sort().join('_')}/${id}`), {del:true}); };
-
+    window.scrollDown = () => { const f = document.getElementById('chat-flow'); f.scrollTop = f.scrollHeight; };
     window.upUI = () => {
         const hasT = document.getElementById('msg-in').value.trim();
         document.getElementById('send-icon').style.display = hasT ? 'block' : 'none';
         document.getElementById('mic-icon').style.display = hasT ? 'none' : 'block';
     };
 
-    window.toggleMenu = (id) => { const m = document.getElementById(id); m.style.display = m.style.display==='grid'||m.style.display==='flex'?'none':(id==='emoji-panel'?'grid':'flex'); };
-    window.hidePopups = () => { document.getElementById('emoji-panel').style.display='none'; document.getElementById('attach-menu').style.display='none'; };
+    window.toggleMenu = (id) => { const m = document.getElementById(id); m.style.display = m.style.display==='grid'?'none':'grid'; };
     window.goBack = () => { document.getElementById('chat-window').style.display='none'; document.getElementById('app-main').style.display='flex'; };
 
-    // Emoji loading
-    const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","🌹","✅","📍","📷","📞"];
+    const ems = ["😊","😂","❤️","😍","👍","🙏","🔥","🌹","✅","📍"];
     ems.forEach(e => {
-        const s = document.createElement('span'); s.innerText = e; s.style.cursor='pointer';
+        const s = document.createElement('span'); s.innerText = e; s.style.fontSize='24px'; s.style.cursor='pointer';
         s.onclick = () => { document.getElementById('msg-in').value += e; upUI(); };
         document.getElementById('emoji-panel').appendChild(s);
     });
 </script>
 </body>
-        </html>
-                
+    </html>
+    
