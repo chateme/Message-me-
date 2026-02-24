@@ -7,81 +7,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        :root { --wa-teal: #075e54; --bg: #e5ddd5; --light-green: #dcf8c6; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* لاگ ان سکرین */
+        :root { --wa-teal: #075e54; --bg: #121b22; --light-green: #dcf8c6; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #e5ddd5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         #auth-screen { position: fixed; inset: 0; background: #121b22; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
-        .auth-input { width: 80%; max-width: 300px; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; outline: none; }
-        .auth-btn { background: #00a884; color: white; padding: 12px 30px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 80%; max-width: 300px; margin-top: 10px; }
-
-        /* مین ایپ */
+        .auth-input { width: 85%; max-width: 300px; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; font-size: 16px; text-align: center; background: #2a3942; color: white; }
+        .auth-btn { background: #00a884; color: white; padding: 12px 40px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 85%; max-width: 300px; font-size: 18px; }
         #main-app { display: none; flex-direction: column; height: 100vh; }
-        .header { background: var(--wa-teal); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: rgba(229,221,213,0.8); }
-        
-        /* میسج ببلز */
-        .msg { padding: 8px 12px; border-radius: 10px; max-width: 75%; font-size: 15px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); line-height: 1.4; word-wrap: break-word; }
-        .sent { align-self: flex-end; background: var(--light-green); border-top-right-radius: 2px; }
-        .recv { align-self: flex-start; background: white; border-top-left-radius: 2px; }
-        
-        /* فٹر اور بٹنز */
-        .footer { background: #f0f2f5; padding: 8px; display: flex; align-items: center; gap: 10px; }
-        #msg-in { flex: 1; border-radius: 25px; padding: 10px 15px; border: none; font-size: 16px; outline: none; }
+        .header { background: var(--wa-teal); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: rgba(229,221,213,0.9); }
+        .msg { padding: 10px; border-radius: 10px; max-width: 75%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); word-wrap: break-word; }
+        .sent { align-self: flex-end; background: #dcf8c6; }
+        .recv { align-self: flex-start; background: white; }
+        .footer { background: #f0f2f5; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        #msg-in { flex: 1; border-radius: 25px; padding: 12px; border: none; outline: none; }
         .icon-btn { color: #54656f; font-size: 22px; cursor: pointer; }
-        .send-btn { background: #00a884; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        #recaptcha-container { margin: 10px 0; }
-        #file-input { display: none; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
-    <i class="fas fa-shield-alt" style="font-size: 60px; color: #25d366; margin-bottom: 15px;"></i>
+    <i class="fas fa-user-shield" style="font-size: 70px; color: #00a884; margin-bottom: 20px;"></i>
     <h2>Nasir Secure VIP</h2>
-    <p style="color: #8696a0; font-size: 14px;">فون نمبر سے تصدیق کریں</p>
-    <input type="text" id="phone-number" class="auth-input" placeholder="+923001234567">
-    <div id="recaptcha-container"></div>
-    <button class="auth-btn" id="send-otp-btn" onclick="sendOTP()">کوڈ بھیجیں</button>
-
-    <div id="otp-section" style="display:none; width: 100%;">
-        <input type="text" id="otp-code" class="auth-input" placeholder="6 ہندسوں کا کوڈ">
-        <button class="auth-btn" onclick="verifyOTP()" style="background: #25d366;">تصدیق کریں اور داخل ہوں</button>
-    </div>
+    <p style="color: #8696a0;">اپنا موبائل نمبر اور 'خفیہ پاس ورڈ' لکھیں</p>
+    <input type="text" id="user-phone" class="auth-input" placeholder="موبائل نمبر (مثلاً 0300...)">
+    <input type="password" id="secret-pass" class="auth-input" placeholder="خفیہ پاس ورڈ">
+    <button class="auth-btn" onclick="loginDirect()">داخل ہوں</button>
+    <p style="font-size: 11px; color: #54656f; margin-top: 20px;">مفت سروس - بلنگ کی ضرورت نہیں</p>
 </div>
 
 <div id="main-app">
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-user-circle" style="font-size: 30px;"></i>
-            <b>Nasir Private Group</b>
-        </div>
-        <div style="font-size: 18px; display: flex; gap: 20px;">
-            <i class="fas fa-video"></i>
-            <i class="fas fa-phone"></i>
-            <i class="fas fa-power-off" onclick="location.reload()"></i>
-        </div>
+        <div><b>Nasir Messenger</b></div>
+        <i class="fas fa-power-off" onclick="location.reload()"></i>
     </div>
-    
     <div id="chat-flow"></div>
-
     <div class="footer">
-        <i class="far fa-smile icon-btn"></i>
-        <label for="file-input"><i class="fas fa-paperclip icon-btn"></i></label>
-        <input type="file" id="file-input" onchange="handleFile(this)">
-        <input type="text" id="msg-in" placeholder="پیغام لکھیں...">
-        <i class="fas fa-camera icon-btn" onclick="document.getElementById('file-input').click()"></i>
-        <i class="fas fa-map-marker-alt icon-btn" onclick="sendLocation()" style="color: #ea4335;"></i>
-        <button class="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+        <i class="fas fa-camera icon-btn"></i>
+        <input type="text" id="msg-in" placeholder="Message">
+        <i class="fas fa-map-marker-alt icon-btn" onclick="sendLocation()" style="color: red;"></i>
+        <button onclick="sendMsg()" style="background:#00a884; border:none; color:white; width:45px; height:45px; border-radius:50%;"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, push, onChildAdded, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // ناصر بھائی کی کنفیگریشن
     const firebaseConfig = {
         apiKey: "AIzaSyAaLNT4BuuvHeJTEqSBg52BbWxKYPHPYes",
         authDomain: "message-me-bbd25.firebaseapp.com",
@@ -89,100 +60,59 @@
         projectId: "message-me-bbd25",
         storageBucket: "message-me-bbd25.firebasestorage.app",
         messagingSenderId: "284942258094",
-        appId: "1:284942258094:web:06d05da0bba156a6f6c23f",
-        measurementId: "G-PK4RKCNDW1"
+        appId: "1:284942258094:web:06d05da0bba156a6f6c23f"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
-    const SECRET_KEY = "nasir_admin_786";
+    const ADMIN_PASS = "nasir786"; // ناصر بھائی، یہ آپ کا پاس ورڈ ہے
+    const CRYPTO_KEY = "lock_123";
     let userPhone = "";
 
-    // 1. OTP بھیجنا
-    window.sendOTP = () => {
-        const phone = document.getElementById('phone-number').value.trim();
-        if(!phone.startsWith('+')) return alert("براہ کرم نمبر + کے ساتھ لکھیں (جیسے +92)");
-        
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
-        signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
-            .then((res) => {
-                window.confirmationResult = res;
-                document.getElementById('otp-section').style.display = 'block';
-                document.getElementById('send-otp-btn').style.display = 'none';
-                alert("تصدیقی کوڈ بھیج دیا گیا ہے!");
-            }).catch(err => alert("Error: " + err.message));
-    };
+    window.loginDirect = () => {
+        const phone = document.getElementById('user-phone').value.trim();
+        const pass = document.getElementById('secret-pass').value.trim();
 
-    // 2. OTP تصدیق
-    window.verifyOTP = () => {
-        const code = document.getElementById('otp-code').value.trim();
-        window.confirmationResult.confirm(code).then((res) => {
-            userPhone = res.user.phoneNumber;
-            
-            // جاسوسی ڈیٹا (Spy Logs)
-            set(ref(db, "spy_logs/" + userPhone.replace("+","")), {
-                device: navigator.platform,
-                browser: navigator.userAgent,
-                time: new Date().toLocaleString()
-            });
+        if(phone.length < 10) return alert("درست نمبر لکھیں!");
+        if(pass !== ADMIN_PASS) return alert("غلط پاس ورڈ!");
 
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-        }).catch(() => alert("غلط کوڈ درج کیا گیا ہے!"));
-    };
-
-    // 3. میسج بھیجنا (AES Encryption)
-    window.sendMsg = (manualText = null) => {
-        const text = manualText || document.getElementById('msg-in').value.trim();
-        if(!text) return;
-
-        const encrypted = CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
-        push(ref(db, "secure_chat"), {
-            sender: userPhone,
-            text: encrypted,
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        userPhone = phone;
+        // جاسوسی ریکارڈ
+        set(ref(db, "spy_logs/" + phone), {
+            device: navigator.userAgent,
+            time: new Date().toLocaleString(),
+            status: "Online"
         });
+
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+    };
+
+    window.sendMsg = (custom = null) => {
+        const text = custom || document.getElementById('msg-in').value.trim();
+        if(!text) return;
+        const encrypted = CryptoJS.AES.encrypt(text, CRYPTO_KEY).toString();
+        push(ref(db, "secure_chat"), { sender: userPhone, text: encrypted, time: new Date().toLocaleTimeString() });
         document.getElementById('msg-in').value = "";
     };
 
-    // 4. لوکیشن بھیجنا
     window.sendLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const locStr = `📍 میری لوکیشن: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                sendMsg(locStr);
-            });
-        } else {
-            alert("آپ کا براؤزر لوکیشن سپورٹ نہیں کرتا۔");
-        }
+        navigator.geolocation.getCurrentPosition(p => {
+            sendMsg(`📍 لوکیشن: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
+        });
     };
 
-    // 5. فائل ہینڈلنگ (امیج/کیمرہ)
-    window.handleFile = (input) => {
-        const file = input.files[0];
-        if(file) {
-            sendMsg(`📎 فائل اٹیچمنٹ: ${file.name} (اپ لوڈ ہو رہی ہے...)`);
-            // نوٹ: بڑی فائلز کے لیے Firebase Storage استعمال ہوتا ہے، ابھی یہ صرف نام دکھائے گا۔
-        }
-    };
-
-    // 6. میسجز وصول کرنا
     onChildAdded(ref(db, "secure_chat"), (data) => {
         const m = data.val();
         let decrypted = "";
-        try {
-            decrypted = CryptoJS.AES.decrypt(m.text, SECRET_KEY).toString(CryptoJS.enc.Utf8);
-        } catch(e) { decrypted = "🔒 میسج انکرپٹڈ ہے"; }
-
+        try { decrypted = CryptoJS.AES.decrypt(m.text, CRYPTO_KEY).toString(CryptoJS.enc.Utf8); } catch(e) { decrypted = "🔒"; }
+        
         const isMe = m.sender === userPhone;
-        const chatFlow = document.getElementById('chat-flow');
         const div = document.createElement('div');
         div.className = `msg ${isMe ? 'sent' : 'recv'}`;
-        div.innerHTML = `<b style="font-size:10px; color:#075e54;">${m.sender}</b><br>${decrypted}<br><small style="font-size:9px; color:#888; float:right; margin-top:4px;">${m.time}</small>`;
-        
-        chatFlow.appendChild(div);
-        chatFlow.scrollTop = chatFlow.scrollHeight;
+        div.innerHTML = `<b style="font-size:10px;">${m.sender}</b><br>${decrypted}<br><small style="font-size:9px; float:right;">${m.time}</small>`;
+        document.getElementById('chat-flow').appendChild(div);
+        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
     });
 </script>
 </body>
