@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WhatsApp Nasir v148</title>
+    <title>WhatsApp Nasir v149</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-green: #25d366; --wa-teal: #075e54; --wa-bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100%; width: 100%; overflow: hidden; background: #f0f2f5; }
 
-        /* Auth Modern Screen */
+        /* Auth Screen */
         #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .auth-card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .auth-card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
         .auth-card input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; outline: none; }
         .auth-btn { width: 100%; padding: 12px; background: var(--wa-teal); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* Main App Header */
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 1000; }
+        /* Header */
+        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
         #app-main { display: none; height: 100%; flex-direction: column; }
         .chat-list { flex: 1; overflow-y: auto; background: white; }
         .chat-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; cursor: pointer; }
@@ -27,22 +27,29 @@
         #chat-window { display: none; position: fixed; inset: 0; background: var(--wa-bg); flex-direction: column; z-index: 3000; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         
-        .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
+        .msg { padding: 8px 12px 22px 12px; border-radius: 10px; max-width: 85%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .msg-info { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #777; }
 
-        /* Fixed Footer Input Area */
-        .input-wrapper { background: #f0f0f0; padding: 8px; display: flex; align-items: center; gap: 8px; min-height: 60px; }
-        .main-pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 0 12px; border: 1px solid #ddd; }
+        /* Input Area Fix: Buttons Inside the Pill */
+        .input-wrapper { background: #f0f0f0; padding: 10px; display: flex; align-items: center; }
+        .main-pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 2px 8px; border: 1px solid #ddd; overflow: hidden; }
         #msg-in { flex: 1; border: none; outline: none; padding: 10px; font-size: 16px; background: transparent; min-width: 0; }
-        .mic-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        #rec-timer { color: #e91e63; font-weight: bold; margin-right: 8px; font-size: 14px; white-space: nowrap; }
+        
+        /* Inner Buttons */
+        .inner-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; border-radius: 50%; }
+        .emoji-btn { color: #666; }
+        .attach-btn { color: #666; }
+        .action-btn { color: var(--wa-teal); }
+        .recording-active { color: red !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
+        #rec-timer { color: red; font-weight: bold; font-size: 14px; margin-right: 5px; white-space: nowrap; }
         #emoji-panel { display: none; position: absolute; bottom: 70px; left: 10px; background: white; border-radius: 12px; padding: 10px; width: 280px; grid-template-columns: repeat(6, 1fr); gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 4000; }
 
         /* Invite Dialog */
-        #invite-box { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; justify-content: center; align-items: center; padding: 20px; }
-        .invite-content { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 100%; max-width: 300px; }
+        #invite-box { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 6000; justify-content: center; align-items: center; padding: 20px; }
+        .invite-content { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 100%; max-width: 320px; }
         .invite-btn { display: block; background: var(--wa-green); color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
@@ -52,15 +59,16 @@
     <div class="auth-card">
         <h2 style="color:var(--wa-teal); margin-bottom:15px;">رجسٹریشن</h2>
         <input type="text" id="u-name" placeholder="پورا نام">
-        <input type="tel" id="u-phone" placeholder="موبائل نمبر">
+        <input type="tel" id="u-phone" placeholder="موبائل نمبر (10 ہندسے)">
         <input type="password" id="u-pin" placeholder="پن کوڈ">
         <button class="auth-btn" onclick="login()">داخل ہوں</button>
+        <p style="font-size:11px; color:gray; margin-top:10px;">مثال: 3001234567</p>
     </div>
 </div>
 
 <div id="app-main">
     <div class="header">
-        <i class="fas fa-power-off" onclick="location.reload()" style="cursor:pointer;"></i>
+        <i class="fas fa-sync" onclick="location.reload()" style="cursor:pointer;"></i>
         <b>ناصر میسنجر</b>
         <div onclick="addNewChat()" style="background:var(--wa-green); padding:5px 12px; border-radius:15px; cursor:pointer; font-size:13px;">نئی چیٹ +</div>
     </div>
@@ -80,26 +88,25 @@
 
     <div class="input-wrapper" onclick="event.stopPropagation()">
         <div class="main-pill">
-            <i class="far fa-smile" style="font-size:22px; color:#666; cursor:pointer;" onclick="toggleEmoji()"></i>
+            <div class="inner-btn emoji-btn" onclick="toggleEmoji()"><i class="far fa-smile"></i></div>
             <span id="rec-timer" style="display:none;">00:00</span>
             <input type="text" id="msg-in" placeholder="میسج..." oninput="upUI()">
-            <i class="fas fa-paperclip" style="font-size:20px; color:#666; margin-left:8px; cursor:pointer;" onclick="document.getElementById('file-up').click()"></i>
+            <div class="inner-btn attach-btn" onclick="document.getElementById('file-up').click()"><i class="fas fa-paperclip"></i></div>
             <input type="file" id="file-up" style="display:none" onchange="upFile(this)">
-        </div>
-        <div class="mic-btn" id="action-btn" onclick="handleAction()">
-            <i class="fas fa-microphone" id="mic-icon"></i>
-            <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
+            <div class="inner-btn action-btn" id="action-btn" onclick="handleAction()">
+                <i class="fas fa-microphone" id="mic-icon"></i>
+                <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="invite-box">
     <div class="invite-content">
-        <i class="fas fa-user-plus" style="font-size:40px; color:var(--wa-teal); margin-bottom:15px;"></i>
         <h3>صارف نہیں ملا</h3>
         <p id="invite-msg" style="color:gray; font-size:14px; margin-top:10px;"></p>
-        <a id="invite-link" class="invite-btn" target="_blank">واٹس ایپ پر انوائٹ کریں</a>
-        <button onclick="document.getElementById('invite-box').style.display='none'" style="border:none; background:none; color:red; margin-top:15px; cursor:pointer;">بند کریں</button>
+        <a id="invite-link" class="invite-btn" target="_blank">لنک کے ساتھ انوائٹ کریں</a>
+        <button onclick="document.getElementById('invite-box').style.display='none'" style="border:none; background:none; color:red; margin-top:15px; cursor:pointer;">کینسل</button>
     </div>
 </div>
 
@@ -112,7 +119,13 @@
     const db = getDatabase(app);
     let myID, myName, toID, chatRef, rec, chunks=[], timer;
 
-    const clean = (n) => n.replace(/\D/g, '').slice(-10);
+    // نمبر کو صاف کرنے اور 10 ہندسے لینے کا فنکشن
+    const clean = (n) => {
+        let num = n.replace(/\D/g, ''); // صرف نمبر رکھیں
+        if (num.startsWith('92')) num = num.slice(2);
+        if (num.startsWith('0')) num = num.slice(1);
+        return num;
+    };
 
     window.login = () => {
         const nameInput = document.getElementById('u-name').value.trim();
@@ -120,17 +133,14 @@
         const pinInput = document.getElementById('u-pin').value;
         myID = clean(rawPhone);
 
-        if(!nameInput || myID.length < 10) return alert("نام اور نمبر مکمل لکھیں");
+        if(!nameInput || myID.length !== 10) return alert("براہ کرم 10 ہندسوں کا صحیح موبائل نمبر لکھیں (مثال: 3001234567)");
 
         get(ref(db, 'USERS/'+myID)).then((s) => {
             if(!s.exists()) {
-                set(ref(db, 'USERS/'+myID), {name: nameInput, pin: pinInput, phone: myID}).then(() => { 
-                    myName = nameInput; start(); 
-                });
+                set(ref(db, 'USERS/'+myID), {name: nameInput, pin: pinInput, phone: myID}).then(() => { myName = nameInput; start(); });
             } else {
-                if(s.val().pin === pinInput) { 
-                    myName = s.val().name || "ناصر صارف"; start(); 
-                } else alert("غلط پن کوڈ");
+                if(s.val().pin === pinInput) { myName = s.val().name; start(); }
+                else alert("غلط پن کوڈ");
             }
         });
     };
@@ -138,21 +148,21 @@
     function start() { document.getElementById('auth-screen').style.display='none'; document.getElementById('app-main').style.display='flex'; loadC(); }
 
     window.addNewChat = async () => {
-        const raw = prompt("نمبر درج کریں:");
+        const raw = prompt("نمبر درج کریں (10 ہندسے):");
         if(!raw) return;
         const n = clean(raw);
-        if(n === myID) return alert("آپ خود کو ایڈ نہیں کر سکتے");
+        if(n === myID) return alert("آپ خود کا نمبر ایڈ نہیں کر سکتے");
 
         const s = await get(child(ref(db), 'USERS/' + n));
         if (s.exists()) {
-            const partnerName = s.val().name || "Unknown";
-            await set(ref(db, `CONTACTS/${myID}/${n}`), partnerName);
+            const pName = s.val().name || "Unknown";
+            await set(ref(db, `CONTACTS/${myID}/${n}`), pName);
             await set(ref(db, `CONTACTS/${n}/${myID}`), myName || "User");
-            loadC(); 
-            openC(n, partnerName);
+            loadC(); openC(n, pName);
         } else {
+            const appLink = window.location.href; // ایپ کا موجودہ لنک
             document.getElementById('invite-msg').innerText = "نمبر " + n + " رجسٹر نہیں ہے۔";
-            document.getElementById('invite-link').href = `https://wa.me/92${n}?text=Assalam o Alaikum! Please register on Nasir Messenger App to chat with me.`;
+            document.getElementById('invite-link').href = `https://wa.me/92${n}?text=Assalam o Alaikum! Please register on Nasir Messenger to chat with me. Click here to open the app: ${appLink}`;
             document.getElementById('invite-box').style.display = 'flex';
         }
     };
@@ -166,7 +176,7 @@
                     div.className = 'chat-item';
                     div.onclick = () => openC(c.key, c.val());
                     div.innerHTML = `<div class="avatar">${c.val()[0].toUpperCase()}</div>
-                                     <div><b>${c.val()}</b><br><small style="color:gray">${c.key}</small></div>`;
+                                     <div><b>${c.val()}</b><br><small style="color:gray">0${c.key}</small></div>`;
                     ui.appendChild(div);
                 });
             } else { ui.innerHTML = "<p style='text-align:center; padding:20px; color:gray;'>نئی چیٹ شروع کریں</p>"; }
@@ -205,19 +215,18 @@
                     const b = new Blob(chunks, {type:'audio/webm'});
                     const r = new FileReader(); r.readAsDataURL(b);
                     r.onloadend = () => send(r.result, 'audio');
-                    chunks = []; clearInterval(timer); document.getElementById('rec-timer').style.display='none';
+                    chunks = []; clearInterval(timer); 
+                    document.getElementById('rec-timer').style.display='none';
+                    document.getElementById('action-btn').classList.remove('recording-active');
                 };
             } catch(e) { alert("مائیک پرمیشن دیں"); return; }
         }
         if(rec.state==='inactive') { 
             rec.start(); 
-            document.getElementById('action-btn').style.background='red';
+            document.getElementById('action-btn').classList.add('recording-active');
             document.getElementById('rec-timer').style.display='inline';
             let s = 0; timer = setInterval(() => { s++; let m=Math.floor(s/60); let sec=s%60; document.getElementById('rec-timer').innerText = `${m}:${sec<10?'0':''}${sec}`; }, 1000);
-        } else { 
-            rec.stop(); 
-            document.getElementById('action-btn').style.background='#075e54'; 
-        }
+        } else { rec.stop(); }
     };
 
     function send(m, type='text') {
@@ -250,5 +259,5 @@
     });
 </script>
 </body>
-            </html>
-                
+    </html>
+    
