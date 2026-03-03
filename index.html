@@ -1,81 +1,96 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nasir Secure WhatsApp v5.0</title>
+    <title>NexChat | Ultimate Secure Messenger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        :root { --wa-green: #25d366; --wa-teal: #075e54; --wa-bg: #e5ddd5; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; direction: rtl; }
-        body, html { height: 100%; width: 100%; overflow: hidden; background: #fff; }
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 100; position: relative; }
-        #app-main { display: none; height: 100%; flex-direction: column; }
+        :root { --brand: #00a884; --dark: #111b21; --teal: #075e54; --bg: #e5ddd5; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body, html { height: 100%; width: 100%; overflow: hidden; }
+
+        /* Header */
+        .header { background: var(--teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 1000; position: relative; }
+        
+        /* Main UI */
+        #app-main { display: none; height: 100%; flex-direction: column; background: white; }
         .chat-list { flex: 1; overflow-y: auto; }
         .chat-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        #chat-window { display: none; position: fixed; inset: 0; background: var(--wa-bg); flex-direction: column; z-index: 1000; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); padding-bottom: 80px; }
-        .msg { padding: 8px 12px 20px 12px; border-radius: 10px; max-width: 80%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 16px; }
-        .sent { background: #dcf8c6; align-self: flex-end; }
-        .msg-info { position: absolute; bottom: 4px; left: 8px; font-size: 10px; color: #777; }
-        
-        /* Emoji & Plus Menu Styling */
-        .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 10px; }
-        #emoji-panel { right: 10px; width: 280px; height: 180px; grid-template-columns: repeat(6, 1fr); overflow-y: auto; }
-        #plus-menu { left: 10px; width: 150px; flex-direction: column; gap: 10px; }
-        .emoji { font-size: 24px; cursor: pointer; text-align: center; padding: 5px; }
-        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
 
-        .input-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px; background: transparent; z-index: 2000; }
-        .pill { background: white; border-radius: 25px; display: flex; align-items: center; padding: 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); height: 50px; }
-        #msg-input { border:none; text-align:right; flex:1; outline:none; padding:10px; font-size: 16px; background: transparent; }
-        
-        #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 5000; display: flex; align-items: center; justify-content: center; color: white; padding: 20px; }
-        .btn { width: 100%; padding: 15px; background: var(--wa-green); border-radius: 30px; border: none; color: white; font-weight: bold; cursor: pointer; }
+        /* Chat Window */
+        #chat-window { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; z-index: 2000; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        .msg { padding: 8px 12px 20px 12px; border-radius: 10px; max-width: 80%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .sent { background: #dcf8c6; align-self: flex-end; }
+        .msg-info { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #777; }
+
+        /* Menus (Emoji & Plus) */
+        .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 10px; }
+        #emoji-panel { left: 10px; width: 280px; height: 200px; grid-template-columns: repeat(6, 1fr); overflow-y: auto; display: none; }
+        #plus-menu { left: 50px; width: 160px; flex-direction: column; gap: 5px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .menu-item:hover { background: #f0f2f5; }
+        .emoji { font-size: 24px; cursor: pointer; text-align: center; padding: 5px; }
+
+        /* Input Area */
+        .input-area { padding: 10px; background: transparent; position: relative; }
+        .pill { background: white; border-radius: 25px; display: flex; align-items: center; padding: 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 50px; }
+        #msg-input { border:none; outline:none; flex:1; padding:10px; font-size: 16px; }
+
+        /* Auth */
+        #auth-screen { position: fixed; inset: 0; background: var(--dark); z-index: 5000; display: flex; align-items: center; justify-content: center; color: white; padding: 20px; }
+        .btn { width: 100%; padding: 15px; background: var(--brand); border-radius: 30px; border: none; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
-<body onclick="closePopups()">
+<body onclick="closeMenus()">
 
 <div id="auth-screen">
     <div style="width:100%; max-width:400px; text-align:center;">
-        <h2 style="color:var(--wa-green); margin-bottom:20px;">ناصر محفوظ واٹس ایپ</h2>
-        <input type="email" id="email-in" placeholder="ای میل (Email) لکھیں" style="width:100%; padding:15px; margin-bottom:10px; border-radius:10px; border:none; text-align:center;">
-        <button class="btn" onclick="requestLogin()">لاگ ان لنک بھیجیں</button>
-        <p id="status-msg" style="margin-top:15px; font-size:14px; color:#cfcfcf;"></p>
+        <h1 style="color:var(--brand); margin-bottom:10px;">NexChat</h1>
+        <p style="margin-bottom:20px; color:#8696a0;">Global Encrypted Messaging</p>
+        <input type="email" id="email-in" placeholder="Enter your email" style="width:100%; padding:15px; border-radius:10px; border:none; text-align:center; margin-bottom:15px;">
+        <button class="btn" onclick="requestLogin()">Login with Email</button>
+        <p id="status-msg" style="margin-top:15px; color:var(--brand);"></p>
     </div>
 </div>
 
 <div id="app-main">
-    <div class="header"><b>چیٹس</b><i class="fas fa-sign-out-alt" onclick="handleLogout()"></i></div>
+    <div class="header">
+        <b>NexChat</b>
+        <i class="fas fa-sign-out-alt" onclick="handleLogout()" style="cursor:pointer;"></i>
+    </div>
     <div class="chat-list" id="contacts-ui"></div>
-    <div style="position:fixed; bottom:25px; left:25px; width:60px; height:60px; background:var(--wa-green); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer;" onclick="addNewChat()"><i class="fas fa-plus"></i></div>
+    <div style="position:fixed; bottom:25px; right:25px; width:60px; height:60px; background:var(--brand); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer;" onclick="addNewChat()">
+        <i class="fas fa-plus"></i>
+    </div>
 </div>
 
 <div id="chat-window">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-arrow-right" onclick="goBack()"></i>
-            <span id="chat-with-title">صارف</span>
+            <i class="fas fa-arrow-left" onclick="goBack()" style="cursor:pointer;"></i>
+            <span id="chat-with-title">User</span>
         </div>
     </div>
-    
     <div id="chat-flow"></div>
 
     <div id="emoji-panel" class="pop-menu" onclick="event.stopPropagation()"></div>
     <div id="plus-menu" class="pop-menu" onclick="event.stopPropagation()">
-        <div class="menu-item"><i class="fas fa-image" style="color:#25d366;"></i> گیلری</div>
-        <div class="menu-item"><i class="fas fa-file" style="color:#075e54;"></i> فائل</div>
-        <div class="menu-item"><i class="fas fa-location-dot" style="color:red;"></i> لوکیشن</div>
+        <div class="menu-item" onclick="alert('Camera opening...')"><i class="fas fa-camera" style="color:#1d8cf8;"></i> Camera</div>
+        <div class="menu-item" onclick="alert('Gallery opening...')"><i class="fas fa-image" style="color:#25d366;"></i> Gallery</div>
+        <div class="menu-item" onclick="alert('Files opening...')"><i class="fas fa-file" style="color:#075e54;"></i> Document</div>
+        <div class="menu-item" onclick="alert('Getting location...')"><i class="fas fa-location-dot" style="color:#ff2e2e;"></i> Location</div>
     </div>
 
     <div class="input-area" onclick="event.stopPropagation()">
         <div class="pill">
-            <i class="fas fa-plus" style="font-size:20px; color:#667781; cursor:pointer;" onclick="togglePlus()"></i>
-            <i class="far fa-smile" style="font-size:22px; color:#667781; cursor:pointer; margin: 0 10px;" onclick="toggleEmoji()"></i>
-            <input type="text" id="msg-input" placeholder="پیغام لکھیں..." oninput="checkInp()">
-            <i class="fas fa-paper-plane" id="send-btn" style="color:var(--wa-teal); cursor:pointer; display:none;" onclick="sendMessage()"></i>
-            <i class="fas fa-microphone" id="mic-btn" style="color:var(--wa-teal); cursor:pointer;"></i>
+            <i class="fas fa-plus" style="color:#667781; cursor:pointer;" onclick="togglePlus()"></i>
+            <i class="far fa-smile" style="margin: 0 10px; color:#667781; cursor:pointer;" onclick="toggleEmoji()"></i>
+            <input type="text" id="msg-input" placeholder="Type a message..." oninput="checkInp()">
+            <i class="fas fa-paper-plane" id="send-btn" style="color:var(--teal); cursor:pointer; display:none;" onclick="sendMessage()"></i>
+            <i class="fas fa-microphone" id="mic-btn" style="color:var(--teal); cursor:pointer;"></i>
         </div>
     </div>
 </div>
@@ -85,7 +100,6 @@
     import { getDatabase, ref, push, onChildAdded, onValue, set, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // آپ کی اپنی Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAaLNT4BuuvHeJTEqSBg52BbWxKYPHPYes",
       authDomain: "message-me-bbd25.firebaseapp.com",
@@ -93,19 +107,16 @@
       projectId: "message-me-bbd25",
       storageBucket: "message-me-bbd25.firebasestorage.app",
       messagingSenderId: "284942258094",
-      appId: "1:284942258094:web:06d05da0bba156a6f6c23f",
-      measurementId: "G-PK4RKCMDW1"
+      appId: "1:284942258094:web:06d05da0bba156a6f6c23f"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
-    const ENC_KEY = "NASIR_SECRET_786"; // Encryption Key
+    const ENC_KEY = "NEXCHAT_MASTER_SECURE_786";
 
-    let currentUserEmail, toID, currentChatRef;
-
-    // --- Emoji Setup ---
-    const emojis = ["😊","😂","❤️","😍","👍","😭","🙏","🔥","🌹","✨","✅","📍","👋","🎉","🤔","😢","💔","😴","😂","😎"];
+    // Emoji Logic
+    const emojis = ["😊","😂","❤️","😍","👍","😭","🙏","🔥","🌹","✨","✅","📍","👋","🎉","🤔","😢","😎","😴"];
     const ep = document.getElementById('emoji-panel');
     emojis.forEach(e => {
         let span = document.createElement('span'); span.className = 'emoji'; span.innerText = e;
@@ -113,16 +124,9 @@
         ep.appendChild(span);
     });
 
-    window.toggleEmoji = () => { 
-        document.getElementById('plus-menu').style.display = 'none';
-        ep.style.display = (ep.style.display === 'grid' ? 'none' : 'grid'); 
-    };
-    window.togglePlus = () => {
-        ep.style.display = 'none';
-        const pm = document.getElementById('plus-menu');
-        pm.style.display = (pm.style.display === 'flex' ? 'none' : 'flex');
-    };
-    window.closePopups = () => { ep.style.display = 'none'; document.getElementById('plus-menu').style.display = 'none'; };
+    window.toggleEmoji = () => { document.getElementById('plus-menu').style.display='none'; ep.style.display = (ep.style.display === 'grid' ? 'none' : 'grid'); };
+    window.togglePlus = () => { ep.style.display='none'; const pm = document.getElementById('plus-menu'); pm.style.display = (pm.style.display === 'flex' ? 'none' : 'flex'); };
+    window.closeMenus = () => { ep.style.display='none'; document.getElementById('plus-menu').style.display='none'; };
 
     window.checkInp = () => {
         const val = document.getElementById('msg-input').value.trim();
@@ -130,14 +134,14 @@
         document.getElementById('mic-btn').style.display = val ? 'none' : 'block';
     };
 
-    // --- Firebase Logic ---
+    // Firebase Auth
     window.requestLogin = async () => {
         const email = document.getElementById('email-in').value;
-        if(!email) return alert("ای میل لکھیں");
+        if(!email) return alert("Enter email");
         try {
             await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true });
             window.localStorage.setItem('emailForSignIn', email);
-            document.getElementById('status-msg').innerText = "لنک بھیج دیا گیا ہے! ای میل چیک کریں۔";
+            document.getElementById('status-msg').innerText = "Check your email inbox!";
         } catch (e) { alert(e.message); }
     };
 
@@ -151,18 +155,18 @@
     });
 
     if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn') || window.prompt('ای میل دوبارہ لکھیں:');
+        let email = window.localStorage.getItem('emailForSignIn') || window.prompt('Email for confirmation:');
         signInWithEmailLink(auth, email, window.location.href);
     }
 
     const encrypt = (t) => CryptoJS.AES.encrypt(t, ENC_KEY).toString();
     const decrypt = (c) => {
-        try { return CryptoJS.AES.decrypt(c, ENC_KEY).toString(CryptoJS.enc.Utf8) || "🔒 محفوظ پیغام"; }
-        catch(e) { return "🔒 محفوظ پیغام"; }
+        try { return CryptoJS.AES.decrypt(c, ENC_KEY).toString(CryptoJS.enc.Utf8) || "🔒 Secured"; }
+        catch(e) { return "🔒 Secured"; }
     };
 
     window.addNewChat = () => {
-        const email = prompt("جس سے چیٹ کرنی ہے اس کی ای میل لکھیں:");
+        const email = prompt("Recipient Email:");
         if(email) {
             const target = email.replace(/[.#$[\]]/g, "_");
             set(ref(db, `CONTACTS/${currentUserEmail}/${target}`), true);
@@ -175,15 +179,15 @@
         onValue(ref(db, `CONTACTS/${currentUserEmail}`), (s) => {
             const ui = document.getElementById('contacts-ui'); ui.innerHTML = "";
             s.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'chat-item';
-                div.innerHTML = `<i class="fas fa-user-circle" style="font-size:40px; color:var(--wa-teal);"></i> 
-                                 <div><b>${c.key.replace(/_/g, ".")}</b><br><small style="color:gray;">محفوظ چیٹ</small></div>`;
+                const div = document.createElement('div'); div.className = 'chat-item';
+                div.innerHTML = `<i class="fas fa-user-circle" style="font-size:45px; color:#ccc;"></i> <b>${c.key.replace(/_/g, ".")}</b>`;
                 div.onclick = () => openChat(c.key);
                 ui.appendChild(div);
             });
         });
     }
+
+    let currentChatRef, toID, currentUserEmail;
 
     window.openChat = (id) => {
         toID = id; document.getElementById('chat-with-title').innerText = id.replace(/_/g, ".");
@@ -198,6 +202,7 @@
 
     window.sendMessage = () => {
         const inp = document.getElementById('msg-input');
+        if(!inp.value.trim()) return;
         push(currentChatRef, { m: encrypt(inp.value), s: currentUserEmail, t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
         inp.value = ""; checkInp();
     };
@@ -214,4 +219,5 @@
     window.goBack = () => { document.getElementById('chat-window').style.display = 'none'; document.getElementById('app-main').style.display = 'flex'; };
 </script>
 </body>
-</html>
+        </html>
+        
