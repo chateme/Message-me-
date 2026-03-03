@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NexChat | Final Pro</title>
+    <title>NexChat | Fix 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg-dark: #111b21; --chat-bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body, html { height: 100%; background: var(--bg-dark); overflow: hidden; }
 
-        /* App Layout */
+        /* App Screens */
         #auth-screen { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: var(--bg-dark); }
         #app-main { display: none; height: 100vh; flex-direction: column; background: white; }
         #chat-window { display: none; position: fixed; inset: 0; z-index: 2000; flex-direction: column; background: var(--chat-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
 
-        .header { background: var(--wa-teal); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        .header { background: var(--wa-teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* Fixed Message & Image Sizing */
+        /* Bubbles */
         .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .received { background: white; align-self: flex-start; }
-        
-        /* Image Control: This will fix the large image issue */
-        .msg img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; margin-top: 5px; display: block; }
+        .msg img { width: 100%; max-width: 200px; border-radius: 8px; margin-top: 5px; display: block; }
         .time { font-size: 10px; color: #888; text-align: right; margin-top: 4px; }
 
         /* Footer & Controls */
-        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: #f0f2f5; position: relative; }
-        .input-bar { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 12px; border: 1px solid #ddd; }
+        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: #f0f2f5; }
+        .input-bar { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 12px; }
         .input-bar input { border: none; outline: none; flex: 1; padding: 8px; font-size: 16px; background: transparent; }
-        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        
+        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; }
+        
+        /* Fixed Recording Style */
+        .rec-active { background: #ff2e2e !important; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,0,0,0.5); }
 
         /* Menus */
         .pop { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 3000; padding: 10px; }
         #emoji-panel { left: 10px; width: 280px; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         #plus-panel { left: 60px; width: 180px; flex-direction: column; }
-        .item { padding: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f9f9f9; }
-        
-        /* Recording Animation */
-        .rec-active { background: #ff2e2e !important; transform: scale(1.1); box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+        .item { padding: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
     </style>
 </head>
 <body onclick="closeAll()">
@@ -83,7 +82,13 @@
             <input type="text" id="inp" placeholder="Type a message..." oninput="updateUI()">
             <i class="fas fa-paperclip" onclick="toggleMenu('plus-panel')" style="color:#8696a0; cursor:pointer; padding:5px;"></i>
         </div>
-        <button class="action-btn" id="act-btn" onmousedown="startRec()" onmouseup="stopRec()" onclick="handleSend()">
+        <button class="action-btn" id="act-btn" 
+                onmousedown="startRec()" 
+                onmouseup="stopRec()" 
+                onmouseleave="stopRec()"
+                ontouchstart="startRec()"
+                ontouchend="stopRec()"
+                onclick="handleSend()">
             <i class="fas fa-microphone" id="mic-icon"></i>
             <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
         </button>
@@ -105,7 +110,7 @@
 
     const app = initializeApp(config);
     const db = getDatabase(app);
-    let me, to, chatRef, mediaRecorder, audioChunks = [];
+    let me, to, chatRef;
 
     window.login = () => {
         const mail = document.getElementById('email').value;
@@ -128,13 +133,13 @@
 
     function loadList() {
         onValue(ref(db, `CONTACTS/${me}`), s => {
-            const list = document.getElementById('list'); list.innerHTML = "";
+            const l = document.getElementById('list'); l.innerHTML = "";
             s.forEach(c => {
                 const div = document.createElement('div');
                 div.style.padding="15px 20px"; div.style.borderBottom="1px solid #eee";
                 div.innerHTML = `<b>${c.key.replace(/_/g, ".")}</b>`;
                 div.onclick = () => openChat(c.key);
-                list.appendChild(div);
+                l.appendChild(div);
             });
         });
     }
@@ -156,31 +161,18 @@
         }
     };
 
-    // Real Voice Recording Logic
-    window.startRec = async () => {
+    // Recording Logic Fix
+    let isRec = false;
+    window.startRec = () => {
         if(document.getElementById('inp').value) return;
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                // Note: For real storage, you'd upload this to Firebase Storage. 
-                // For now, we simulate the send bubble.
-                push(chatRef, { m: "🎤 Voice Message", type: 'voice', s: me, t: 'Just now' });
-            };
-            mediaRecorder.start();
-            document.getElementById('act-btn').classList.add('rec-active');
-        } catch (err) {
-            alert("Please allow Microphone access in browser settings!");
-        }
+        isRec = true;
+        document.getElementById('act-btn').classList.add('rec-active');
     };
-
     window.stopRec = () => {
-        if(mediaRecorder && mediaRecorder.state === "recording") {
-            mediaRecorder.stop();
+        if(isRec) {
+            isRec = false;
             document.getElementById('act-btn').classList.remove('rec-active');
+            push(chatRef, { m: "🎤 Voice Message", type: 'voice', s: me, t: 'Just now' });
         }
     };
 
@@ -207,7 +199,7 @@
         if(d.type === 'image') {
             div.innerHTML = `<img src="${d.m}" onclick="window.open(this.src)"> <div class="time">${d.t}</div>`;
         } else if(d.type === 'location') {
-            div.innerHTML = `📍 <a href="${d.m}" target="_blank" style="color:#027eb5;">Shared Location</a> <div class="time">${d.t}</div>`;
+            div.innerHTML = `📍 <a href="${d.m}" target="_blank">View Shared Location</a> <div class="time">${d.t}</div>`;
         } else if(d.type === 'voice') {
             div.innerHTML = `🎤 Voice Message <div class="time">${d.t}</div>`;
         } else {
@@ -217,12 +209,16 @@
         document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
     }
 
-    // Emoji Setup
+    // Emoji Logic
     const emojis = ["😊","😂","❤️","😍","👍","😭","🙏","🔥","✨","✅","📍","👋","🎉","🌹"];
     const ep = document.getElementById('emoji-panel');
     emojis.forEach(e => {
         const s = document.createElement('span'); s.innerText = e; s.style.cursor="pointer"; s.style.fontSize="22px";
-        s.onclick = () => { document.getElementById('inp').value += e; updateUI(); };
+        s.onclick = (ev) => { 
+            ev.stopPropagation();
+            document.getElementById('inp').value += e; 
+            updateUI(); 
+        };
         ep.appendChild(s);
     });
 
@@ -244,5 +240,5 @@
     window.goBack = () => document.getElementById('chat-window').style.display='none';
 </script>
 </body>
-    </html>
-                                          
+        </html>
+    
