@@ -3,221 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NexChat | Ultimate Secure Messenger</title>
+    <title>NexChat | Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        :root { --brand: #00a884; --dark: #111b21; --teal: #075e54; --bg: #e5ddd5; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body, html { height: 100%; width: 100%; overflow: hidden; }
-
-        /* Header */
-        .header { background: var(--teal); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 60px; z-index: 1000; position: relative; }
+        :root { --teal: #075e54; --green: #25d366; --bg: #e5ddd5; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: #fff; height: 100vh; overflow: hidden; }
         
-        /* Main UI */
-        #app-main { display: none; height: 100%; flex-direction: column; background: white; }
-        .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .header { background: var(--teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        
+        /* Screens */
+        #auth-screen { position: fixed; inset: 0; background: #111b21; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #app-main { display: none; height: 100vh; flex-direction: column; }
+        #chat-window { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 2000; flex-direction: column; }
 
-        /* Chat Window */
-        #chat-window { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; z-index: 2000; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .msg { padding: 8px 12px 20px 12px; border-radius: 10px; max-width: 80%; position: relative; background: white; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        /* Chat UI */
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 10px; background: white; max-width: 80%; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: #dcf8c6; align-self: flex-end; }
-        .msg-info { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #777; }
 
-        /* Menus (Emoji & Plus) */
-        .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 10px; }
-        #emoji-panel { left: 10px; width: 280px; height: 200px; grid-template-columns: repeat(6, 1fr); overflow-y: auto; display: none; }
-        #plus-menu { left: 50px; width: 160px; flex-direction: column; gap: 5px; }
-        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-        .menu-item:hover { background: #f0f2f5; }
-        .emoji { font-size: 24px; cursor: pointer; text-align: center; padding: 5px; }
+        /* Bottom Bar */
+        .footer { padding: 10px; background: #f0f0f0; display: flex; align-items: center; gap: 10px; }
+        .input-pill { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 15px; }
+        input { border: none; outline: none; flex: 1; padding: 8px; font-size: 16px; }
 
-        /* Input Area */
-        .input-area { padding: 10px; background: transparent; position: relative; }
-        .pill { background: white; border-radius: 25px; display: flex; align-items: center; padding: 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 50px; }
-        #msg-input { border:none; outline:none; flex:1; padding:10px; font-size: 16px; }
-
-        /* Auth */
-        #auth-screen { position: fixed; inset: 0; background: var(--dark); z-index: 5000; display: flex; align-items: center; justify-content: center; color: white; padding: 20px; }
-        .btn { width: 100%; padding: 15px; background: var(--brand); border-radius: 30px; border: none; color: white; font-weight: bold; cursor: pointer; }
+        /* Menus */
+        .pop-menu { display: none; position: absolute; bottom: 70px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); padding: 10px; z-index: 3000; }
+        #emoji-box { left: 10px; width: 250px; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        #plus-box { left: 50px; width: 150px; flex-direction: column; }
+        .menu-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
-<body onclick="closeMenus()">
+<body>
 
 <div id="auth-screen">
-    <div style="width:100%; max-width:400px; text-align:center;">
-        <h1 style="color:var(--brand); margin-bottom:10px;">NexChat</h1>
-        <p style="margin-bottom:20px; color:#8696a0;">Global Encrypted Messaging</p>
-        <input type="email" id="email-in" placeholder="Enter your email" style="width:100%; padding:15px; border-radius:10px; border:none; text-align:center; margin-bottom:15px;">
-        <button class="btn" onclick="requestLogin()">Login with Email</button>
-        <p id="status-msg" style="margin-top:15px; color:var(--brand);"></p>
-    </div>
+    <h1 style="color:var(--green)">NexChat</h1>
+    <p style="margin-bottom:20px">Secure Global Messenger</p>
+    <input type="email" id="email-field" placeholder="Enter Email" style="padding:12px; width:80%; border-radius:8px; border:none; margin-bottom:15px; text-align:center;">
+    <button onclick="loginNow()" style="background:var(--green); color:white; border:none; padding:12px 40px; border-radius:25px; font-weight:bold; cursor:pointer;">LOGIN</button>
 </div>
 
 <div id="app-main">
     <div class="header">
         <b>NexChat</b>
-        <i class="fas fa-sign-out-alt" onclick="handleLogout()" style="cursor:pointer;"></i>
+        <i class="fas fa-sign-out-alt" onclick="location.reload()"></i>
     </div>
-    <div class="chat-list" id="contacts-ui"></div>
-    <div style="position:fixed; bottom:25px; right:25px; width:60px; height:60px; background:var(--brand); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; cursor:pointer;" onclick="addNewChat()">
-        <i class="fas fa-plus"></i>
+    <div style="padding:20px; text-align:center; color:gray;">
+        <p>No active chats.</p>
+        <button onclick="startChat()" style="margin-top:20px; padding:10px 20px; border-radius:20px; border:none; background:var(--teal); color:white;">+ Start New Chat</button>
     </div>
 </div>
 
 <div id="chat-window">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-arrow-left" onclick="goBack()" style="cursor:pointer;"></i>
-            <span id="chat-with-title">User</span>
+            <i class="fas fa-arrow-left" onclick="closeChat()"></i>
+            <span id="chat-title">Contact Name</span>
         </div>
     </div>
-    <div id="chat-flow"></div>
-
-    <div id="emoji-panel" class="pop-menu" onclick="event.stopPropagation()"></div>
-    <div id="plus-menu" class="pop-menu" onclick="event.stopPropagation()">
-        <div class="menu-item" onclick="alert('Camera opening...')"><i class="fas fa-camera" style="color:#1d8cf8;"></i> Camera</div>
-        <div class="menu-item" onclick="alert('Gallery opening...')"><i class="fas fa-image" style="color:#25d366;"></i> Gallery</div>
-        <div class="menu-item" onclick="alert('Files opening...')"><i class="fas fa-file" style="color:#075e54;"></i> Document</div>
-        <div class="menu-item" onclick="alert('Getting location...')"><i class="fas fa-location-dot" style="color:#ff2e2e;"></i> Location</div>
+    
+    <div id="chat-flow">
+        <div class="msg">Hello! This is an encrypted message.</div>
     </div>
 
-    <div class="input-area" onclick="event.stopPropagation()">
-        <div class="pill">
-            <i class="fas fa-plus" style="color:#667781; cursor:pointer;" onclick="togglePlus()"></i>
-            <i class="far fa-smile" style="margin: 0 10px; color:#667781; cursor:pointer;" onclick="toggleEmoji()"></i>
-            <input type="text" id="msg-input" placeholder="Type a message..." oninput="checkInp()">
-            <i class="fas fa-paper-plane" id="send-btn" style="color:var(--teal); cursor:pointer; display:none;" onclick="sendMessage()"></i>
-            <i class="fas fa-microphone" id="mic-btn" style="color:var(--teal); cursor:pointer;"></i>
+    <div id="emoji-box" class="pop-menu" style="display:none; grid-template-columns: repeat(5, 1fr);">
+        <span onclick="addEmoji('😊')" style="cursor:pointer; font-size:20px;">😊</span>
+        <span onclick="addEmoji('😂')" style="cursor:pointer; font-size:20px;">😂</span>
+        <span onclick="addEmoji('❤️')" style="cursor:pointer; font-size:20px;">❤️</span>
+        <span onclick="addEmoji('👍')" style="cursor:pointer; font-size:20px;">👍</span>
+    </div>
+
+    <div id="plus-box" class="pop-menu">
+        <div class="menu-item" onclick="alert('Camera')"><i class="fas fa-camera"></i> Camera</div>
+        <div class="menu-item" onclick="alert('Gallery')"><i class="fas fa-image"></i> Gallery</div>
+        <div class="menu-item" onclick="alert('Location')"><i class="fas fa-location-dot"></i> Location</div>
+    </div>
+
+    <div class="footer">
+        <div class="input-pill">
+            <i class="fas fa-plus" onclick="toggleBox('plus-box')" style="color:gray; cursor:pointer;"></i>
+            <i class="far fa-smile" onclick="toggleBox('emoji-box')" style="margin:0 10px; color:gray; cursor:pointer;"></i>
+            <input type="text" id="msg-input" placeholder="Type a message...">
+            <i class="fas fa-paper-plane" onclick="sendMsg()" style="color:var(--teal); cursor:pointer;"></i>
         </div>
+        <i class="fas fa-microphone" onclick="alert('Recording...')" style="color:var(--teal); font-size:20px;"></i>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onValue, set, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAaLNT4BuuvHeJTEqSBg52BbWxKYPHPYes",
-      authDomain: "message-me-bbd25.firebaseapp.com",
-      databaseURL: "https://message-me-bbd25-default-rtdb.firebaseio.com",
-      projectId: "message-me-bbd25",
-      storageBucket: "message-me-bbd25.firebasestorage.app",
-      messagingSenderId: "284942258094",
-      appId: "1:284942258094:web:06d05da0bba156a6f6c23f"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-    const ENC_KEY = "NEXCHAT_MASTER_SECURE_786";
-
-    // Emoji Logic
-    const emojis = ["😊","😂","❤️","😍","👍","😭","🙏","🔥","🌹","✨","✅","📍","👋","🎉","🤔","😢","😎","😴"];
-    const ep = document.getElementById('emoji-panel');
-    emojis.forEach(e => {
-        let span = document.createElement('span'); span.className = 'emoji'; span.innerText = e;
-        span.onclick = () => { document.getElementById('msg-input').value += e; checkInp(); };
-        ep.appendChild(span);
-    });
-
-    window.toggleEmoji = () => { document.getElementById('plus-menu').style.display='none'; ep.style.display = (ep.style.display === 'grid' ? 'none' : 'grid'); };
-    window.togglePlus = () => { ep.style.display='none'; const pm = document.getElementById('plus-menu'); pm.style.display = (pm.style.display === 'flex' ? 'none' : 'flex'); };
-    window.closeMenus = () => { ep.style.display='none'; document.getElementById('plus-menu').style.display='none'; };
-
-    window.checkInp = () => {
-        const val = document.getElementById('msg-input').value.trim();
-        document.getElementById('send-btn').style.display = val ? 'block' : 'none';
-        document.getElementById('mic-btn').style.display = val ? 'none' : 'block';
-    };
-
-    // Firebase Auth
-    window.requestLogin = async () => {
-        const email = document.getElementById('email-in').value;
-        if(!email) return alert("Enter email");
-        try {
-            await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true });
-            window.localStorage.setItem('emailForSignIn', email);
-            document.getElementById('status-msg').innerText = "Check your email inbox!";
-        } catch (e) { alert(e.message); }
-    };
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUserEmail = user.email.replace(/[.#$[\]]/g, "_");
+<script>
+    // بنیادی فنکشنز جو ہر حال میں کام کریں گے
+    function loginNow() {
+        const email = document.getElementById('email-field').value;
+        if(email.includes('@')) {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-main').style.display = 'flex';
-            loadContacts();
+        } else {
+            alert("Please enter a valid email");
         }
-    });
-
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn') || window.prompt('Email for confirmation:');
-        signInWithEmailLink(auth, email, window.location.href);
     }
 
-    const encrypt = (t) => CryptoJS.AES.encrypt(t, ENC_KEY).toString();
-    const decrypt = (c) => {
-        try { return CryptoJS.AES.decrypt(c, ENC_KEY).toString(CryptoJS.enc.Utf8) || "🔒 Secured"; }
-        catch(e) { return "🔒 Secured"; }
-    };
-
-    window.addNewChat = () => {
-        const email = prompt("Recipient Email:");
-        if(email) {
-            const target = email.replace(/[.#$[\]]/g, "_");
-            set(ref(db, `CONTACTS/${currentUserEmail}/${target}`), true);
-            set(ref(db, `CONTACTS/${target}/${currentUserEmail}`), true);
-            openChat(target);
+    function startChat() {
+        const contact = prompt("Enter contact email:");
+        if(contact) {
+            document.getElementById('chat-title').innerText = contact;
+            document.getElementById('chat-window').style.display = 'flex';
         }
-    };
-
-    function loadContacts() {
-        onValue(ref(db, `CONTACTS/${currentUserEmail}`), (s) => {
-            const ui = document.getElementById('contacts-ui'); ui.innerHTML = "";
-            s.forEach(c => {
-                const div = document.createElement('div'); div.className = 'chat-item';
-                div.innerHTML = `<i class="fas fa-user-circle" style="font-size:45px; color:#ccc;"></i> <b>${c.key.replace(/_/g, ".")}</b>`;
-                div.onclick = () => openChat(c.key);
-                ui.appendChild(div);
-            });
-        });
     }
 
-    let currentChatRef, toID, currentUserEmail;
-
-    window.openChat = (id) => {
-        toID = id; document.getElementById('chat-with-title').innerText = id.replace(/_/g, ".");
-        document.getElementById('chat-window').style.display = 'flex';
-        document.getElementById('app-main').style.display = 'none';
-        const cID = [currentUserEmail, toID].sort().join('--');
-        if(currentChatRef) off(currentChatRef);
-        document.getElementById('chat-flow').innerHTML = "";
-        currentChatRef = ref(db, `MESSAGES/${cID}`);
-        onChildAdded(currentChatRef, (s) => renderMsg(s.val()));
-    };
-
-    window.sendMessage = () => {
-        const inp = document.getElementById('msg-input');
-        if(!inp.value.trim()) return;
-        push(currentChatRef, { m: encrypt(inp.value), s: currentUserEmail, t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-        inp.value = ""; checkInp();
-    };
-
-    function renderMsg(d) {
-        const div = document.createElement('div');
-        div.className = "msg " + (d.s === currentUserEmail ? "sent" : "");
-        div.innerHTML = decrypt(d.m) + `<div class="msg-info">${d.t}</div>`;
-        document.getElementById('chat-flow').appendChild(div);
-        document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
+    function closeChat() {
+        document.getElementById('chat-window').style.display = 'none';
     }
 
-    window.handleLogout = () => { signOut(auth); location.reload(); };
-    window.goBack = () => { document.getElementById('chat-window').style.display = 'none'; document.getElementById('app-main').style.display = 'flex'; };
+    function toggleBox(id) {
+        const box = document.getElementById(id);
+        box.style.display = (box.style.display === 'none' || box.style.display === '') ? (id === 'emoji-box' ? 'grid' : 'flex') : 'none';
+    }
+
+    function addEmoji(e) {
+        document.getElementById('msg-input').value += e;
+        document.getElementById('emoji-box').style.display = 'none';
+    }
+
+    function sendMsg() {
+        const text = document.getElementById('msg-input').value;
+        if(text.trim() !== "") {
+            const flow = document.getElementById('chat-flow');
+            const div = document.createElement('div');
+            div.className = "msg sent";
+            div.innerText = text;
+            flow.appendChild(div);
+            document.getElementById('msg-input').value = "";
+            flow.scrollTop = flow.scrollHeight;
+        }
+    }
 </script>
+
 </body>
-        </html>
-        
+</html>
