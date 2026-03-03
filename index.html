@@ -3,88 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NexChat | Final Fix</title>
+    <title>NexChat | Image Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg-dark: #111b21; --chat-bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body, html { height: 100%; background: var(--bg-dark); overflow: hidden; }
 
-        /* Login Fix */
+        /* App Screens */
         #auth-screen { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: var(--bg-dark); }
-        .card { background: #1f2c33; padding: 30px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; border: 1px solid #3b4a54; }
-        .card h1 { color: var(--wa-green); margin-bottom: 20px; }
-        .card input { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #2a3942; color: white; margin-bottom: 20px; text-align: center; }
-        .card button { width: 100%; padding: 12px; border-radius: 25px; border: none; background: var(--wa-green); font-weight: bold; cursor: pointer; }
-
-        /* Main UI */
         #app-main { display: none; height: 100vh; flex-direction: column; background: white; }
-        .header { background: var(--wa-teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
-
-        /* Chat Window */
         #chat-window { display: none; position: fixed; inset: 0; z-index: 2000; flex-direction: column; background: var(--chat-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 8px 12px 18px 12px; border-radius: 10px; max-width: 80%; position: relative; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        .header { background: var(--wa-teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Message Bubbles */
+        .msg { padding: 10px; border-radius: 10px; max-width: 80%; position: relative; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-wrap: break-word; }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .received { background: white; align-self: flex-start; }
-        .time { position: absolute; bottom: 3px; right: 8px; font-size: 10px; color: #888; }
+        .msg img { width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; }
+        .time { font-size: 10px; color: #888; text-align: right; margin-top: 4px; }
 
-        /* Footer Fix */
-        .footer { padding: 10px; display: flex; align-items: center; gap: 8px; background: #f0f2f5; }
-        .input-bar { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 12px; min-height: 48px; border: 1px solid #ddd; }
+        /* Footer */
+        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: #f0f2f5; }
+        .input-bar { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 12px; }
         .input-bar input { border: none; outline: none; flex: 1; padding: 8px; font-size: 16px; background: transparent; }
-        .input-bar i { color: #8696a0; font-size: 22px; cursor: pointer; padding: 5px; }
-        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        .action-btn { background: var(--wa-teal); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
 
-        /* Floating Panels */
-        .pop { display: none; position: absolute; bottom: 70px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 3000; padding: 10px; border: 1px solid #ddd; }
-        #emoji-box { left: 10px; width: 280px; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        #plus-box { left: 50px; width: 160px; flex-direction: column; }
-        .item { padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f5f5f5; }
+        /* Popups */
+        .pop { display: none; position: absolute; bottom: 70px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 10px; width: 160px; }
+        .item { padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
     </style>
 </head>
 <body onclick="closeAll()">
 
 <div id="auth-screen">
-    <div class="card">
-        <h1>NexChat</h1>
-        <input type="email" id="email" placeholder="Your Email">
-        <button onclick="login()">Login</button>
+    <div style="background:#1f2c33; padding:30px; border-radius:15px; text-align:center; width:90%; max-width:340px;">
+        <h1 style="color:var(--wa-green); margin-bottom:20px;">NexChat</h1>
+        <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:none; text-align:center;">
+        <button onclick="login()" style="width:100%; padding:12px; background:var(--wa-green); border:none; border-radius:25px; font-weight:bold;">Login</button>
     </div>
 </div>
 
 <div id="app-main">
-    <div class="header"><b>NexChat</b> <i class="fas fa-plus" onclick="startNew()"></i></div>
-    <div id="contact-list" style="flex:1; overflow-y:auto;"></div>
+    <div class="header"><b>NexChat</b> <i class="fas fa-plus" onclick="addFriend()"></i></div>
+    <div id="list" style="flex:1; overflow-y:auto;"></div>
 </div>
 
 <div id="chat-window">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
             <i class="fas fa-arrow-left" onclick="goBack()"></i>
-            <span id="target-name">User</span>
+            <span id="chat-name">User</span>
         </div>
     </div>
     <div id="chat-flow"></div>
 
-    <div id="emoji-box" class="pop" onclick="event.stopPropagation()"></div>
-    <div id="plus-box" class="pop" onclick="event.stopPropagation()">
+    <div id="plus-menu" class="pop" style="left:50px;" onclick="event.stopPropagation()">
         <label for="cam" class="item"><i class="fas fa-camera" style="color:#ff2e2e;"></i> Camera</label>
         <label for="gal" class="item"><i class="fas fa-image" style="color:#bf59cf;"></i> Gallery</label>
     </div>
 
-    <input type="file" id="cam" accept="image/*" capture="camera" style="display:none" onchange="handleFile(this)">
-    <input type="file" id="gal" accept="image/*" style="display:none" onchange="handleFile(this)">
+    <input type="file" id="cam" accept="image/*" capture="camera" style="display:none" onchange="uploadImage(this)">
+    <input type="file" id="gal" accept="image/*" style="display:none" onchange="uploadImage(this)">
 
     <div class="footer" onclick="event.stopPropagation()">
         <div class="input-bar">
-            <i class="far fa-smile" onclick="toggleMenu('emoji-box')"></i>
-            <input type="text" id="inp" placeholder="Message" oninput="updateUI()">
-            <i class="fas fa-paperclip" onclick="toggleMenu('plus-box')"></i>
+            <input type="text" id="inp" placeholder="Message" oninput="toggleBtn()">
+            <i class="fas fa-paperclip" onclick="toggleMenu('plus-menu')" style="color:#8696a0; cursor:pointer;"></i>
         </div>
-        <button class="action-btn" id="main-btn" onclick="handleAction()">
-            <i class="fas fa-microphone" id="mic-icon"></i>
-            <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
+        <button class="action-btn" id="send-btn" onclick="send()">
+            <i class="fas fa-microphone" id="mic"></i>
+            <i class="fas fa-paper-plane" id="plane" style="display:none"></i>
         </button>
     </div>
 </div>
@@ -116,8 +107,8 @@
         }
     };
 
-    window.startNew = () => {
-        const e = prompt("Friend's Email:");
+    window.addFriend = () => {
+        const e = prompt("Friend Email:");
         if(e) {
             const tid = e.replace(/[.#$[\]]/g, "_");
             set(ref(db, `CONTACTS/${me}/${tid}`), true);
@@ -127,7 +118,7 @@
 
     function loadList() {
         onValue(ref(db, `CONTACTS/${me}`), s => {
-            const l = document.getElementById('contact-list'); l.innerHTML = "";
+            const l = document.getElementById('list'); l.innerHTML = "";
             s.forEach(c => {
                 const d = document.createElement('div'); d.style.padding="20px"; d.style.borderBottom="1px solid #eee";
                 d.innerHTML = `<b>${c.key.replace(/_/g, ".")}</b>`;
@@ -138,65 +129,69 @@
     }
 
     window.openChat = (id) => {
-        to = id; document.getElementById('target-name').innerText = id.replace(/_/g, ".");
+        to = id; document.getElementById('chat-name').innerText = id.replace(/_/g, ".");
         document.getElementById('chat-window').style.display = 'flex';
         const room = [me, to].sort().join('--');
         document.getElementById('chat-flow').innerHTML = "";
         chatRef = ref(db, `MESSAGES/${room}`);
-        onChildAdded(chatRef, s => renderMsg(s.val()));
+        onChildAdded(chatRef, s => render(s.val()));
     };
 
-    // Main Logic Fix
-    window.handleAction = () => {
-        const val = document.getElementById('inp').value.trim();
-        if(val) {
-            push(chatRef, { m: val, s: me, t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-            document.getElementById('inp').value = ""; updateUI();
+    window.send = () => {
+        const v = document.getElementById('inp').value.trim();
+        if(v) {
+            push(chatRef, { m: v, type: 'text', s: me, t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+            document.getElementById('inp').value = ""; toggleBtn();
         } else {
-            // Real Voice Start (Simplified for GitHub)
-            console.log("Mic Pressed");
-            const btn = document.getElementById('main-btn');
-            btn.style.background = "red";
-            setTimeout(() => { btn.style.background = "var(--wa-teal)"; }, 1000);
+            // Voice Click Feedback
+            const btn = document.getElementById('send-btn');
+            btn.style.background = "#ff2e2e";
+            setTimeout(() => btn.style.background = "var(--wa-teal)", 500);
         }
     };
 
-    window.handleFile = (input) => {
-        if(input.files[0]) {
-            push(chatRef, { m: "📷 Image: " + input.files[0].name, s: me, t: "Sent" });
-            closeAll();
+    // Real Image Upload Fix
+    window.uploadImage = (input) => {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                push(chatRef, { 
+                    m: base64, 
+                    type: 'image', 
+                    s: me, 
+                    t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) 
+                });
+            };
+            reader.readAsDataURL(file);
         }
+        closeAll();
     };
 
-    function renderMsg(d) {
+    function render(d) {
         const div = document.createElement('div');
         div.className = "msg " + (d.s === me ? "sent" : "received");
-        div.innerHTML = d.m + `<div class="time">${d.t}</div>`;
+        if(d.type === 'image') {
+            div.innerHTML = `<img src="${d.m}" onclick="window.open(this.src)"> <div class="time">${d.t}</div>`;
+        } else {
+            div.innerHTML = d.m + `<div class="time">${d.t}</div>`;
+        }
         document.getElementById('chat-flow').appendChild(div);
         document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
     }
 
+    window.toggleBtn = () => {
+        const v = document.getElementById('inp').value.trim();
+        document.getElementById('mic').style.display = v ? 'none' : 'block';
+        document.getElementById('plane').style.display = v ? 'block' : 'none';
+    };
     window.toggleMenu = (id) => {
         const el = document.getElementById(id);
-        const isShow = el.style.display === 'grid' || el.style.display === 'flex';
-        closeAll();
-        if(!isShow) el.style.display = (id==='emoji-box'?'grid':'flex');
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
     };
-    window.closeAll = () => { document.getElementById('emoji-box').style.display='none'; document.getElementById('plus-box').style.display='none'; };
-    window.updateUI = () => {
-        const v = document.getElementById('inp').value.trim();
-        document.getElementById('mic-icon').style.display = v ? 'none' : 'block';
-        document.getElementById('send-icon').style.display = v ? 'block' : 'none';
-    };
+    window.closeAll = () => document.getElementById('plus-menu').style.display='none';
     window.goBack = () => document.getElementById('chat-window').style.display='none';
-
-    // Emoji
-    const ems = ["😊","😂","❤️","😍","👍","😭","🙏","🔥","✨","✅","📍","👋"];
-    ems.forEach(e => {
-        const s = document.createElement('span'); s.innerText = e; s.style.cursor="pointer"; s.style.fontSize="22px";
-        s.onclick = () => { document.getElementById('inp').value += e; updateUI(); };
-        document.getElementById('emoji-box').appendChild(s);
-    });
 </script>
 </body>
 </html>
