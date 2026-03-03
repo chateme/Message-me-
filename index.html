@@ -3,42 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NexChat | Final Version</title>
+    <title>NexChat | Pro Version</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --wa-teal: #075e54; --wa-green: #25d366; --bg-dark: #111b21; --chat-bg: #e5ddd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body, html { height: 100%; background: var(--bg-dark); overflow: hidden; }
 
-        /* App Screens */
+        /* Screens */
         #auth-screen { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: var(--bg-dark); }
         #app-main { display: none; height: 100vh; flex-direction: column; background: white; }
         #chat-window { display: none; position: fixed; inset: 0; z-index: 2000; flex-direction: column; background: var(--chat-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
 
-        .header { background: var(--wa-teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .header { background: var(--wa-teal); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
         #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* Image Message Optimization */
-        .msg { padding: 8px; border-radius: 12px; max-width: 75%; position: relative; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        /* Bubbles & Images */
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; position: relative; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sent { background: #dcf8c6; align-self: flex-end; }
         .received { background: white; align-self: flex-start; }
-        
-        /* New Image CSS */
-        .msg img { width: 100%; max-width: 240px; height: auto; border-radius: 8px; display: block; margin: 4px 0; border: 1px solid #ccc; object-fit: cover; }
-        .time { font-size: 10px; color: #888; text-align: right; }
+        .msg img { width: 100%; max-width: 250px; border-radius: 8px; margin: 4px 0; display: block; cursor: pointer; }
+        .time { font-size: 10px; color: #888; text-align: right; margin-top: 4px; }
 
-        /* Controls */
-        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: #f0f2f5; position: relative; }
-        .input-bar { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 12px; border: 1px solid #ddd; }
+        /* Footer & Controls */
+        .footer { padding: 8px; display: flex; align-items: center; gap: 8px; background: #f0f2f5; }
+        .input-bar { background: white; border-radius: 25px; flex: 1; display: flex; align-items: center; padding: 5px 12px; position: relative; }
         .input-bar input { border: none; outline: none; flex: 1; padding: 8px; font-size: 16px; background: transparent; }
-        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; cursor: pointer; }
+        .action-btn { background: var(--wa-teal); color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
 
-        /* Recording Effect */
-        .rec-active { background: #ff2e2e !important; transform: scale(1.15); box-shadow: 0 0 15px rgba(255,46,46,0.5); }
+        /* Emoji & Plus Menus */
+        .pop { display: none; position: absolute; bottom: 70px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 3000; padding: 10px; }
+        #emoji-panel { left: 10px; width: 280px; grid-template-columns: repeat(7, 1fr); gap: 10px; display: none; }
+        #plus-panel { left: 60px; width: 180px; flex-direction: column; }
+        .item { padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
 
-        /* Menu Panel */
-        .pop { display: none; position: absolute; bottom: 70px; left: 50px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 3000; padding: 8px; width: 180px; }
-        .item { padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f5f5f5; font-weight: bold; }
+        /* Recording Animation */
+        .recording { background: #ff2e2e !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body onclick="closeAll()">
@@ -46,7 +47,7 @@
 <div id="auth-screen">
     <div style="background:#1f2c33; padding:30px; border-radius:15px; text-align:center; width:90%; max-width:340px;">
         <h1 style="color:var(--wa-green); margin-bottom:20px;">NexChat</h1>
-        <input type="email" id="email" placeholder="Enter Email" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:none; text-align:center;">
+        <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:none; text-align:center;">
         <button onclick="login()" style="width:100%; padding:12px; background:var(--wa-green); border:none; border-radius:25px; font-weight:bold; color:white;">LOGIN</button>
     </div>
 </div>
@@ -62,11 +63,11 @@
             <i class="fas fa-arrow-left" onclick="goBack()"></i>
             <span id="chat-name">User</span>
         </div>
-        <i class="fas fa-ellipsis-v"></i>
     </div>
     <div id="chat-flow"></div>
 
-    <div id="plus-menu" class="pop" onclick="event.stopPropagation()">
+    <div id="emoji-panel" class="pop" onclick="event.stopPropagation()" style="display:none; grid-template-columns: repeat(7, 1fr);"></div>
+    <div id="plus-panel" class="pop" onclick="event.stopPropagation()">
         <label for="cam" class="item"><i class="fas fa-camera" style="color:#ff2e2e;"></i> Camera</label>
         <label for="gal" class="item"><i class="fas fa-image" style="color:#bf59cf;"></i> Gallery</label>
         <div class="item" onclick="sendLocation()"><i class="fas fa-location-dot" style="color:#1fa855;"></i> Location</div>
@@ -77,13 +78,13 @@
 
     <div class="footer" onclick="event.stopPropagation()">
         <div class="input-bar">
-            <i class="far fa-smile" style="color:#8696a0; font-size: 22px; margin-right: 5px;"></i>
+            <i class="far fa-smile" onclick="toggleMenu('emoji-panel')" style="color:#8696a0; cursor:pointer; font-size:22px; padding:5px;"></i>
             <input type="text" id="inp" placeholder="Type a message..." oninput="updateUI()">
-            <i class="fas fa-paperclip" onclick="toggleMenu('plus-menu')" style="color:#8696a0; cursor:pointer; padding:5px;"></i>
+            <i class="fas fa-paperclip" onclick="toggleMenu('plus-panel')" style="color:#8696a0; cursor:pointer; padding:5px;"></i>
         </div>
-        <button class="action-btn" id="btn-act" onmousedown="recStart()" onmouseup="recStop()" onclick="handleSend()">
-            <i class="fas fa-microphone" id="mic"></i>
-            <i class="fas fa-paper-plane" id="plane" style="display:none"></i>
+        <button class="action-btn" id="act-btn" onmousedown="startRecording()" onmouseup="stopRecording()" onclick="handleAction()">
+            <i class="fas fa-microphone" id="mic-icon"></i>
+            <i class="fas fa-paper-plane" id="send-icon" style="display:none"></i>
         </button>
     </div>
 </div>
@@ -111,12 +112,12 @@
             me = mail.replace(/[.#$[\]]/g, "_");
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-main').style.display = 'flex';
-            loadContacts();
+            loadList();
         }
     };
 
     window.addFriend = () => {
-        const e = prompt("Friend Email:");
+        const e = prompt("Enter Friend's Email:");
         if(e) {
             const tid = e.replace(/[.#$[\]]/g, "_");
             set(ref(db, `CONTACTS/${me}/${tid}`), true);
@@ -124,15 +125,14 @@
         }
     };
 
-    function loadContacts() {
+    function loadList() {
         onValue(ref(db, `CONTACTS/${me}`), s => {
             const list = document.getElementById('list'); list.innerHTML = "";
             s.forEach(c => {
-                const div = document.createElement('div');
-                div.style.padding = "15px 20px"; div.style.borderBottom = "1px solid #f0f0f0";
-                div.innerHTML = `<b>${c.key.replace(/_/g, ".")}</b>`;
-                div.onclick = () => openChat(c.key);
-                list.appendChild(div);
+                const d = document.createElement('div'); d.style.padding="20px"; d.style.borderBottom="1px solid #f0f0f0";
+                d.innerHTML = `<b>${c.key.replace(/_/g, ".")}</b>`;
+                d.onclick = () => openChat(c.key);
+                list.appendChild(d);
             });
         });
     }
@@ -146,7 +146,8 @@
         onChildAdded(chatRef, s => renderMsg(s.val()));
     };
 
-    window.handleSend = () => {
+    // Action Handler
+    window.handleAction = () => {
         const val = document.getElementById('inp').value.trim();
         if(val) {
             push(chatRef, { m: val, type: 'text', s: me, t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
@@ -154,35 +155,33 @@
         }
     };
 
-    // Corrected Image Send
+    // Recording Logic
+    window.startRecording = () => {
+        if(!document.getElementById('inp').value) {
+            document.getElementById('act-btn').classList.add('recording');
+        }
+    };
+    window.stopRecording = () => {
+        document.getElementById('act-btn').classList.remove('recording');
+    };
+
+    // File Upload
     window.uploadFile = (input) => {
         if(input.files[0]) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                push(chatRef, { m: e.target.result, type: 'image', s: me, t: 'Sent' });
-            };
+            reader.onload = (e) => push(chatRef, { m: e.target.result, type: 'image', s: me, t: 'Sent' });
             reader.readAsDataURL(input.files[0]);
         }
         closeAll();
     };
 
-    // Location Feature
+    // Location
     window.sendLocation = () => {
-        navigator.geolocation.getCurrentPosition(pos => {
-            const link = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-            push(chatRef, { m: "📍 Shared Location: " + link, type: 'text', s: me, t: 'Just now' });
+        navigator.geolocation.getCurrentPosition(p => {
+            const url = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+            push(chatRef, { m: "📍 Location: " + url, type: 'text', s: me, t: 'Just now' });
         });
         closeAll();
-    };
-
-    // Recording UI Feedback
-    window.recStart = () => {
-        if(!document.getElementById('inp').value) {
-            document.getElementById('btn-act').classList.add('rec-active');
-        }
-    };
-    window.recStop = () => {
-        document.getElementById('btn-act').classList.remove('rec-active');
     };
 
     function renderMsg(d) {
@@ -197,18 +196,31 @@
         document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
     }
 
-    window.updateUI = () => {
-        const val = document.getElementById('inp').value.trim();
-        document.getElementById('mic').style.display = val ? 'none' : 'block';
-        document.getElementById('plane').style.display = val ? 'block' : 'none';
-    };
+    // Emoji Setup
+    const emojis = ["😊","😂","❤️","😍","👍","😭","🙏","🔥","✨","✅","📍","👋","🎉","🌹"];
+    const ep = document.getElementById('emoji-panel');
+    emojis.forEach(e => {
+        const s = document.createElement('span'); s.innerText = e; s.style.cursor="pointer"; s.style.fontSize="22px";
+        s.onclick = () => { document.getElementById('inp').value += e; updateUI(); };
+        ep.appendChild(s);
+    });
+
     window.toggleMenu = (id) => {
         const el = document.getElementById(id);
-        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        const cur = el.style.display;
+        closeAll();
+        if(cur !== 'grid' && cur !== 'flex') el.style.display = (id === 'emoji-panel' ? 'grid' : 'flex');
     };
-    window.closeAll = () => document.getElementById('plus-menu').style.display='none';
+    window.closeAll = () => { 
+        document.getElementById('emoji-panel').style.display='none'; 
+        document.getElementById('plus-panel').style.display='none'; 
+    };
+    window.updateUI = () => {
+        const v = document.getElementById('inp').value.trim();
+        document.getElementById('mic-icon').style.display = v ? 'none' : 'block';
+        document.getElementById('send-icon').style.display = v ? 'block' : 'none';
+    };
     window.goBack = () => document.getElementById('chat-window').style.display='none';
 </script>
 </body>
-    </html>
-    
+</html>
